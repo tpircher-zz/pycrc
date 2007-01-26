@@ -24,8 +24,13 @@
 #include <string.h>
 
 static bool atob(const char *str);
-static int atox(const char *str);
+static int xtoi(const char *str);
 static int get_config(int argc, char *argv[], crc_cfg_t *cfg);
+#ifdef CRC_ALGO_BIT_BY_BIT
+static crc_t crc_verify(const crc_cfg_t *cfg, crc_t crc_pre_final, crc_t crc);
+static long crc_reflect(long data, size_t data_len);
+#endif
+
 
 
 static bool verbose = false;
@@ -45,7 +50,7 @@ bool atob(const char *str)
     return false;
 }
 
-int atox(const char *str)
+int xtoi(const char *str)
 {
     int ret = 0;
 
@@ -112,19 +117,19 @@ int get_config(int argc, char *argv[], crc_cfg_t *cfg)
                 cfg->width = atoi(optarg);
                 break;
             case 'p':
-                cfg->poly = atox(optarg);
+                cfg->poly = xtoi(optarg);
                 break;
             case 'n':
                 cfg->reflect_in = atob(optarg);
                 break;
             case 'i':
-                cfg->xor_in = atox(optarg);
+                cfg->xor_in = xtoi(optarg);
                 break;
             case 'u':
                 cfg->reflect_out = atob(optarg);
                 break;
             case 'o':
-                cfg->xor_out = atox(optarg);
+                cfg->xor_out = xtoi(optarg);
                 break;
             case 's':
                 memcpy(str, optarg, strlen(optarg) < sizeof(str) ? strlen(optarg) + 1 : sizeof(str));
@@ -149,11 +154,66 @@ int get_config(int argc, char *argv[], crc_cfg_t *cfg)
     cfg->msb_mask = 1 << (cfg->width - 1);
     cfg->crc_mask = (cfg->msb_mask - 1) | cfg->msb_mask;
 
-    cfg->poly           &= cfg->crc_mask;
-    cfg->xor_in         &= cfg->crc_mask;
-    cfg->xor_out        &= cfg->crc_mask;
+    cfg->poly &= cfg->crc_mask;
+    cfg->xor_in &= cfg->crc_mask;
+    cfg->xor_out &= cfg->crc_mask;
     return 0;
 }
+
+
+#if CRC_ALGO_BIT_BY_BIT
+crc_t crc_verify(const crc_cfg_t *cfg, crc_t crc_pre_final, crc_t crc)
+{
+    crc_t result;
+    unsigned char data;
+    unsigned int i;
+
+    // don't verify if the width is not a multiple of 8
+    if (cfg->width % 8) {
+        return 0;
+    }
+    if (cfg->xor_out) {
+        crc ^= cfg->xor_out;
+    }
+    if (cfg->reflect_out) {
+        crc = crc_reflect(crc, cfg->width);
+    }
+    result = crc_pre_final;
+    for (i = 0; i < cfg->width / 8; i++) {
+        data = (crc >> (cfg->width - 8 * i - 8)) & 0xff;
+        if (cfg->reflect_in) {
+            data = crc_reflect(data, 8);
+        }
+        result = crc_update(cfg, result, &data, 1);
+    }
+    // no crc_finalize, because if the CRC calculation is correct, result == 0.
+    // A crc_finalize would XOR-in again some ones into the solution.
+    // In theory the finalize function of the bit_by_bit algorithm
+    // would also loop over cfg->width zero bits, but since
+    // a) result == 0, and
+    // b) input data == 0
+    // the output would always be zero
+    return result;
+}
+
+long crc_reflect(long data, size_t data_len)
+{
+    unsigned int i;
+    long ret;
+
+    ret = 0;
+    for (i = 0; i < data_len; i++)
+    {
+        if (data & 0x01) {
+            ret = (ret << 1) | 1;
+        } else {
+            ret = ret << 1;
+        }
+        data >>= 1;
+    }
+    return ret;
+}
+#endif       // CRC_ALGO_BIT_BY_BIT
 
 
 int main(int argc, char *argv[])
@@ -169,7 +229,7 @@ int main(int argc, char *argv[])
         0,      // crc_mask
         0,      // msb_mask
     };
-    crc_t crc;
+    crc_t crc, crc_pre_final;
     char format[20];
     int ret;
 
@@ -179,8 +239,15 @@ int main(int argc, char *argv[])
         crc_table_gen(&cfg);
 #       endif       // CRC_ALGO_TABLE_DRIVEN
         crc = crc_init(&cfg);
-        crc = crc_update(&cfg, crc, str, strlen((char *)str));
+        crc = crc_pre_final = crc_update(&cfg, crc, str, strlen((char *)str));
         crc = crc_finalize(&cfg, crc);
+
+#       if CRC_ALGO_BIT_BY_BIT
+        if (crc_verify(&cfg, crc_pre_final, crc) != 0) {
+            fprintf(stderr, "error: crc verification failed\n");
+            return 1;
+        }
+#       endif
 
         if (verbose) {
             snprintf(format, sizeof(format), "%%-16s = 0x%%0%dx\n", (unsigned int)(cfg.width + 3) / 4);

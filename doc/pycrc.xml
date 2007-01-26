@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
-<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
-                    "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+                    "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
 <!ENTITY program_name       "pycrc">
 <!ENTITY program_version    "0.3">
 <!ENTITY author_firstname   "Thomas">
@@ -29,7 +29,7 @@
 
     <refnamediv>
         <refname>&program_name;</refname>
-        <refpurpose>a parametrizable Cyclic Redundancy Check (CRC) calculation utility and C source code generator written in Python</refpurpose>
+        <refpurpose>a parametrisable Cyclic Redundancy Check (CRC) calculation utility and C source code generator written in Python</refpurpose>
     </refnamediv>
 
     <refentryinfo>
@@ -53,12 +53,10 @@
 
     <refsect1><title>Description</title>
         <para>
-            &program_name; implements a reference model in Python and a source code generator for C.
-            Although CRCs are not strong hashes from a cryptographic point of view, they are widespread in the telecommunication, 
-            because they are easily implemented in hardware permit some basic error corrections. 
-            The used CRC variant can be chosen from a fast but space-consuming implementation to slower but smaller implementations 
-            suitable especially for embedded applications.
-            The following functions are implemented:
+            &program_name; provides a parametrised CRC reference implementation written in Python and a source code generator for C.
+            Different variants of the CRC algorithm are supported and range from a fast but space-consuming implementation to slower 
+            but smaller code suitable especially for embedded applications.
+            The following operations are implemented:
             <itemizedlist>
                 <listitem>
                     <para>
@@ -69,8 +67,6 @@
                 <listitem>
                     <para>
                     generate the C header and source files for a client implementation.
-                    The algorithm can be chosen from fast but big implementation to slower but smaller implementations 
-                    suitable especially for embedded applications.
                     </para>
                 </listitem>
             </itemizedlist>
@@ -82,34 +78,30 @@
                     <para>
                         <replaceable>&bit_by_bit;</replaceable>: the basic algorithm which operates individually on every bit of the augmented message 
                         (i.e. the input data with <replaceable>&width;</replaceable> 0-bits attached to the end).
-                        This algorithm is the easiest one to understand, because it's a direct implementation of the basic polynomial division, 
+                        This algorithm is the easiest to understand because it is a direct implementation of the basic polynomial division, 
                         but it is also the slowest among all possible variants.
                     </para>
                 </listitem>
                 <listitem>
                     <para>
                         <replaceable>&bit_by_bit_fast;</replaceable>: a variation of the simple <replaceable>&bit_by_bit;</replaceable> algorithm, 
-                        which doesn't need the augmented message.
+                        with the difference that it does not need to augment the data, i.e. it does not add <replaceable>&width;</replaceable> zero 
+                        bits at the end of the message.
                         This algorithm might be a good choice for embedded platforms, where code space is a major concern.
                     </para>
                 </listitem>
                 <listitem>
                     <para>
-                        <replaceable>&table_driven;</replaceable>: the standard table driven algorithm. This algorithm works only on models with multiples 
-                        of 8 as <replaceable>&width;</replaceable>.
-                        This is the fastest variant, because if operates on bytes as opposed to bits, and uses a look-up table of 256 elements, which might
-                        not be feasible for small embedded systems, though. Anyway, the number of elements in the look-up table can be reduced by means of
-                        the <option>--table_idx_with</option> command line switch. By using 4 bits (16 elements in the look-up table) a significant speed-up 
-                        can be measured with respect to the bit-by-bit algorithms.
+                        <replaceable>&table_driven;</replaceable>: the standard table driven algorithm. This algorithm works only with a 
+                        <replaceable>&width;</replaceable> which is a multiple of 8.
+                        This is the fastest variant because it operates on one byte at a time, as opposed to bits, and uses a look-up table of 256 elements, 
+                        which might not be feasible for small embedded systems, though. Anyway, the number of elements in the look-up table can be reduced by 
+                        means of the <option>--table_idx_with</option> command line switch. By using 4 bits (16 elements in the look-up table) a significant 
+                        speed-up can be measured with respect to the bit-by-bit algorithms.
                     </para>
                 </listitem>
             </itemizedlist>
         </para>
-        <!--
-        <para>
-            &program_name; is a simple all-purpose tool to work with Cyclic Redundancy Checks.
-        </para>
-        -->
     </refsect1>
 
     <refsect1><title>Options</title>
@@ -146,7 +138,7 @@
                 <option>--verbose</option>
             </term>
             <listitem>
-                <para>be more verbose; in particular, print informations about the parameters and the model</para>
+                <para>be more verbose; in particular, print the value of the parameters and the chosen model</para>
             </listitem>
         </varlistentry>
         <varlistentry>
@@ -163,8 +155,22 @@
                 <option>--model=</option><replaceable>MODEL</replaceable>
             </term>
             <listitem>
-                <para>choose a model from {<replaceable>crc-8</replaceable>, <replaceable>crc-16</replaceable>, <replaceable>citt</replaceable>, 
-                <replaceable>xmodem</replaceable>, <replaceable>crc-32</replaceable>}</para>
+                <para>choose a parameter set from {<replaceable>crc-8</replaceable>, 
+                    <replaceable>crc-16</replaceable>, 
+                    <replaceable>citt</replaceable>, 
+                    <replaceable>kermit</replaceable>, 
+                    <replaceable>x-25</replaceable>, 
+                    <replaceable>xmodem</replaceable>, 
+                    <replaceable>zmodem</replaceable>, 
+                    <replaceable>crc-32</replaceable>,
+                    <replaceable>crc-32c</replaceable>,
+                    <replaceable>posix</replaceable>,
+                    <replaceable>jam</replaceable>,
+                    <replaceable>xfer</replaceable>}</para>
+                <para>
+                This is the parameter with the lowest priority. Any other option (whether specified before or after the <option>--model</option>
+                option) will override its parameter.
+                </para>
             </listitem>
         </varlistentry>
         <varlistentry>
@@ -234,6 +240,14 @@
         </varlistentry>
         <varlistentry>
             <term>
+                <option>--check_file=</option><replaceable>FILE</replaceable>
+            </term>
+            <listitem>
+                <para>calculate the checksum of the given file</para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
                 <option>--generate_c</option>
             </term>
             <listitem>
@@ -245,7 +259,7 @@
                 <option>--generate_c_main</option>
             </term>
             <listitem>
-                <para>generate a C source file with main fucntion</para>
+                <para>generate a C source file with main function</para>
             </listitem>
         </varlistentry>
         <varlistentry>
@@ -254,6 +268,14 @@
             </term>
             <listitem>
                 <para>generate a C header source file</para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
+                <option>--symbol_prefix=</option><replaceable>STRING</replaceable>
+            </term>
+            <listitem>
+                <para>when generating source code, use <replaceable>STRING</replaceable> as prefix to the generated symbols</para>
             </listitem>
         </varlistentry>
         <varlistentry>
@@ -272,19 +294,19 @@
         </varlistentry>
     </refsect1>
 
-    <refsect1><title>The Rocksoft Model</title>
+    <refsect1><title>The CRC Parametric Model</title>
         <para>
-            The CRC parameters are taken from Ross N. Williams' "A Painless Guide to CRC Error Detection Algorithms". 
-            The parameters are described as follows.
+            The parametric model has been picked from Ross N. Williams' "A Painless Guide to CRC Error Detection Algorithms". He calls this set of parameters
+            "The Rocksoft Model". Since most people are familiar with this kind of parameters, &program_name; follows this convention, described as follows:
             <glosslist>
                 <glossentry>
                     <glossterm><replaceable>&width;</replaceable></glossterm>
                     <glossdef>
                         <para>
-                        The with of the CRC <replaceable>&poly;</replaceable>, in number of bits. This is also the width of the final CRC result. 
-                        For the <replaceable>&bit_by_bit;</replaceable> and the <replaceable>&bit_by_bit_fast;</replaceable> algorithms, any with 
-                        can be used, but for the <replaceable>&table_driven;</replaceable> algorithm, which operate on 8 bits at a time, 
-                        <replaceable>&width;</replaceable> must be multiples of 8.
+                        The width of the CRC <replaceable>&poly;</replaceable>, in number of bits. This is also the width of the final CRC result. 
+                        For the <replaceable>&bit_by_bit;</replaceable> and the <replaceable>&bit_by_bit_fast;</replaceable> algorithms, any width 
+                        can be used, but for the <replaceable>&table_driven;</replaceable> algorithm which operate on 8 bits at a time, only
+                        multiples of 8 can be chosen as <replaceable>&width;</replaceable>.
                         </para>
                     </glossdef>
                 </glossentry>
@@ -292,8 +314,12 @@
                     <glossterm><replaceable>&poly;</replaceable></glossterm>
                     <glossdef>
                         <para>
-                        The polynom of the CRC. Although the <replaceable>&poly;</replaceable> may be specified with the leading 1 at the bit-position 
-                        <replaceable>&width;</replaceable> + 1, this leading bit is silently ignored.
+                        The unreflected polynom of the CRC algorithm.
+                        </para>
+                        <para>
+                        The <replaceable>&poly;</replaceable> may be specified in its standard form, i.e. with bit <replaceable>&width;</replaceable>+1
+                        set to 1, but the most significant bit may also be ommitted. For example, for a <replaceable>&width;</replaceable> of 16,
+                        both forms 0x18005 and 0x8005 are accepted.
                         </para>
                     </glossdef>
                 </glossentry>
@@ -301,28 +327,14 @@
                     <glossterm><replaceable>&reflect_in;</replaceable></glossterm>
                     <glossdef>
                         <para>
-                        Whether the input bits are reflected. A byte is reflected by inverting the position of all bits with 
-                        respect to the middle position of the byte. Reflected algorithms are more efficient than straight-forward
-                        implementations.
-                        The reversed value of 0xa3 (10100010) is 0x45 (01000101), for example.
+                        Reflect the bytes of the message before processing them. A word is reflected by inverting the position of its bits with 
+                        respect to the middle axis of the word. 
+                        The reversed value of 0xa3 (10100010b) is 0x45 (01000101b), for example.
+                        Some CRC algorithms can be implemented more efficiently in a bit reversed version.
                         </para>
-                        <!--
                         <para>
-                        In the generated algorithm the data bytes are explicitely reversed before processed. That's probably not the way
-                        the algorithm is used. In fact, the data bytes should be already be inverted from the peripherical device.
-                        But since  most of the algorithms we could find in the WWW are written that way, the algorithms are implemented 
-                        by reflected the data 2 times.
-                        It is, however, quite straightforward to eliminate the reflection of the input data.
-                        </para>
-                        -->
-                    </glossdef>
-                </glossentry>
-                <glossentry>
-                    <glossterm><replaceable>&reflect_out;</replaceable></glossterm>
-                    <glossdef>
-                        <para>
-                        Whether the output bytes are reflected. This opeartion (if any) takes place before XOR-ing the resulting the final CRC 
-                        value with the <replaceable>&xor_out;</replaceable> parameter.
+                        Reflected algorithms are more efficient than straight-forward implementations, thus many of the standard algorithmic
+                        variants use reflected input bytes.
                         </para>
                     </glossdef>
                 </glossentry>
@@ -330,10 +342,20 @@
                     <glossterm><replaceable>&xor_in;</replaceable></glossterm>
                     <glossdef>
                         <para>
-                        The initial value (usually all 0 or all 1) of the algorithms which operate on the non-augmented data. 
-                        This value can be seen as a value which will be XOR-ed into the CRC register after the <replaceable>&width;</replaceable> 
+                        The initial value (usually all 0 or all 1) in the algorithms which operate on the non-augmented message. 
+                        This value can be seen as a value which will be XOR-ed into the CRC register after <replaceable>&width;</replaceable> 
                         iterations of the <replaceable>&bit_by_bit;</replaceable> algorithm. 
-                        This means, the simple bit_by_bit algorithm must calculate the initial value with a sort of reverse CRC algorithm for with bits.
+                        This means the simple <replaceable>&bit_by_bit;</replaceable> algorithm must calculate the initial value with some sort of
+                        reverse CRC algorithm on the <replaceable>&xor_in;</replaceable> value.
+                        </para>
+                    </glossdef>
+                </glossentry>
+                <glossentry>
+                    <glossterm><replaceable>&reflect_out;</replaceable></glossterm>
+                    <glossdef>
+                        <para>
+                        Reflect the final CRC result. This operation takes place before XOR-ing the final CRC 
+                        value with the <replaceable>&xor_out;</replaceable> parameter.
                         </para>
                     </glossdef>
                 </glossentry>
@@ -341,7 +363,7 @@
                     <glossterm><replaceable>&xor_out;</replaceable></glossterm>
                     <glossdef>
                         <para>
-                        A value (usually all 0 or all 1) which will be XOR-ed to the final CRC value.
+                        A value (usually all bits 0 or all 1) which will be XOR-ed to the final CRC value.
                         </para>
                     </glossdef>
                 </glossentry>
@@ -349,14 +371,110 @@
                     <glossterm><replaceable>&check;</replaceable></glossterm>
                     <glossdef>
                         <para>
-                        This value is not really a parameter of a model, but it is sometimes given together with the Rocksoft Model parameters.
-                        It is the CRC value of the parametrized model over the standard string <replaceable>123456789</replaceable> and
-                        may be used to validate a implementation.
+                        This value is not exactly a parameter of a model but it is sometimes given together with the Rocksoft Model parameters.
+                        It is the CRC value of the parametrised model over the standard string <replaceable>123456789</replaceable> and
+                        may be used to validate an implementation.
                         </para>
                     </glossdef>
                 </glossentry>
             </glosslist>
         </para>
+    </refsect1>
+
+    <refsect1><title>Code generation</title>
+        <para>
+        The Code generator outputs strict ISO C99 code. For every chosen parameter set, at least three functions are defined:
+        <function>crc_init()</function>, <function>crc_update()</function> and <function>crc_finalize()</function>.
+        According to the number of parameters given to &program_name;, a different interface definition is generated.
+        Fully parametrised models have a simpler API, while the generated code for runtime-specified implementations adds a 
+        pointer to a configuration structure as first parameter to all functions.
+        </para>
+        <para>
+        The generated source code uses the type <type>crc_t</type>, which is used throughout the code. It may be redefined in the generated header file.
+        </para>
+
+        <refsect2><title>Fully parametrised models</title>
+            <funcsynopsis>
+                <funcsynopsisinfo>
+#include &lt;unistd.h&gt;
+typedef XXXX ctc_t;             // this type is defined in the generated header file
+                </funcsynopsisinfo>
+                <funcprototype>
+                    <?dbhtml funcsynopsis-style='ansi'?>
+                    <funcdef>crc_t <function>crc_init</function></funcdef>
+                    <void/>
+                </funcprototype>
+
+                <funcprototype>
+                    <?dbhtml funcsynopsis-style='ansi'?>
+                    <funcdef>crc_t <function>crc_update</function></funcdef>
+                    <paramdef>crc_t <parameter>crc</parameter></paramdef>
+                    <paramdef>const unsigned char *<parameter>data</parameter></paramdef>
+                    <paramdef>size_t <parameter>data_len</parameter></paramdef>
+                </funcprototype>
+
+                <funcprototype>
+                    <?dbhtml funcsynopsis-style='ansi'?>
+                    <funcdef>crc_t <function>crc_finalize</function></funcdef>
+                    <paramdef>crc_t <parameter>crc</parameter></paramdef>
+                </funcprototype>
+            </funcsynopsis>
+        </refsect2>
+
+        <para>
+        The following code snippet shows how to use the generated functions.
+        <programlisting>
+#include "my_generated_crc.h"
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+    static const unsigned char str1[] = "1234";
+    static const unsigned char str2[] = "56789";
+    crc_t crc;
+
+    crc = crc_init();
+    crc = crc_update(crc, str1, sizeof(str1) - 1);
+    crc = crc_update(crc, str2, sizeof(str2) - 1);
+    // more calls to crc_update...
+    crc = crc_finalize(crc);
+
+    printf("0x%lx\n", (long)crc);
+    return 0;
+}
+        </programlisting>
+        </para>
+
+        <refsect2><title>Models with runtime-configurable parameters</title>
+            <para>
+            When the model is not fully defined then the missing parameters are contained in a structure of 
+            type <type>crc_cfg_t</type>.
+            The first argument of the crc functions is a pointer to that structure, and its fields must be initialised
+            properly by the user before the first call to the crc functions.
+            Tis structure contains two additional parameters, <parameter>msb_mask</parameter> and <parameter>crc_mask</parameter>,
+            if the <replaceable>&width;</replaceable> was undefined when the code was generated.
+            <programlisting>
+typedef struct {
+    unsigned int width;
+    crc_t poly;
+    bool reflect_in;
+    crc_t xor_in;
+    bool reflect_out;
+    crc_t xor_out;
+
+    // internal parameters
+    crc_t msb_mask;             // initialise as 0x01 &lt;&lt; (cfg-&gt;width - 1)
+    crc_t crc_mask;             // initialise as (cfg-&gt;msb_mask - 1) | cfg-&gt;msb_mask
+} crc_cfg_t;
+            </programlisting>
+            </para>
+            <para>
+            <parameter>msb_mask</parameter> is a bitmask with the most significant bit of a <parameter>width</parameter> bits
+            wide data type set to 1.
+            <parameter>msb_mask</parameter> is a bitmask with all bits of a <parameter>width</parameter> bits
+            wide data type set to 1.
+            </para>
+        </refsect2>
     </refsect1>
 
     <refsect1><title>Examples</title>
@@ -371,13 +489,17 @@
                     </glossdef>
                 </glossentry>
                 <glossentry>
-                    <glossterm>Generate the source code of the table-driven algorithm:</glossterm>
+                    <glossterm>Generate the source code of the table-driven algorithm for an embedded application.</glossterm>
                     <glossdef>
                         <para>
                         <userinput>pycrc.py --model crc-16 --algorithm table_driven --table_idx_with 4 --generate_h -o crc.h</userinput>
                         </para>
                         <para>
                         <userinput>pycrc.py --model crc-16 --algorithm table_driven --table_idx_with 4 --generate_c -o crc.c</userinput>
+                        </para>
+                        <para>
+                         The table index with of 4 bits ensures a moderate memory consumption. In fact, the resulting table is 
+                         <code>16 * sizeof(crc_t)</code> bytes big.
                         </para>
                     </glossdef>
                 </glossentry>
@@ -399,6 +521,7 @@
         </para>
     </refsect1>
 
+    <!--
     <refsect1><title>See also</title>
         <para>
             <ulink url="http://en.wikipedia.org/wiki/Cyclic_redundancy_check" />,
@@ -410,5 +533,6 @@
             <ulink url="http://www.ross.net/crc/" />,
         </para>
     </refsect1>
+    -->
 </refentry>
 

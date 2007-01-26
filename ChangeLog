@@ -1,3 +1,37 @@
+#
+# Version 0.4, 2007-01-26
+#
+
+2007-01-27  Thomas Pircher   <tehpeh@gmx.net>
+
+	* pycrc.py: Eliminated needless documentation of not generated functions
+
+2007-01-23  Thomas Pircher   <tehpeh@gmx.net>
+
+	* pycrc.py: Added more parameter sets (now supported: crc-8, crc-16, citt,
+	kermit, x-25, xmodem, zmodem, crc-32, crc-32c, posix, jam, xfer) from
+	http://homepages.tesco.net/~rainstorm/crc-catalogue.htm
+	* doc/pycrc.xml: Many corrections to the manual (thanks Francesca)
+	Documented the new parameter sets
+	* test/test.sh: added some new tests, disabled the random loop
+
+2007-01-21  Thomas Pircher   <tehpeh@gmx.net>
+
+	* pycrc.py: Added Doxygen documentation strings to the functions.
+	Added the --symbol_prefix option
+	Added the --check_file option
+
+	* doc/pycrc.xml: Corrected many typos and bad phrasing (still a lot to do)
+	Documented the --symbol_prefix option	                 
+
+2007-01-17  Thomas Pircher   <tehpeh@gmx.net>
+
+	* test/test.sh: Added a non-regression test on the generated C source
+
+#
+# Version 0.3, 2007-01-14
+#
+
 2007-01-14  Thomas Pircher   <tehpeh@gmx.net>
 
 	* pycrc.py: first public release pycrc v0.3

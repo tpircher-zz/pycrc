@@ -99,9 +99,9 @@ class Options:
     The options parsing and validationg class
     """
     ProgramName     = "pycrc"
-    Version         = "0.3"
+    Version         = "0.4"
     VersionStr      = "%s v%s" % (ProgramName, Version)
-    WebAddress      = "http://www.tty1.net/pycrc"
+    WebAddress      = "http://www.tty1.net/pycrc/"
     Width           = None
     Poly            = None
     ReflectIn       = None
@@ -113,6 +113,7 @@ class Options:
     String          = "123456789"
 
     Algorithm       = 0x00
+    SymbolPrefix    = None
     OutputFile      = None
     Action          = "check_string"
 
@@ -129,7 +130,7 @@ class Options:
                         help="choose an algorithm from {bit_by_bit, bit_by_bit_fast, table_driven, all}", metavar="ALGO")
         parser.add_option("--model",
                         action="store", type="string", dest="model", default=None,
-                        help="choose a model from {crc-8, crc-16, citt, xmodem, crc-32}", metavar="MODEL")
+                        help="choose a parameter set from {crc-8, crc-16, citt, kermit, x-25, xmodem, zmodem, crc-32, crc-32c, posix, jam, xfer}", metavar="MODEL")
         parser.add_option("--width",
                         action="store", type="hex", dest="width",
                         help="use WIDTH bits", metavar="WIDTH")
@@ -154,15 +155,21 @@ class Options:
         parser.add_option("--check_string",
                         action="store", type="string", dest="check_string",
                         help="calculate the checksum of the given string ('123456789' default)", metavar="STRING")
+        parser.add_option("--check_file",
+                        action="store", type="string", dest="check_file",
+                        help="calculate the checksum of the given file", metavar="FILE")
         parser.add_option("--generate_c",
                         action="store_true", dest="generate_c", default=False,
                         help="generate a C source file")
         parser.add_option("--generate_c_main",
                         action="store_true", dest="generate_c_main", default=False,
-                        help="generate a C source file with main fucntion")
+                        help="generate a C source file with main function")
         parser.add_option("--generate_h",
                         action="store_true", dest="generate_h", default=False,
                         help="generate a C header source file")
+        parser.add_option("--symbol_prefix",
+                        action="store", type="string", dest="symbol_prefix",
+                        help="when generating source code, use STRING as prefix to the generated symbols", metavar="STRING")
         parser.add_option("-o", "--output_file",
                         action="store", type="string", dest="output_file",
                         help="write the generated code to file instead to stdout", metavar="FILE")
@@ -178,19 +185,47 @@ class Options:
                 self.XorIn      = 0x0
                 self.ReflectOut = False
                 self.XorOut     = 0x0
-            elif mod == "crc-16" or mod == "citt":
+            elif mod == "crc-16":
                 self.Width      = 16
                 self.Poly       = 0x8005
                 self.ReflectIn  = True
                 self.XorIn      = 0x0
                 self.ReflectOut = True
                 self.XorOut     = 0x0
+            elif mod == "citt":
+                self.Width      = 16
+                self.Poly       = 0x1021
+                self.ReflectIn  = False
+                self.XorIn      = 0xffff
+                self.ReflectOut = False
+                self.XorOut     = 0x0
+            elif mod == "kermit":
+                self.Width      = 16
+                self.Poly       = 0x1021
+                self.ReflectIn  = True
+                self.XorIn      = 0x0
+                self.ReflectOut = True
+                self.XorOut     = 0x0
+            elif mod == "x-25":
+                self.Width      = 16
+                self.Poly       = 0x1021
+                self.ReflectIn  = True
+                self.XorIn      = 0xffff
+                self.ReflectOut = True
+                self.XorOut     = 0xffff
             elif mod == "xmodem":
                 self.Width      = 16
                 self.Poly       = 0x8408
                 self.ReflectIn  = True
                 self.XorIn      = 0x0
                 self.ReflectOut = True
+                self.XorOut     = 0x0
+            elif mod == "zmodem":
+                self.Width      = 16
+                self.Poly       = 0x1021
+                self.ReflectIn  = False
+                self.XorIn      = 0x0
+                self.ReflectOut = False
                 self.XorOut     = 0x0
             elif mod == "crc-32":
                 self.Width      = 32
@@ -199,6 +234,34 @@ class Options:
                 self.XorIn      = 0xffffffff
                 self.ReflectOut = True
                 self.XorOut     = 0xffffffff
+            elif mod == "crc-32c":
+                self.Width      = 32
+                self.Poly       = 0x1edc6f41
+                self.ReflectIn  = True
+                self.XorIn      = 0xffffffff
+                self.ReflectOut = True
+                self.XorOut     = 0xffffffff
+            elif mod == "posix":
+                self.Width      = 32
+                self.Poly       = 0x4c11db7
+                self.ReflectIn  = False
+                self.XorIn      = 0x0
+                self.ReflectOut = False
+                self.XorOut     = 0xffffffff
+            elif mod == "jam":
+                self.Width      = 32
+                self.Poly       = 0x4c11db7
+                self.ReflectIn  = True
+                self.XorIn      = 0xffffffff
+                self.ReflectOut = True
+                self.XorOut     = 0x0
+            elif mod == "xfer":
+                self.Width      = 32
+                self.Poly       = 0x000000af
+                self.ReflectIn  = False
+                self.XorIn      = 0x0
+                self.ReflectOut = False
+                self.XorOut     = 0x0
             else:
                 sys.stderr.write("Error: unsupported model %s\n" % options.model)
                 sys.exit(1)
@@ -272,12 +335,18 @@ class Options:
             else:
                 self.Algorithm &= ~(Algo_Table_Driven)
 
+        if options.symbol_prefix != None:
+            self.SymbolPrefix = options.symbol_prefix
         if options.output_file != None:
             self.OutputFile = options.output_file
         op_count = 0
         if options.check_string != None:
             self.Action         = "check_string"
             self.CheckString    = options.check_string
+            op_count += 1
+        if options.check_file != None:
+            self.Action         = "check_file"
+            self.CheckFile      = options.check_file
             op_count += 1
         if options.generate_c or options.generate_c_main or options.generate_h:
             if self.Algorithm != Algo_Bit_by_Bit and self.Algorithm != Algo_Bit_by_Bit_Fast and self.Algorithm != Algo_Table_Driven:
@@ -432,7 +501,7 @@ class CRenderer:
 
     def __init__(self, opt):
         """
-        Initialize the local variables.
+        Initialise the local variables.
         In particular, copy all used parameters from the opt class and pretty-print them
         """
         self.ProgramName    = opt.ProgramName
@@ -448,6 +517,7 @@ class CRenderer:
         self.MSB_Mask       = opt.MSB_Mask
         self.Mask           = opt.Mask
         self.Algorithm      = opt.Algorithm
+        self.SymbolPrefix   = opt.SymbolPrefix
         self.OutputFile     = opt.OutputFile
         self.Action         = opt.Action
         self.UndefinedCrcParameters = opt.UndefinedCrcParameters
@@ -475,19 +545,22 @@ class CRenderer:
         else:
             self.InlineFinalizeFunc = False
 
+        if self.SymbolPrefix == None:
+            self.SymbolPrefix = "crc"
+
         if self.OutputFile == None:
             self.OutputFile = "stdout"
 
         if self.Width == None:
-            self.crc_t = "unsigned long"
+            self.crc_typedef = "unsigned long"
         elif self.Width <= 8:
-            self.crc_t = "uint8_t"
+            self.crc_typedef = "uint8_t"
         elif self.Width <= 16:
-            self.crc_t = "uint16_t"
+            self.crc_typedef = "uint16_t"
         elif self.Width <= 32:
-            self.crc_t = "uint32_t"
+            self.crc_typedef = "uint32_t"
         else:
-            self.crc_t = "unsigned long"
+            self.crc_typedef = "unsigned long"
 
         if opt.Width != None:
             self.PrettyWidth        = "%d" % opt.Width
@@ -534,6 +607,13 @@ class CRenderer:
             self.PrettyHeaderFile = self.OutputFile[0:-1] + "h"
         else:
             self.PrettyHeaderFile = self.OutputFile + ".h"
+        self.PrettyCrc_t            = self.SymbolPrefix + "_t"
+        self.PrettyCrcCfg_t         = self.SymbolPrefix + "_cfg_t"
+        self.PrettyCrcReflectFunc   = self.SymbolPrefix + "_reflect"
+        self.PrettyCrcGenTableFunc  = self.SymbolPrefix + "_table_gen"
+        self.PrettyCrcInitFunc      = self.SymbolPrefix + "_init"
+        self.PrettyCrcUpdateFunc    = self.SymbolPrefix + "_update"
+        self.PrettyCrcFinalizeFunc  = self.SymbolPrefix + "_finalize"
 
 
     def print_param(self):
@@ -658,6 +738,8 @@ class CRenderer:
             return "{ 0 }"
         tbl = crc_gen_table(opt)
         if self.Width >= 32:
+            values_per_line = 4
+        elif self.Width >= 16:
             values_per_line = 8
         else:
             values_per_line = 16
@@ -680,37 +762,107 @@ class CRenderer:
         Return the header banner of the generated .c or .h file
         """
         out  = ""
-        out += "//*****************************************************************************\n"
-        out += "// Filename: %s\n" % (self.OutputFile)
-        out += "//\n"
-        out += "// Generated on %s by %s (%s)\n" % (self.GenDate, self.VersionStr, self.WebAddress)
-        out += "// Using the configuration:\n"
+        out += "/**\n"
+        out += " * \\file %s\n" % (self.OutputFile)
+        out += " * Functions and types for CRC checks.\n"
+        out += " *\n"
+        out += " * Generated on %s,\n" % (self.GenDate)
+        out += " * by %s, %s\n" % (self.VersionStr, self.WebAddress)
+        out += " * using the configuration:\n"
         if self.Width != None:
-            out += "//    Width        = %s\n" % (self.PrettyWidth)
+            out += " *    Width        = %s\n" % (self.PrettyWidth)
         else:
-            out += "//    Width        = %s\n" % "Undefined"
+            out += " *    Width        = %s\n" % "Undefined"
         if self.Poly != None:
-            out += "//    Poly         = %s\n" % (self.PrettyPoly)
+            out += " *    Poly         = %s\n" % (self.PrettyPoly)
         else:
-            out += "//    Poly         = %s\n" % "Undefined"
+            out += " *    Poly         = %s\n" % "Undefined"
         if self.XorIn != None:
-            out += "//    XorIn        = %s\n" % (self.PrettyXorIn)
+            out += " *    XorIn        = %s\n" % (self.PrettyXorIn)
         else:
-            out += "//    XorIn        = %s\n" % "Undefined"
+            out += " *    XorIn        = %s\n" % "Undefined"
         if self.ReflectIn != None:
-            out += "//    ReflectIn    = %s\n" % (self.PrettyReflectIn)
+            out += " *    ReflectIn    = %s\n" % (self.PrettyReflectIn)
         else:
-            out += "//    ReflectIn    = %s\n" % "Undefined"
+            out += " *    ReflectIn    = %s\n" % "Undefined"
         if self.XorOut != None:
-            out += "//    XorOut       = %s\n" % (self.PrettyXorOut)
+            out += " *    XorOut       = %s\n" % (self.PrettyXorOut)
         else:
-            out += "//    XorOut       = %s\n" % "Undefined"
+            out += " *    XorOut       = %s\n" % "Undefined"
         if self.ReflectOut != None:
-            out += "//    ReflectOut   = %s\n" % (self.PrettyReflectOut)
+            out += " *    ReflectOut   = %s\n" % (self.PrettyReflectOut)
         else:
-            out += "//    ReflectOut   = %s\n" % "Undefined"
-        out += "//    Algorithm    = %s\n" % (self.__pretty_algorithm())
-        out += "//*****************************************************************************\n"
+            out += " *    ReflectOut   = %s\n" % "Undefined"
+        out += " *    Algorithm    = %s\n" % (self.__pretty_algorithm())
+        out += " *****************************************************************************/\n"
+        return out
+
+    def __pretty_crc_reflect_doc(self):
+        """
+        Return the doxygen header for the crc_reflect function
+        """
+        out = ""
+        out += "/**\n"
+        out += " * \\brief      Reflect all bits of a \\a data word of \\a data_len bytes.\n"
+        out += " * \\param data         The data word to be reflected.\n"
+        out += " * \\param data_len     The width of \\a data expressed in number of bits.\n"
+        out += " * \\return     The reflected data.\n"
+        out += " *****************************************************************************/\n"
+        return out
+
+    def __pretty_crc_table_gen_doc(self):
+        """
+        Return the doxygen header for the crc_table_gen function
+        """
+        out = ""
+        out += "/**\n"
+        out += " * \\brief      Populate the private static crc table.\n"
+        out += " * \\param cfg  A pointer to a initialised %s structure.\n" % (self.PrettyCrcCfg_t)
+        out += " * \\return     void\n"
+        out += " *****************************************************************************/\n"
+        return out
+
+    def __pretty_crc_init_doc(self):
+        """
+        Return the doxygen header for the crc_init function
+        """
+        out = ""
+        out += "/**\n"
+        out += " * \\brief      Calculate the initial crc value.\n"
+        if not self.ConstantCrcInit:
+            out += " * \\param cfg  A pointer to a initialised %s structure.\n" % (self.PrettyCrcCfg_t)
+        out += " * \\return     The initial crc value.\n"
+        out += " *****************************************************************************/\n"
+        return out
+
+    def __pretty_crc_update_doc(self):
+        """
+        Return the doxygen header for the crc_update function
+        """
+        out = ""
+        out += "/**\n"
+        out += " * \\brief          Update the crc value with new data.\n"
+        out += " * \\param crc      The current crc value.\n"
+        if not self.ConstantCrcInit:
+            out += " * \\param cfg      A pointer to a initialised %s structure.\n" % (self.PrettyCrcCfg_t)
+        out += " * \\param data     Pointer to a buffer of \\a data_len bytes.\n"
+        out += " * \\param data_len Number of bytes in the \\a data buffer.\n"
+        out += " * \\return         The updated crc value.\n"
+        out += " *****************************************************************************/\n"
+        return out
+
+    def __pretty_crc_finalize_doc(self):
+        """
+        Return the doxygen header for the crc_finalize function
+        """
+        out = ""
+        out += "/**\n"
+        out += " * \\brief      Calculate the final crc value.\n"
+        if self.UndefinedCrcParameters:
+            out += " * \\param cfg  A pointer to a initialised %s structure.\n" % (self.PrettyCrcCfg_t)
+        out += " * \\param crc  The current crc value.\n"
+        out += " * \\return     The final crc value.\n"
+        out += " *****************************************************************************/\n"
         return out
 
     def __generate_h(self):
@@ -727,6 +879,9 @@ class CRenderer:
         if self.UndefinedCrcParameters:
             out += "#include <stdbool.h>\n"
         out += "\n"
+        out += "/**\n"
+        out += " * \\brief   The definition of the used algorithm.\n"
+        out += " *****************************************************************************/\n"
         if self.Algorithm & Algo_Bit_by_Bit:
             out += "#define CRC_ALGO_BIT_BY_BIT 1\n"
         if self.Algorithm & Algo_Bit_by_Bit_Fast:
@@ -734,61 +889,83 @@ class CRenderer:
         if self.Algorithm & Algo_Table_Driven:
             out += "#define CRC_ALGO_TABLE_DRIVEN 1\n"
         out += "\n"
-        out += "typedef %s crc_t;\n" % (self.crc_t)
+        out += "/**\n"
+        out += " * \\brief   The type of the CRC values.\n"
+        out += " *\n"
+        out += " * This type must be big enough to contain at least %s bits.\n" % (self.PrettyWidth)
+        out += " *****************************************************************************/\n"
+        out += "typedef %s %s;\n" % (self.crc_typedef, self.PrettyCrc_t)
         out += "\n"
+        # crc_cfg_t
         if self.UndefinedCrcParameters:
+            out += "/**\n"
+            out += " * \\brief   The configuration type of the CRC algorithm.\n"
+            out += " *****************************************************************************/\n"
             out += "typedef struct {\n"
             if self.Width == None:
-                out += "    unsigned int width;\n"
+                out += "    unsigned int width;     /*!< The width of the polynom */\n"
             if self.Poly == None:
-                out += "    crc_t poly;\n"
+                out += "    %s poly;             /*!< The CRC polynom */\n" % (self.PrettyCrc_t)
             if self.ReflectIn == None:
-                out += "    bool reflect_in;\n"
+                out += "    bool reflect_in;        /*!< Whether the input shall be reflected or not */\n"
             if self.XorIn == None:
-                out += "    crc_t xor_in;\n"
+                out += "    %s xor_in;           /*!< The initial value of the algorithm */\n" % (self.PrettyCrc_t)
             if self.ReflectOut == None:
-                out += "    bool reflect_out;\n"
+                out += "    bool reflect_out;       /*!< Wether the output shall be reflected or not */\n"
             if self.XorOut == None:
-                out += "    crc_t xor_out;\n"
+                out += "    %s xor_out;          /*!< The value which shall be XOR-ed to the final CRC value */\n" % (self.PrettyCrc_t)
             if self.Width == None:
                 out += "\n"
                 out += "    // internal parameters\n"
-                out += "    crc_t crc_mask, msb_mask;\n"
-            out += "} crc_cfg_t;\n"
+                out += "    %s msb_mask;         /*!< A bitmask with the Most Significant Bit set to 1\n" % (self.PrettyCrc_t)
+                out += "                                 Initialise as 0x01 << (%s - 1) */\n" % (self.PrettyWidth)
+                out += "    %s crc_mask;         /*!< A bitmask with all %s bits set to 1\n" % (self.PrettyCrc_t, self.PrettyWidth)
+                out += "                                 Initialise as (cfg->msb_mask - 1) | cfg->msb_mask */\n"
+            out += "} %s;\n" % (self.PrettyCrcCfg_t)
             out += "\n"
+        # crc_reflect
         if self.ReflectIn or self.ReflectOut:
             if not self.StaticReflectFunc:
-                out += "long crc_reflect(long data, size_t data_len);\n"
+                out += self.__pretty_crc_reflect_doc()
+                out += "long %s(long data, size_t data_len);\n" % (self.PrettyCrcReflectFunc)
                 out += "\n"
+        # crc_table_gen
         if self.Algorithm == Algo_Table_Driven:
             if self.UndefinedCrcParameters:
-                out += "void crc_table_gen(const crc_cfg_t *cfg);\n"
+                out += self.__pretty_crc_table_gen_doc()
+                out += "void %s(const %s *cfg);\n" %(self.PrettyCrcGenTableFunc, self.PrettyCrcCfg_t)
             out += "\n"
+        # crc_init
+        out += self.__pretty_crc_init_doc()
         if not self.ConstantCrcInit:
-            out += "crc_t crc_init(const crc_cfg_t *cfg);\n"
+            out += "%s %s(const %s *cfg);\n" % (self.PrettyCrc_t, self.PrettyCrcInitFunc, self.PrettyCrcCfg_t)
         else:
-            out += "static inline crc_t crc_init(void)\n"
+            out += "static inline %s %s(void)\n" % (self.PrettyCrc_t, self.PrettyCrcInitFunc)
             out += "{\n"
             out += "    return %s;\n" % (self.PrettyInitValue)
             out += "}\n"
         out += "\n"
+        # crc_update
+        out += self.__pretty_crc_update_doc()
         if self.UndefinedCrcParameters:
-            out += "crc_t crc_update(const crc_cfg_t *cfg, crc_t crc, const unsigned char *data, size_t data_len);\n"
+            out += "%s %s(const %s *cfg, %s crc, const unsigned char *data, size_t data_len);\n" % (self.PrettyCrc_t, self.PrettyCrcUpdateFunc, self.PrettyCrcCfg_t, self.PrettyCrc_t)
         else:
-            out += "crc_t crc_update(crc_t crc, const unsigned char *data, size_t data_len);\n"
+            out += "%s %s(%s crc, const unsigned char *data, size_t data_len);\n" % (self.PrettyCrc_t, self.PrettyCrcUpdateFunc, self.PrettyCrc_t)
         out += "\n"
+        # crc_finalize
+        out += self.__pretty_crc_finalize_doc()
         if self.InlineFinalizeFunc:
-            out += "static inline crc_t crc_finalize(crc_t crc)\n"
+            out += "static inline %s %s(%s crc)\n" % (self.PrettyCrc_t, self.PrettyCrcFinalizeFunc, self.PrettyCrc_t)
             out += "{\n"
             if self.ReflectOut:
-                out += "    return crc_reflect(crc, %s) ^ %s;\n" % (self.Width, self.XorOut)
+                out += "    return %s(crc, %s) ^ %s;\n" % (self.PrettyCrcReflectFunc, self.Width, self.XorOut)
             else:
                 out += "    return crc ^ %s;\n" % (self.XorOut)
             out += "}\n"
         if self.UndefinedCrcParameters:
-            out += "crc_t crc_finalize(const crc_cfg_t *cfg, crc_t crc);\n"
+            out += "%s %s(const %s *cfg, %s crc);\n" % (self.PrettyCrc_t, self.PrettyCrcFinalizeFunc, self.PrettyCrcCfg_t, self.PrettyCrc_t)
         elif self.Algorithm == Algo_Bit_by_Bit:
-            out += "crc_t crc_finalize(crc_t crc);\n"
+            out += "%s %s(%s crc);\n" % (self.PrettyCrc_t, self.PrettyCrcFinalizeFunc, self.PrettyCrc_t)
         out += "\n"
         out += "#endif  // %s\n" % self.HeaderProtection
         return out
@@ -805,19 +982,26 @@ class CRenderer:
         if self.UndefinedCrcParameters or self.Algorithm == Algo_Bit_by_Bit or self.Algorithm == Algo_Bit_by_Bit_Fast:
             out += "#include <stdbool.h>\n"
         out += "\n"
+        if self.StaticReflectFunc:
+            out += "static long %s(long data, size_t data_len);\n" % (self.PrettyCrcReflectFunc)
+        else:
+            out += "long %s(long data, size_t data_len);\n" % (self.PrettyCrcReflectFunc)
+        out += "\n"
         if self.Algorithm == Algo_Table_Driven:
+            out += "/**\n"
+            out += " * Static table used for the table_driven implementation.\n"
             if self.UndefinedCrcParameters:
-                out += "static crc_t crc_table[%s];\n" % (self.PrettyTableWidth)
+                out += " * Must be initialised with the %s function.\n" % (self.PrettyCrcInitFunc)
+            out += " *****************************************************************************/\n"
+            if self.UndefinedCrcParameters:
+                out += "static %s crc_table[%s];\n" % (self.PrettyCrc_t, self.PrettyTableWidth)
             else:
-                out += "static const crc_t crc_table[%s] = %s;\n" % (self.PrettyTableWidth, self.PrettyTableInit)
+                out += "static const %s crc_table[%s] = %s;\n" % (self.PrettyCrc_t, self.PrettyTableWidth, self.PrettyTableInit)
             out += "\n"
+        # crc_reflect
         if self.ReflectIn == None or self.ReflectIn or self.ReflectOut == None or self.ReflectOut:
-            if self.StaticReflectFunc:
-                out += "static long crc_reflect(long data, size_t data_len);\n"
-            else:
-                out += "long crc_reflect(long data, size_t data_len);\n"
-            out += "\n"
-            out += "long crc_reflect(long data, size_t data_len)\n"
+            out += self.__pretty_crc_reflect_doc()
+            out += "long %s(long data, size_t data_len)\n" % (self.PrettyCrcReflectFunc)
             out += "{\n"
             out += "    unsigned int i;\n"
             out += "    long ret;\n"
@@ -835,13 +1019,15 @@ class CRenderer:
             out += "    return ret;\n"
             out += "}\n"
             out += "\n"
+        # crc_init
         if not self.ConstantCrcInit:
-            out += "crc_t crc_init(const crc_cfg_t *cfg)\n"
+            out += self.__pretty_crc_init_doc()
+            out += "%s %s(const crc_cfg_t *cfg)\n" % (self.PrettyCrc_t, self.PrettyCrcInitFunc)
             out += "{\n"
             if self.Algorithm == Algo_Bit_by_Bit:
                 out += "    unsigned int i;\n"
                 out += "    bool bit;\n"
-                out += "    crc_t crc = %s;\n" % (self.PrettyXorIn)
+                out += "    %s crc = %s;\n" % (self.PrettyCrc_t, self.PrettyXorIn)
                 out += "    for (i = 0; i < %s; i++) {\n" % (self.PrettyWidth)
                 out += "        bit = crc & 0x01;\n"
                 out += "        if (bit) {\n"
@@ -856,21 +1042,23 @@ class CRenderer:
             elif self.Algorithm == Algo_Table_Driven:
                 if self.ReflectIn == None:
                     out += "    if (%s) {\n" % (self.PrettyReflectIn)
-                    out += "        return crc_reflect(%s & %s, %s);\n" % (self.PrettyXorIn, self.PrettyMask, self.PrettyWidth)
+                    out += "        return %s(%s & %s, %s);\n" % (self.PrettyCrcReflectFunc, self.PrettyXorIn, self.PrettyMask, self.PrettyWidth)
                     out += "    } else {\n"
                     out += "        return %s & %s;\n" % (self.PrettyXorIn, self.PrettyMask)
                     out += "    }\n"
                 elif self.ReflectIn:
-                    out += "    return crc_reflect(%s & %s, %s);\n" % (self.PrettyXorIn, self.PrettyMask, self.PrettyWidth)
+                    out += "    return %s(%s & %s, %s);\n" % (self.PrettyCrcReflectFunc, self.PrettyXorIn, self.PrettyMask, self.PrettyWidth)
                 else:
                     out += "    return %s & %s;\n" % (self.PrettyXorIn, self.PrettyMask)
             out += "}\n"
             out += "\n"
+        # crc_update
         if self.Algorithm == Algo_Bit_by_Bit:
+            out += self.__pretty_crc_update_doc()
             if self.UndefinedCrcParameters:
-                out += "crc_t crc_update(const crc_cfg_t *cfg, crc_t crc, const unsigned char *data, size_t data_len)\n"
+                out += "%s %s(const %s *cfg, %s crc, const unsigned char *data, size_t data_len)\n" % (self.PrettyCrc_t, self.PrettyCrcUpdateFunc, self.PrettyCrcCfg_t, self.PrettyCrc_t)
             else:
-                out += "crc_t crc_update(crc_t crc, const unsigned char *data, size_t data_len)\n"
+                out += "%s %s(%s crc, const unsigned char *data, size_t data_len)\n" % (self.PrettyCrc_t, self.PrettyCrcUpdateFunc, self.PrettyCrc_t)
             out += "{\n"
             out += "    unsigned int i;\n"
             out += "    bool bit;\n"
@@ -879,12 +1067,12 @@ class CRenderer:
             out += "    while (data_len--) {\n"
             if self.ReflectIn == None:
                 out += "        if (%s) {\n" % (self.PrettyReflectIn)
-                out += "            c = crc_reflect(*data++, 8);\n"
+                out += "            c = %s(*data++, 8);\n" % (self.PrettyCrcReflectFunc)
                 out += "        } else {\n"
                 out += "            c = *data++;\n"
                 out += "        }\n"
             elif self.ReflectIn:
-                out += "        c = crc_reflect(*data++, 8);\n"
+                out += "        c = %s(*data++, 8);\n" % (self.PrettyCrcReflectFunc)
             else:
                 out += "        c = *data++;\n"
             out += "        for (i = 0; i < 8; i++) {\n"
@@ -900,10 +1088,12 @@ class CRenderer:
             out += "}\n"
             out += "\n"
             out += "\n"
+            # crc_finalize
+            out += self.__pretty_crc_finalize_doc()
             if self.UndefinedCrcParameters:
-                out += "crc_t crc_finalize(const crc_cfg_t *cfg, crc_t crc)\n"
+                out += "%s %s(const %s *cfg, %s crc)\n" % (self.PrettyCrc_t, self.PrettyCrcFinalizeFunc, self.PrettyCrcCfg_t, self.PrettyCrc_t)
             else:
-                out += "crc_t crc_finalize(crc_t crc)\n"
+                out += "%s %s(%s crc)\n" % (self.PrettyCrc_t, self.PrettyCrcFinalizeFunc, self.PrettyCrc_t)
             out += "{\n"
             out += "    unsigned int i;\n"
             out += "    bool bit;\n"
@@ -917,18 +1107,20 @@ class CRenderer:
             out += "    }\n"
             if self.ReflectOut == None:
                 out += "    if (%s) {\n" % (self.PrettyReflectOut)
-                out += "        crc = crc_reflect(crc, %s);\n" % (self.PrettyWidth)
+                out += "        crc = %s(crc, %s);\n" % (self.PrettyCrcReflectFunc, self.PrettyWidth)
                 out += "    }\n"
             elif self.ReflectOut:
-                out += "    crc = crc_reflect(crc, %s);\n" % (self.PrettyWidth)
+                out += "    crc = %s(crc, %s);\n" % (self.PrettyCrcReflectFunc, self.PrettyWidth)
             out += "    return (crc ^ %s) & %s;\n" % (self.PrettyXorOut, self.PrettyMask)
             out += "}\n"
             out += "\n"
         if self.Algorithm == Algo_Bit_by_Bit_Fast:
+            # crc_update
+            out += self.__pretty_crc_update_doc()
             if self.UndefinedCrcParameters:
-                out += "crc_t crc_update(const crc_cfg_t *cfg, crc_t crc, const unsigned char *data, size_t data_len)\n"
+                out += "%s %s(const %s *cfg, %s crc, const unsigned char *data, size_t data_len)\n" % (self.PrettyCrc_t, self.PrettyCrcUpdateFunc, self.PrettyCrcCfg_t, self.PrettyCrc_t)
             else:
-                out += "crc_t crc_update(crc_t crc, const unsigned char *data, size_t data_len)\n"
+                out += "%s %s(%s crc, const unsigned char *data, size_t data_len)\n" % (self.PrettyCrc_t, self.PrettyCrcUpdateFunc, self.PrettyCrc_t)
             out += "{\n"
             out += "    unsigned int i;\n"
             out += "    bool bit;\n"
@@ -937,7 +1129,7 @@ class CRenderer:
             out += "    while (data_len--) {\n"
             if self.ReflectIn == None:
                 out += "        if (%s) {\n" % (self.PrettyReflectIn)
-                out += "            c = crc_reflect(*data++, 8);\n"
+                out += "            c = %s(*data++, 8);\n" % (self.PrettyCrcReflectFunc)
                 out += "        } else {\n"
                 out += "            c = *data++;\n"
                 out += "        }\n"
@@ -962,37 +1154,41 @@ class CRenderer:
             out += "}\n"
             out += "\n"
             out += "\n"
+            # crc_finalize
+            out += self.__pretty_crc_finalize_doc()
             if not self.InlineFinalizeFunc:
                 if self.UndefinedCrcParameters:
-                    out += "crc_t crc_finalize(const crc_cfg_t *cfg, crc_t crc)\n"
+                    out += "%s %s(const %s *cfg, %s crc)\n" % (self.PrettyCrc_t, self.PrettyCrcFinalizeFunc, self.PrettyCrcCfg_t, self.PrettyCrc_t)
                 else:
-                    out += "crc_t crc_finalize(crc_t crc)\n"
+                    out += "%s %s(crc_t crc)\n" % (self.PrettyCrc_t, self.PrettyCrcFinalizeFunc, self.PrettyCrc_t)
                 out += "{\n"
                 if self.ReflectOut == None:
                     out += "    if (cfg->reflect_out) {\n"
-                    out += "        crc = crc_reflect(crc, %s);\n" % (self.PrettyWidth)
+                    out += "        crc = %s(crc, %s);\n" % (self.PrettyCrcReflectFunc, self.PrettyWidth)
                     out += "    }\n"
                 elif self.ReflectOut:
-                    out += "    crc = crc_reflect(crc, %s);\n" % (self.PrettyWidth)
+                    out += "    crc = %s(crc, %s);\n" % (self.PrettyCrcReflectFunc, self.PrettyWidth)
                 out += "    return (crc ^ %s) & %s;\n" % (self.PrettyXorOut, self.PrettyMask)
                 out += "}\n"
                 out += "\n"
         if self.Algorithm == Algo_Table_Driven:
+            # crc_table_gen
             if self.UndefinedCrcParameters:
-                out += "void crc_table_gen(const crc_cfg_t *cfg)\n"
+                out += self.__pretty_crc_table_gen_doc()
+                out += "void %s(const %s *cfg)\n" % (self.PrettyCrcGenTableFunc, self.PrettyCrcCfg_t)
                 out += "{\n"
-                out += "    crc_t crc;\n"
+                out += "    %s crc;\n" % (self.PrettyCrc_t)
                 out += "    unsigned int i, j;\n"
                 out += "\n"
                 out += "    for (i = 0; i < %s; i++) {\n" % (self.PrettyTableWidth)
                 if self.ReflectIn == None:
                     out += "        if (cfg->reflect_in) {\n"
-                    out += "            crc = crc_reflect(i, %s);\n" % (self.TableIdxBits)
+                    out += "            crc = %s(i, %s);\n" % (self.PrettyCrcReflectFunc, self.TableIdxBits)
                     out += "        } else {\n"
                     out += "            crc = i;\n"
                     out += "        }\n"
                 elif self.ReflectIn:
-                    out += "        crc = crc_reflect(i, %s);\n" % (self.TableIdxBits)
+                    out += "        crc = %s(i, %s);\n" % (self.PrettyCrcReflectFunc, self.TableIdxBits)
                 else:
                     out += "        crc = i;\n"
                 out += "        crc <<= (%s - %s);\n" % (self.PrettyWidth, self.TableIdxBits)
@@ -1005,18 +1201,20 @@ class CRenderer:
                 out += "        }\n"
                 if self.ReflectIn == None:
                     out += "        if (cfg->reflect_in) {\n"
-                    out += "            crc = crc_reflect(crc, %s);\n" % (self.PrettyWidth)
+                    out += "            crc = %s(crc, %s);\n" % (self.PrettyCrcReflectFunc, self.PrettyWidth)
                     out += "        }\n"
                 elif self.ReflectIn:
-                    out += "        crc = crc_reflect(crc, %s);\n" % (self.PrettyWidth)
+                    out += "        crc = %s(crc, %s);\n" % (self.PrettyCrcReflectFunc, self.PrettyWidth)
                 out += "        crc_table[i] = crc & %s;\n" % (self.PrettyMask)
                 out += "    }\n"
                 out += "}\n"
                 out += "\n"
+            # crc_update
+            out += self.__pretty_crc_update_doc()
             if self.UndefinedCrcParameters:
-                out += "crc_t crc_update(const crc_cfg_t *cfg, crc_t crc, const unsigned char *data, size_t data_len)\n"
+                out += "%s %s(const %s *cfg, %s crc, const unsigned char *data, size_t data_len)\n" % (self.PrettyCrc_t, self.PrettyCrcUpdateFunc, self.PrettyCrcCfg_t, self.PrettyCrc_t)
             else:
-                out += "crc_t crc_update(crc_t crc, const unsigned char *data, size_t data_len)\n"
+                out += "%s %s(%s crc, const unsigned char *data, size_t data_len)\n" % (self.PrettyCrc_t, self.PrettyCrcUpdateFunc, self.PrettyCrc_t)
             out += "{\n"
             out += "    unsigned int tbl_idx;\n"
             out += "\n"
@@ -1032,7 +1230,7 @@ class CRenderer:
                         out += "            crc = crc_table[tbl_idx & %s] ^ (crc >> %d);\n" % (self.PrettyTableMask, self.TableIdxBits)
                     out += "            data++;\n"
                 out += "        }\n"
-                out += "        crc = crc_reflect(crc, %s);\n" % (self.PrettyWidth)
+                out += "        crc = %s(crc, %s);\n" % (self.PrettyCrcReflectFunc, self.PrettyWidth)
                 out += "    } else {\n"
                 out += "        while (data_len--) {\n"
                 if self.TableIdxBits == 8:
@@ -1056,7 +1254,7 @@ class CRenderer:
                         out += "        crc = crc_table[tbl_idx & %s] ^ (crc >> %d);\n" % (self.PrettyTableMask, self.TableIdxBits)
                     out += "        data++;\n"
                 out += "    }\n"
-                out += "    crc = crc_reflect(crc, %s);\n" % (self.PrettyWidth)
+                out += "    crc = %s(crc, %s);\n" % (self.PrettyCrcReflectFunc, self.PrettyWidth)
             else:
                 out += "    while (data_len--) {\n"
                 if self.TableIdxBits == 8:
@@ -1074,17 +1272,19 @@ class CRenderer:
             if not self.InlineFinalizeFunc:
                 out += "\n"
                 out += "\n"
+                # crc_finalize
+                out += self.__pretty_crc_finalize_doc()
                 if self.UndefinedCrcParameters:
-                    out += "crc_t crc_finalize(const crc_cfg_t *cfg, crc_t crc)\n"
+                    out += "%s %s(const %s *cfg, %s crc)\n" % (self.PrettyCrc_t, self.PrettyCrcFinalizeFunc, self.PrettyCrcCfg_t, self.PrettyCrc_t)
                 else:
-                    out += "crc_t crc_finalize(crc_t crc)\n"
+                    out += "%s %s(%s crc)\n" % (self.PrettyCrc_t, self.PrettyCrcFinalizeFunc, self.PrettyCrc_t)
                 out += "{\n"
                 if self.ReflectOut == None:
                     out += "    if (cfg->reflect_out) {\n"
-                    out += "        crc = crc_reflect(crc, %s);\n" % (self.PrettyWidth)
+                    out += "        crc = %s(crc, %s);\n" % (self.PrettyCrcReflectFunc, self.PrettyWidth)
                     out += "    }\n"
                 elif self.ReflectOut:
-                    out += "    crc = crc_reflect(crc, %s);\n" % (self.PrettyWidth)
+                    out += "    crc = %s(crc, %s);\n" % (self.PrettyCrcReflectFunc, self.PrettyWidth)
                 out += "    return (crc ^ %s) & %s;\n" % (self.PrettyXorOut, self.PrettyMask)
                 out += "}\n"
         return out
@@ -1098,10 +1298,14 @@ class CRenderer:
         out += "\n"
         out += "#include <stdio.h>\n"
         out += "\n"
+        out += "/**\n"
+        out += " * \\brief      C main function.\n"
+        out += " * \\return     0 on success, != 0 on error.\n"
+        out += " *****************************************************************************/\n"
         out += "int main(void)\n"
         out += "{\n"
         if self.UndefinedCrcParameters:
-            out += "    crc_cfg_t cfg = {\n"
+            out += "    %s cfg = {\n" % (self.PrettyCrcCfg_t)
             if self.Width == None:
                 out += "        0,      // width\n"
             if self.Poly == None:
@@ -1120,18 +1324,18 @@ class CRenderer:
                 out += "        0,      // msb_mask\n"
             out += "    };\n"
         out += "    static const unsigned char str[] = \"123456789\";\n"
-        out += "    crc_t crc;\n"
+        out += "    %s crc;\n" % (self.PrettyCrc_t)
         out += "\n"
         if self.UndefinedCrcParameters:
             if self.Algorithm == Algo_Table_Driven:
-                out += "    crc_table_gen(&cfg);\n"
-            out += "    crc = crc_init(&cfg);\n"
-            out += "    crc = crc_update(&cfg, crc, str, sizeof(str) - 1);\n"
-            out += "    crc = crc_finalize(&cfg, crc);\n"
+                out += "    %s(&cfg);\n" % (self.PrettyCrcGenTableFunc)
+            out += "    crc = %s(&cfg);\n" % (self.PrettyCrcInitFunc)
+            out += "    crc = %s(&cfg, crc, str, sizeof(str) - 1);\n" % (self.PrettyCrcUpdateFunc)
+            out += "    crc = %s(&cfg, crc);\n" % (self.PrettyCrcFinalizeFunc)
         else:
-            out += "    crc = crc_init();\n"
-            out += "    crc = crc_update(crc, str, sizeof(str) - 1);\n"
-            out += "    crc = crc_finalize(crc);\n"
+            out += "    crc = %s();\n" % (self.PrettyCrcInitFunc)
+            out += "    crc = %s(crc, str, sizeof(str) - 1);\n" % (self.PrettyCrcUpdateFunc)
+            out += "    crc = %s(crc);\n" % (self.PrettyCrcFinalizeFunc)
         out += "\n"
         out += "    printf(\"0x%lx\\n\", (long)crc);\n"
         out += "    return 0;\n"
@@ -1185,6 +1389,65 @@ def check_string(opt):
     return crc
 
 
+def crc_file_update(opt, tbl, register, str):
+    """
+    Update the CRC using the table_driven CRC algorithm.
+    """
+    if not opt.ReflectIn:
+        register = opt.XorIn
+        for i in range(len(str)):
+            octet = ord(str[i])
+            tblidx = ((register >> (opt.Width - 8)) ^ octet) & 0xff
+            register = ((register << 8) ^ tbl[tblidx]) & opt.Mask
+    else:
+        register = reflect(opt.XorIn, opt.Width)
+        for i in range(len(str)):
+            octet = ord(str[i])
+            tblidx = (register ^ octet) & 0xff
+            register = ((register >> 8) ^ tbl[tblidx]) & opt.Mask
+        register = reflect(register, opt.Width)
+    return register
+
+def check_file(opt):
+    """
+    Calculate the CRC of a file.
+    This algorithm uses the table_driven CRC algorithm.
+    """
+    if opt.UndefinedCrcParameters:
+        sys.stderr.write("Error: undefined parameters\n")
+        sys.exit(1)
+    tbl = crc_gen_table(opt)
+
+    try:
+        file = open(opt.CheckFile, 'rb')
+    except:
+        sys.stderr.write("Error: can't open file %s\n" % opt.CheckFile)
+        sys.exit(1)
+
+    if not opt.ReflectIn:
+        register = opt.XorIn
+    else:
+        register = reflect(opt.XorIn, opt.Width)
+    try:
+        str = file.read()
+    except:
+        sys.stderr.write("Error: can't open read %s\n" % opt.CheckFile)
+        sys.exit(1)
+    while len(str):
+        register = crc_file_update(opt, tbl, register, str)
+        try:
+            str = file.read()
+        except:
+            sys.stderr.write("Error: can't open read %s\n" % opt.CheckFile)
+            sys.exit(1)
+    file.close()
+
+    if opt.ReflectOut:
+        register = reflect(register, opt.Width)
+    register = register ^ opt.XorOut
+    return register
+
+
 def main():
     """
     Main function
@@ -1196,6 +1459,9 @@ def main():
         print renderer.print_param()
     if opt.Action == "check_string":
         crc = check_string(opt)
+        print "0x%x" % crc
+    if opt.Action == "check_file":
+        crc = check_file(opt)
         print "0x%x" % crc
     if opt.Action == "generate_h" or opt.Action == "generate_c" or opt.Action == "generate_c_main":
         renderer = CRenderer(opt)
