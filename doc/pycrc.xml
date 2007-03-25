@@ -2,12 +2,12 @@
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
                     "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
 <!ENTITY program_name       "pycrc">
-<!ENTITY program_version    "0.3">
+<!ENTITY program_version    "0.5">
 <!ENTITY author_firstname   "Thomas">
 <!ENTITY author_surname     "Pircher">
 <!ENTITY author_email       "tehpeh@gmx.net">
 <!ENTITY author             "&author_firstname; &author_surname;">
-<!ENTITY date               "2007-01-11">
+<!ENTITY date               "2007-03-25">
 <!ENTITY bit_by_bit         "bit_by_bit">
 <!ENTITY bit_by_bit_fast    "bit_by_bit_fast">
 <!ENTITY table_driven       "table_driven">
@@ -223,7 +223,7 @@
         </varlistentry>
         <varlistentry>
             <term>
-                <option>----table_idx_with=</option><replaceable>WIDTH</replaceable>
+                <option>--table_idx_with=</option><replaceable>WIDTH</replaceable>
             </term>
             <listitem>
                 <para>use WIDTH bits to index the crc table; WIDTH one of {<replaceable>1</replaceable>, <replaceable>2</replaceable>, 
@@ -397,7 +397,7 @@
             <funcsynopsis>
                 <funcsynopsisinfo>
 #include &lt;unistd.h&gt;
-typedef XXXX ctc_t;             // this type is defined in the generated header file
+typedef XXXX crc_t;             // this type is defined in the generated header file
                 </funcsynopsisinfo>
                 <funcprototype>
                     <?dbhtml funcsynopsis-style='ansi'?>
@@ -481,7 +481,7 @@ typedef struct {
         <para>
             <glosslist>
                 <glossentry>
-                    <glossterm>Calculate the CRC-16 checksum of the string 123456789:</glossterm>
+                    <glossterm>Calculate the CRC-32 checksum of the string 123456789:</glossterm>
                     <glossdef>
                         <para>
                         <userinput>pycrc.py --model crc-32 --check_string 123456789</userinput>

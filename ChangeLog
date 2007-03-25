@@ -1,4 +1,15 @@
 #
+# Version 0.5, 2007-03-25
+#
+
+2007-03-25  Thomas Pircher   <tehpeh@gmx.net>
+
+	* pycrc.py: Fixed bug 1686404: unhandled exception when called with
+	both options --table_idx_with and --check_file
+	* pycrc.py: Eliminated useless declaration of crc_reflect, when not used
+	* pycrc.py: Corrected typos in the documentation
+
+#
 # Version 0.4, 2007-01-26
 #
 

@@ -99,7 +99,7 @@ class Options:
     The options parsing and validationg class
     """
     ProgramName     = "pycrc"
-    Version         = "0.4"
+    Version         = "0.5"
     VersionStr      = "%s v%s" % (ProgramName, Version)
     WebAddress      = "http://www.tty1.net/pycrc/"
     Width           = None
@@ -967,7 +967,7 @@ class CRenderer:
         elif self.Algorithm == Algo_Bit_by_Bit:
             out += "%s %s(%s crc);\n" % (self.PrettyCrc_t, self.PrettyCrcFinalizeFunc, self.PrettyCrc_t)
         out += "\n"
-        out += "#endif  // %s\n" % self.HeaderProtection
+        out += "#endif      // %s\n" % self.HeaderProtection
         return out
 
     def __generate_c(self):
@@ -982,11 +982,12 @@ class CRenderer:
         if self.UndefinedCrcParameters or self.Algorithm == Algo_Bit_by_Bit or self.Algorithm == Algo_Bit_by_Bit_Fast:
             out += "#include <stdbool.h>\n"
         out += "\n"
-        if self.StaticReflectFunc:
-            out += "static long %s(long data, size_t data_len);\n" % (self.PrettyCrcReflectFunc)
-        else:
-            out += "long %s(long data, size_t data_len);\n" % (self.PrettyCrcReflectFunc)
-        out += "\n"
+        if self.ReflectIn or self.ReflectOut:
+            if self.StaticReflectFunc:
+                out += "static long %s(long data, size_t data_len);\n" % (self.PrettyCrcReflectFunc)
+            else:
+                out += "long %s(long data, size_t data_len);\n" % (self.PrettyCrcReflectFunc)
+            out += "\n"
         if self.Algorithm == Algo_Table_Driven:
             out += "/**\n"
             out += " * Static table used for the table_driven implementation.\n"
@@ -1416,6 +1417,8 @@ def check_file(opt):
     if opt.UndefinedCrcParameters:
         sys.stderr.write("Error: undefined parameters\n")
         sys.exit(1)
+    opt.TableIdxBits = 8            # FIXME cowardly refusing to use less bits for the table
+
     tbl = crc_gen_table(opt)
 
     try:
