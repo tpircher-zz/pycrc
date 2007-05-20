@@ -38,7 +38,7 @@
                     </listitem>
                     <listitem>
                         <para>
-                        a clean C source code generator which output could be easily icluded in embedded programs
+                        a clean C source code generator which output could be easily included in embedded programs
                         </para>
                     </listitem>
                 </itemizedlist>
@@ -49,7 +49,7 @@
     <sect1 id="pycrc"><title>pycrc</title>
         <sect2 id="inefficient"><title>But the Python implementation is extremely inefficient!</title>
             <para>
-            Good observation! And I'm not going to change this. The Python implementation is thought to provide a corretc, stable and easy
+            Good observation! And I'm not going to change this. The Python implementation is thought to provide a correct, stable and easy
             to read code bases for further experiments.
             The right place to do performance tuning is the generated C code. I'm happy to consider every suggestion to improve the generated code.
             </para>

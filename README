@@ -1,7 +1,11 @@
 This directory contains the pycrc general purpose CRC utility and C source file
-generator. See http://www.tty1.net/pycrc for more details.
+generator. See http://www.tty1.net/pycrc/ for more details.
 
 See the file doc/FAQ for frequently asked questions.
+
+
+Installation
+============
 
 pycrc requires Python 2.2.3 or later.
 
@@ -13,26 +17,12 @@ executable: chmod +x pycrc.py
 If you have questions about using pycrc and the documentation does
 not answer them, please send mail to <tehpeh@gmx.net>.
 
------
 
-Copyright (C) 2006-2007  Thomas Pircher  <tehpeh@gmx.net>
+Copyright of the generated source code
+======================================
 
-This file is part of pycrc.
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-As a special exception to the terms of the GPL, you may use source code
-generated as output by pycrc under the terms of the license of your choice.
-See the copyright statement of pycrc.py for more details.
+Prior to v0.6, pycrc was released under the GPL and an additional addition to
+the licence was required to permit to use the generated source code in products
+with a OSI unapproved licence. Since version 0.6, pycrc is released under the
+MIT licence and thus such an additional clause to the licence has become
+obsolete.

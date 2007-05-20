@@ -1,4 +1,41 @@
 #
+# Version 0.6, 2007-05-21
+#
+
+2007-05-15  Thomas Pircher   <tehpeh@gmx.net>
+
+	* crc_opt.py: Added the --std option to generate C89 (ANSI) compliant code
+	* crc_symtable.py: Reduced the size of the symbol table by re-arranging
+	items
+
+2007-05-13  Thomas Pircher   <tehpeh@gmx.net>
+
+	* test/test.sh: Added a new check to the test script which validate all
+	possible combination of undefined parameters
+	* crc_code_gen.py: Made the generated main function cope with command line
+	arguments
+
+2007-05-12  Thomas Pircher   <tehpeh@gmx.net>
+
+	* pycrc.py: Added the --generate table option
+	* pycrc.py: Added a template engine for the code generation. Split up
+	pycrc.py into smaller modules
+
+2007-04-11  Thomas Pircher   <tehpeh@gmx.net>
+
+	* pycrc.py: Added obsolete options again tor legacy reasons.
+	Added a better handling of the --model parameter.
+
+2007-04-07  Thomas Pircher   <tehpeh@gmx.net>
+
+	* pycrc.py: Changed licence to the MIT licence. This makes the additional
+	clause for generated source code obsolete.
+	Changed all command line options with underscores to hyphen (e.g.
+	table_driven becomes table-driven).
+	Added the option --generate which obsoletes the old options --generate_c
+	--generate_h etc.
+
+#
 # Version 0.5, 2007-03-25
 #
 

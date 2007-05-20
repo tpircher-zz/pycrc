@@ -89,13 +89,13 @@ int get_config(int argc, char *argv[], crc_cfg_t *cfg)
     static struct option long_options[] = {
         {"width",           1, 0, 'w'},
         {"poly",            1, 0, 'p'},
-        {"reflect_in",      1, 0, 'n'},
-        {"xor_in",          1, 0, 'i'},
-        {"reflect_out",     1, 0, 'u'},
-        {"xor_out",         1, 0, 'o'},
+        {"reflect-in",      1, 0, 'n'},
+        {"xor-in",          1, 0, 'i'},
+        {"reflect-out",     1, 0, 'u'},
+        {"xor-out",         1, 0, 'o'},
         {"verbose",         0, 0, 'v'},
-        {"check_string",    1, 0, 's'},
-        {"table_idx_with",  1, 0, 't'},
+        {"check-string",    1, 0, 's'},
+        {"table-idx-with",  1, 0, 't'},
         {0, 0, 0, 0}
     };
 

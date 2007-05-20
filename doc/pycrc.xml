@@ -2,15 +2,15 @@
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
                     "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
 <!ENTITY program_name       "pycrc">
-<!ENTITY program_version    "0.5">
+<!ENTITY program_version    "0.6">
 <!ENTITY author_firstname   "Thomas">
 <!ENTITY author_surname     "Pircher">
 <!ENTITY author_email       "tehpeh@gmx.net">
 <!ENTITY author             "&author_firstname; &author_surname;">
-<!ENTITY date               "2007-03-25">
-<!ENTITY bit_by_bit         "bit_by_bit">
-<!ENTITY bit_by_bit_fast    "bit_by_bit_fast">
-<!ENTITY table_driven       "table_driven">
+<!ENTITY date               "2007-05-12">
+<!ENTITY bit-by-bit         "bit-by-bit">
+<!ENTITY bit-by-bit-fast    "bit-by-bit-fast">
+<!ENTITY table-driven       "table-driven">
 <!ENTITY width          "Width">
 <!ENTITY poly           "Poly">
 <!ENTITY reflect_in     "ReflectIn">
@@ -61,7 +61,11 @@
                 <listitem>
                     <para>
                     generate the checksum of a string
-                    <!-- and a file (not implememnted)-->
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                    generate the checksum of a file
                     </para>
                 </listitem>
                 <listitem>
@@ -76,7 +80,7 @@
             <itemizedlist>
                 <listitem>
                     <para>
-                        <replaceable>&bit_by_bit;</replaceable>: the basic algorithm which operates individually on every bit of the augmented message 
+                        <replaceable>&bit-by-bit;</replaceable>: the basic algorithm which operates individually on every bit of the augmented message 
                         (i.e. the input data with <replaceable>&width;</replaceable> 0-bits attached to the end).
                         This algorithm is the easiest to understand because it is a direct implementation of the basic polynomial division, 
                         but it is also the slowest among all possible variants.
@@ -84,7 +88,7 @@
                 </listitem>
                 <listitem>
                     <para>
-                        <replaceable>&bit_by_bit_fast;</replaceable>: a variation of the simple <replaceable>&bit_by_bit;</replaceable> algorithm, 
+                        <replaceable>&bit-by-bit-fast;</replaceable>: a variation of the simple <replaceable>&bit-by-bit;</replaceable> algorithm, 
                         with the difference that it does not need to augment the data, i.e. it does not add <replaceable>&width;</replaceable> zero 
                         bits at the end of the message.
                         This algorithm might be a good choice for embedded platforms, where code space is a major concern.
@@ -92,11 +96,11 @@
                 </listitem>
                 <listitem>
                     <para>
-                        <replaceable>&table_driven;</replaceable>: the standard table driven algorithm. This algorithm works only with a 
+                        <replaceable>&table-driven;</replaceable>: the standard table driven algorithm. This algorithm works only with a 
                         <replaceable>&width;</replaceable> which is a multiple of 8.
                         This is the fastest variant because it operates on one byte at a time, as opposed to bits, and uses a look-up table of 256 elements, 
                         which might not be feasible for small embedded systems, though. Anyway, the number of elements in the look-up table can be reduced by 
-                        means of the <option>--table_idx_with</option> command line switch. By using 4 bits (16 elements in the look-up table) a significant 
+                        means of the <option>--table-idx-width</option> command line switch. By using 4 bits (16 elements in the look-up table) a significant 
                         speed-up can be measured with respect to the bit-by-bit algorithms.
                     </para>
                 </listitem>
@@ -143,11 +147,43 @@
         </varlistentry>
         <varlistentry>
             <term>
+                <option>--check-string=</option><replaceable>STRING</replaceable>
+            </term>
+            <listitem>
+                <para>calculate the checksum of the given string ('<replaceable>123456789</replaceable>' default)</para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
+                <option>--check-file=</option><replaceable>FILE</replaceable>
+            </term>
+            <listitem>
+                <para>calculate the checksum of the given file</para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
+                <option>--generate=</option><replaceable>CODE</replaceable>
+            </term>
+            <listitem>
+                <para>generate the source code type as a choice from {c, h, c-main, table}</para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
+                <option>--std=</option><replaceable>STD</replaceable>
+            </term>
+            <listitem>
+                <para>C standard style of the generated code from {C89, ANSI, C99}</para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
                 <option>--algorithm=</option><replaceable>ALGO</replaceable>
             </term>
             <listitem>
-                <para>choose an algorithm from {<replaceable>bit_by_bit</replaceable>, <replaceable>bit_by_bit_fast</replaceable>, 
-                <replaceable>table_driven</replaceable>, <replaceable>all</replaceable>}</para>
+                <para>choose an algorithm from {<replaceable>bit-by-bit</replaceable>, <replaceable>bit-by-bit-fast</replaceable>, 
+                <replaceable>table-driven</replaceable>, <replaceable>all</replaceable>}</para>
             </listitem>
         </varlistentry>
         <varlistentry>
@@ -167,10 +203,6 @@
                     <replaceable>posix</replaceable>,
                     <replaceable>jam</replaceable>,
                     <replaceable>xfer</replaceable>}</para>
-                <para>
-                This is the parameter with the lowest priority. Any other option (whether specified before or after the <option>--model</option>
-                option) will override its parameter.
-                </para>
             </listitem>
         </varlistentry>
         <varlistentry>
@@ -186,12 +218,12 @@
                 <option>--poly=</option><replaceable>HEX</replaceable>
             </term>
             <listitem>
-                <para>use HEX as Polynom</para>
+                <para>use HEX as polynom</para>
             </listitem>
         </varlistentry>
         <varlistentry>
             <term>
-                <option>--reflect_in=</option><replaceable>BOOL</replaceable>
+                <option>--reflect-in=</option><replaceable>BOOL</replaceable>
             </term>
             <listitem>
                 <para>reflect input bytes</para>
@@ -199,7 +231,7 @@
         </varlistentry>
         <varlistentry>
             <term>
-                <option>--xor_in=</option><replaceable>HEX</replaceable>
+                <option>--xor-in=</option><replaceable>HEX</replaceable>
             </term>
             <listitem>
                 <para>use HEX as initial value</para>
@@ -207,7 +239,7 @@
         </varlistentry>
         <varlistentry>
             <term>
-                <option>--reflect_out=</option><replaceable>BOOL</replaceable>
+                <option>--reflect-out=</option><replaceable>BOOL</replaceable>
             </term>
             <listitem>
                 <para>reflect output bytes</para>
@@ -215,7 +247,7 @@
         </varlistentry>
         <varlistentry>
             <term>
-                <option>--xor_out=</option><replaceable>HEX</replaceable>
+                <option>--xor-out=</option><replaceable>HEX</replaceable>
             </term>
             <listitem>
                 <para>xor the final crc value with HEX</para>
@@ -223,7 +255,7 @@
         </varlistentry>
         <varlistentry>
             <term>
-                <option>--table_idx_with=</option><replaceable>WIDTH</replaceable>
+                <option>--table-idx-width=</option><replaceable>WIDTH</replaceable>
             </term>
             <listitem>
                 <para>use WIDTH bits to index the crc table; WIDTH one of {<replaceable>1</replaceable>, <replaceable>2</replaceable>, 
@@ -232,47 +264,7 @@
         </varlistentry>
         <varlistentry>
             <term>
-                <option>--check_string=</option><replaceable>STRING</replaceable>
-            </term>
-            <listitem>
-                <para>calculate the checksum of the given string ('<replaceable>123456789</replaceable>' default)</para>
-            </listitem>
-        </varlistentry>
-        <varlistentry>
-            <term>
-                <option>--check_file=</option><replaceable>FILE</replaceable>
-            </term>
-            <listitem>
-                <para>calculate the checksum of the given file</para>
-            </listitem>
-        </varlistentry>
-        <varlistentry>
-            <term>
-                <option>--generate_c</option>
-            </term>
-            <listitem>
-                <para>generate a C source file</para>
-            </listitem>
-        </varlistentry>
-        <varlistentry>
-            <term>
-                <option>--generate_c_main</option>
-            </term>
-            <listitem>
-                <para>generate a C source file with main function</para>
-            </listitem>
-        </varlistentry>
-        <varlistentry>
-            <term>
-                <option>--generate_h</option>
-            </term>
-            <listitem>
-                <para>generate a C header source file</para>
-            </listitem>
-        </varlistentry>
-        <varlistentry>
-            <term>
-                <option>--symbol_prefix=</option><replaceable>STRING</replaceable>
+                <option>--symbol-prefix=</option><replaceable>STRING</replaceable>
             </term>
             <listitem>
                 <para>when generating source code, use <replaceable>STRING</replaceable> as prefix to the generated symbols</para>
@@ -304,8 +296,8 @@
                     <glossdef>
                         <para>
                         The width of the CRC <replaceable>&poly;</replaceable>, in number of bits. This is also the width of the final CRC result. 
-                        For the <replaceable>&bit_by_bit;</replaceable> and the <replaceable>&bit_by_bit_fast;</replaceable> algorithms, any width 
-                        can be used, but for the <replaceable>&table_driven;</replaceable> algorithm which operate on 8 bits at a time, only
+                        For the <replaceable>&bit-by-bit;</replaceable> and the <replaceable>&bit-by-bit-fast;</replaceable> algorithms, any width 
+                        can be used, but for the <replaceable>&table-driven;</replaceable> algorithm which operate on 8 bits at a time, only
                         multiples of 8 can be chosen as <replaceable>&width;</replaceable>.
                         </para>
                     </glossdef>
@@ -344,8 +336,8 @@
                         <para>
                         The initial value (usually all 0 or all 1) in the algorithms which operate on the non-augmented message. 
                         This value can be seen as a value which will be XOR-ed into the CRC register after <replaceable>&width;</replaceable> 
-                        iterations of the <replaceable>&bit_by_bit;</replaceable> algorithm. 
-                        This means the simple <replaceable>&bit_by_bit;</replaceable> algorithm must calculate the initial value with some sort of
+                        iterations of the <replaceable>&bit-by-bit;</replaceable> algorithm. 
+                        This means the simple <replaceable>&bit-by-bit;</replaceable> algorithm must calculate the initial value with some sort of
                         reverse CRC algorithm on the <replaceable>&xor_in;</replaceable> value.
                         </para>
                     </glossdef>
@@ -484,7 +476,7 @@ typedef struct {
                     <glossterm>Calculate the CRC-32 checksum of the string 123456789:</glossterm>
                     <glossdef>
                         <para>
-                        <userinput>pycrc.py --model crc-32 --check_string 123456789</userinput>
+                        <userinput>pycrc.py --model crc-32 --check-string 123456789</userinput>
                         </para>
                     </glossdef>
                 </glossentry>
@@ -492,13 +484,13 @@ typedef struct {
                     <glossterm>Generate the source code of the table-driven algorithm for an embedded application.</glossterm>
                     <glossdef>
                         <para>
-                        <userinput>pycrc.py --model crc-16 --algorithm table_driven --table_idx_with 4 --generate_h -o crc.h</userinput>
+                        <userinput>pycrc.py --model crc-16 --algorithm table-driven --table-idx-width 4 --generate_h -o crc.h</userinput>
                         </para>
                         <para>
-                        <userinput>pycrc.py --model crc-16 --algorithm table_driven --table_idx_with 4 --generate_c -o crc.c</userinput>
+                        <userinput>pycrc.py --model crc-16 --algorithm table-driven --table-idx-width 4 --generate_c -o crc.c</userinput>
                         </para>
                         <para>
-                         The table index with of 4 bits ensures a moderate memory consumption. In fact, the resulting table is 
+                         The table index width of 4 bits ensures a moderate memory consumption. In fact, the resulting table is 
                          <code>16 * sizeof(crc_t)</code> bytes big.
                         </para>
                     </glossdef>
@@ -521,18 +513,5 @@ typedef struct {
         </para>
     </refsect1>
 
-    <!--
-    <refsect1><title>See also</title>
-        <para>
-            <ulink url="http://en.wikipedia.org/wiki/Cyclic_redundancy_check" />,
-        </para>
-        <para>
-            <ulink url="http://www.zorc.breitbandkatze.de/crc.html" />,
-        </para>
-        <para>
-            <ulink url="http://www.ross.net/crc/" />,
-        </para>
-    </refsect1>
-    -->
 </refentry>
 
