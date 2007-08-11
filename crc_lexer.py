@@ -1,5 +1,6 @@
 #  pycrc -- flexible CRC calculation utility and C source file generator
-#
+# -*- coding: Latin-1 -*-
+
 #  Copyright (c) 2006-2007  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy

@@ -229,9 +229,10 @@ int main(int argc, char *argv[])
         0,      // crc_mask
         0,      // msb_mask
     };
-    crc_t crc, crc_pre_final;
+    crc_t crc;
+    crc_t crc_test, crc_pre_final;
     char format[20];
-    int ret;
+    int ret, i;
 
     ret = get_config(argc, argv, &cfg);
     if (ret == 0) {
@@ -248,6 +249,20 @@ int main(int argc, char *argv[])
             return 1;
         }
 #       endif
+
+        // calculate the checksum again, but this time loop over the input
+        // bytes one-by-one.
+        crc_test = crc_init(&cfg);
+        for (i = 0; str[i]; i++)
+        {
+            fprintf(stderr, "i = %d, str[i] = 0x%02x\n", i, str[i]);
+            crc_test = crc_update(&cfg, crc_test, str + i, 1);
+        }
+        crc_test = crc_finalize(&cfg, crc_test);
+        if (crc_test != crc) {
+            fprintf(stderr, "error: crc loop verification failed\n");
+            return 1;
+        }
 
         if (verbose) {
             snprintf(format, sizeof(format), "%%-16s = 0x%%0%dx\n", (unsigned int)(cfg.width + 3) / 4);

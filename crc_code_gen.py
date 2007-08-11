@@ -1,5 +1,6 @@
 #  pycrc -- flexible CRC calculation utility and C source file generator
-#
+# -*- coding: Latin-1 -*-
+
 #  Copyright (c) 2006-2007  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -146,7 +147,6 @@ class CodeGenerator(object):
                     return False
                 self.lex.advance(skip_nl = True)
                 if not self.__parse_data():
-#                    sys.stderr.write("Error: No data for if\n")
                     return False
                 while self.lex.text.startswith("elif "):
                     if not self.__parse_elif(self.lex.text):

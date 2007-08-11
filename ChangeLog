@@ -1,4 +1,32 @@
 #
+# Version 0.6.1, 2007-08-12
+#
+
+2007-08-12  Thomas Pircher   <tehpeh@gmx.net>
+
+	* test/test.sh Added test for C89 compilation
+	* test/main.c Added a test case to loop over the input bytes one by one
+	* crc_symtable.py: Bugfix in the source code generator for C89:
+	Compilation error due to mismatch of parameters in the crc_finalize
+	funtion
+	* crc_symtable.py: Changes related to 919107: Code generator includes
+	reflect() function even if not needed
+
+2007-07-22  Thomas Pircher   <tehpeh@gmx.net>
+
+	* crc_symtable.py: Fixed a typo in the C89 source code generator.
+	Thanks to Helmut Bauer
+
+2007-06-10  Thomas Pircher   <tehpeh@gmx.net>
+
+	* all files: Tidied up the documentation
+	* all files: Code cleanup
+
+2007-05-15  Thomas Pircher   <tehpeh@gmx.net>
+
+	* crc_opt.py: Deleted obsolete options
+
+#
 # Version 0.6, 2007-05-21
 #
 

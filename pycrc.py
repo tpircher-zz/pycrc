@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: Latin-1 -*-
 
 #  pycrc -- flexible CRC calculation utility and C source file generator
 #
@@ -170,7 +171,7 @@ def main():
     """
     Main function
     """
-    opt = Options("0.6");
+    opt = Options("0.6.1");
     opt.parse(sys.argv)
     if opt.Verbose:
         print print_parameters(opt)
@@ -183,7 +184,7 @@ def main():
     if opt.Action == "generate_h" or opt.Action == "generate_c" or opt.Action == "generate_c-main" or opt.Action == "generate_table":
         g = CodeGenerator(opt)
         if opt.Action == "generate_h":
-            in_str = "{%header_template%}"
+            in_str = "{%h_template%}"
         elif opt.Action == "generate_c":
             in_str = "{%c_template%}"
         elif opt.Action == "generate_c-main":

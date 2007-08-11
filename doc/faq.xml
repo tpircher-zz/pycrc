@@ -103,11 +103,9 @@
 
         <sect2 id="code-ownership"><title>Who owns the generated code?</title>
             <para>
-            You. I have added a special exception to the copyright statement which permits the use of pycrc#s output in larger works and to distribute
-            that code under terms of your choice.
-            </para>
-            <para>
-            If you decide to include pycrc's output in your work, I would appreciate a short mention od it in your sorce code or documentation.
+            This question has become almost irrelevant with the MIT licence introduced in version 0.6.
+            The sloppy answer is: you are free to do whatever you like with pycrc's the output, as long as the
+            terms of the MIT licence are not violated.
             </para>
         </sect2>
     </sect1>

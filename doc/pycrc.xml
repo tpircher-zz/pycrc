@@ -193,7 +193,7 @@
             <listitem>
                 <para>choose a parameter set from {<replaceable>crc-8</replaceable>, 
                     <replaceable>crc-16</replaceable>, 
-                    <replaceable>citt</replaceable>, 
+                    <replaceable>ccitt</replaceable>, 
                     <replaceable>kermit</replaceable>, 
                     <replaceable>x-25</replaceable>, 
                     <replaceable>xmodem</replaceable>, 

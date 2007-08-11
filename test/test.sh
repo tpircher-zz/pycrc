@@ -12,81 +12,84 @@ TEST_ARGS_COMPILATION=0
 
 
 function testres {
-    lcmd="$1"
-    lres="$2"
-    lres=`echo $lres | sed -e      's/.*0x0*\([0-9a-fA-F][0-9a-fA-F]*\).*/\1/'`
-    lclc=`$lcmd      | sed -e '$!d; s/.*0x0*\([0-9a-fA-F][0-9a-fA-F]*\).*/\1/'`
-    if [ "$lclc" != "$lres" ]; then
-        echo >&2 test failed: $lcmd 
-        echo >&2 got $lclc instead of expected $lres
+    testres_lcmd="$1"
+    testres_lres="$2"
+    testres_lres=`echo $testres_lres | sed -e      's/.*0x0*\([0-9a-fA-F][0-9a-fA-F]*\).*/\1/'`
+    testres_lclc=`$testres_lcmd      | sed -e '$!d; s/.*0x0*\([0-9a-fA-F][0-9a-fA-F]*\).*/\1/'`
+    if [ "$testres_lclc" != "$testres_lres" ]; then
+        echo >&2 test failed: $testres_lcmd 
+        echo >&2 got $testres_lclc instead of expected $testres_lres
         return 1
     fi
 }
 
 
 function teststr {
-    lopt="$1 --check-string 123456789"
-    lres="$2"
-    testres "$lopt" "$lres"
+    teststr_lopt="$1 --check-string 123456789"
+    teststr_lres="$2"
+    testres "$teststr_lopt" "$teststr_lres"
 }
 
 
 function compile {
-    lalg="$1"
-    lopt="$2"
-    lout="$3"
+    compile_lalg="$1"
+    compile_lopt="$2"
+    compile_lout="$3"
 
-    $PYCRC --algorithm "$lalg" $lopt --generate h -o crc.h
-    ldef=`echo "$lopt" | egrep -c 'width|poly|reflect|xor'` || true
+    $PYCRC --algorithm "$compile_lalg" $compile_lopt --generate h -o crc.h
+    ldef=`echo "$compile_lopt" | egrep -c 'width|poly|reflect|xor'` || true
     if [ "$ldef" -eq 0 ]; then
-        $PYCRC --algorithm "$lalg" $lopt --generate c -o crc.c
-        gcc -W -Wall -pedantic -std=c99 main.c crc.c -o "$lout"
+        $PYCRC --algorithm "$compile_lalg" $compile_lopt --generate c -o crc.c
+        gcc -W -Wall -pedantic -std=c99 main.c crc.c -o "$compile_lout"
     else
-        $PYCRC --algorithm "$lalg" $lopt --generate c-main -o crc.c
-        gcc -W -Wall -pedantic -std=c99 crc.c -o "$lout"
+        $PYCRC --algorithm "$compile_lalg" $compile_lopt --generate c-main -o crc.c
+        gcc -W -Wall -pedantic -std=c99 crc.c -o "$compile_lout"
     fi
 }
 
 
 function testcmp {
-    lalg="$1"
-    lopt="$2"
-    larg="$3"
-    lres="$4"
+    testcmp_lalg="$1"
+    testcmp_lopt="$2"
+    testcmp_larg="$3"
+    testcmp_lres="$4"
 
-    compile "$lalg" "$lopt" "a.out"
-    testres "./a.out $larg" "$lres"
+    compile "$testcmp_lalg" "$testcmp_lopt --std C89" "a.out"
+    testres "./a.out $testcmp_larg" "$testcmp_lres"
+
+    compile "$testcmp_lalg" "$testcmp_lopt --std C99" "a.out"
+    testres "./a.out $testcmp_larg" "$testcmp_lres"
 }
 
 
 function testbin {
-    lopt="$1"
-    lres="$2"
+    testbin_lopt="$1"
+    testbin_lres="$2"
 
     if [ "$CHECK_COMPILED" -ne 0 ]; then
-        testres "./crc-bb  $lopt" "$lres"
-        testres "./crc-bf  $lopt" "$lres"
-        testres "./crc-td2 $lopt" "$lres"
-        testres "./crc-td4 $lopt" "$lres"
-        testres "./crc-td8 $lopt" "$lres"
+        testres "./crc-bb  $testbin_lopt" "$testbin_lres"
+        testres "./crc-bf  $testbin_lopt" "$testbin_lres"
+        testres "./crc-td2 $testbin_lopt" "$testbin_lres"
+        testres "./crc-td4 $testbin_lopt" "$testbin_lres"
+        testres "./crc-td8 $testbin_lopt" "$testbin_lres"
 
         if [ "$COMPILE_FIXED" -ne 0 ]; then
-            testcmp bit-by-bit "$lopt" "" "$lres"
-            testcmp bit-by-bit-fast "$lopt" "" "$lres"
-            testcmp table-driven "$lopt --table-idx-width 2" "" "$lres"
-            testcmp table-driven "$lopt --table-idx-width 4" "" "$lres"
-            testcmp table-driven "$lopt --table-idx-width 8" "" "$lres"
+            testcmp bit-by-bit "$testbin_lopt" "" "$testbin_lres"
+            testcmp bit-by-bit-fast "$testbin_lopt" "" "$testbin_lres"
+            testcmp table-driven "$testbin_lopt --table-idx-width 2" "" "$testbin_lres"
+            testcmp table-driven "$testbin_lopt --table-idx-width 4" "" "$testbin_lres"
+            testcmp table-driven "$testbin_lopt --table-idx-width 8" "" "$testbin_lres"
         fi
     fi
 }
 
 
 function testfil {
-    lopt="$1 --check-file file.txt"
-    lres="$2"
+    testfil_lopt="$1 --check-file file.txt"
+    testfil_lres="$2"
 
     if [ "$CHECK_FILE" -ne 0 ]; then
-        testres "$lopt" "$lres"
+        testres "$testfil_lopt" "$testfil_lres"
     fi
 }
 
@@ -124,7 +127,7 @@ testbin "$opt" "$res"
 
 #CRC-16/CITT
 res="0x29b1"
-cmd="$PYCRC --model citt"
+cmd="$PYCRC --model ccitt"
 opt="--width 16 --poly 0x1021 --reflect-in 0 --xor-in 0xffff --reflect-out 0 --xor-out 0x0"
 teststr "$cmd" "$res"
 teststr "$PYCRC $opt" "$res"
@@ -251,10 +254,9 @@ if [ "$TEST_ARGS_COMPILATION" -ne 0 ]; then
                         if [ "$xor_in" -eq 1 ]; then cmp_xorin="$opt_xorin"; arg_xorin=""; else cmp_xorin=""; arg_xorin="$opt_xorin"; fi
                         for xor_out in 0 1; do
                             if [ "$xor_out" -eq 1 ]; then cmp_xorout="$opt_xorout"; arg_xorout=""; else cmp_xorout=""; arg_xorout="$opt_xorout"; fi
+
                             cmp_opt="$cmp_width $cmp_poly $cmp_refin $cmp_refout $cmp_xorin $cmp_xorout"
                             arg_opt="$arg_width $arg_poly $arg_refin $arg_refout $arg_xorin $arg_xorout"
-                            echo $cmp_opt
-                            echo $arg_opt
                             testcmp bit-by-bit "$cmp_opt" "$arg_opt" "$res"
                             testcmp bit-by-bit-fast "$cmp_opt" "$arg_opt" "$res"
                             testcmp table-driven "$cmp_opt" "$arg_opt" "$res"

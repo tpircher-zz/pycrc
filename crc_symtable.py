@@ -1,5 +1,6 @@
 #  pycrc -- flexible CRC calculation utility and C source file generator
-#
+# -*- coding: Latin-1 -*-
+
 #  Copyright (c) 2006-2007  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -95,12 +96,24 @@ class SymbolTable:
         else:
             self.table["inline_crc_finalize"] = self.__pretty_bool(False)
 
-        if self.opt.ReflectOut != None and self.opt.Algorithm == self.opt.Algo_Table_Driven:
-            self.table["static_reflect_func"] = False
-        elif self.opt.ReflectOut != None and self.opt.Algorithm == self.opt.Algo_Bit_by_Bit_Fast:
-            self.table["static_reflect_func"] = False
+        if self.opt.Algorithm != self.opt.Algo_Bit_by_Bit and (self.opt.Width != None and self.opt.ReflectOut != None and self.opt.XorOut != None) \
+                or self.opt.Algorithm == self.opt.Algo_Bit_by_Bit and \
+                (self.opt.Width != None and self.opt.ReflectOut != None and self.opt.XorOut != None and self.opt.Poly != None):
+            self.table["simple_crc_finalize_def"] = self.__pretty_bool(True)
         else:
-            self.table["static_reflect_func"] = True
+            self.table["simple_crc_finalize_def"] = self.__pretty_bool(False)
+
+        if self.opt.ReflectOut == False and self.opt.ReflectIn == False:
+            self.table["use_reflect_func"] = self.__pretty_bool(False)
+        else:
+            self.table["use_reflect_func"] = self.__pretty_bool(True)
+
+        if self.opt.Algorithm == self.opt.Algo_Table_Driven:
+            self.table["static_reflect_func"] = self.__pretty_bool(False)
+        elif self.opt.ReflectOut != None and self.opt.Algorithm == self.opt.Algo_Bit_by_Bit_Fast:
+            self.table["static_reflect_func"] = self.__pretty_bool(False)
+        else:
+            self.table["static_reflect_func"] = self.__pretty_bool(True)
 
         if self.opt.Algorithm == self.opt.Algo_Bit_by_Bit:
             self.table["crc_algorithm"] = "bit-by-bit"
@@ -164,7 +177,7 @@ crc ^ {%crc_xor_out%}\
 
         self.table["crc_table_init"] = self.__get_table_init()
 
-        self.table["header_template"] = """\
+        self.table["h_template"] = """\
 {%source_header%}
 #ifndef {%header_protection%}
 #define {%header_protection%}
@@ -227,12 +240,10 @@ typedef struct {
 } {%cfg_t%};
 
 {%endif%}
-{%if $crc_reflect_in == True or $crc_reflect_out == True%}
-{%if $static_reflect_func != True%}
+{%if $use_reflect_func == True and $static_reflect_func != True%}
 {%crc_reflect_doc%}
-long {%crc_reflect_function%}(long data, size_t data_len);
+{%crc_reflect_function_def%};
 
-{%endif%}
 {%endif%}
 {%if $crc_algorithm == "table-driven" and $undefined_parameters == True%}
 {%crc_table_gen_doc%}
@@ -243,7 +254,7 @@ void {%crc_table_gen_function%}(const {%cfg_t%} *cfg);
 {%if $constant_crc_init == False%}
 {%crc_init_function_def%};
 {%elif $c_std == C89%}
-#define %crc_init_function_def%}()      ({%crc_init_value%})
+#define {%crc_init_function%}()      ({%crc_init_value%})
 {%else%}
 static inline {%crc_init_function_def%}{%%}
 {
@@ -257,7 +268,7 @@ static inline {%crc_init_function_def%}{%%}
 {%crc_finalize_doc%}
 {%if $inline_crc_finalize == True%}
 {%if $c_std == C89%}
-#define {%crc_finalize_function%}()      ({%crc_final_value%})
+#define {%crc_finalize_function%}(crc)      ({%crc_final_value%})
 {%else%}
 static inline {%crc_finalize_function_def%}{%%}
 {
@@ -384,7 +395,7 @@ long {%crc_reflect_function%}(long data, size_t data_len)\
 """
 
         self.table["crc_finalize_function_def"] = """\
-{%if $undefined_parameters == True%}
+{%if $simple_crc_finalize_def != True%}
 {%crc_t%} {%crc_finalize_function%}(const {%cfg_t%} *cfg, {%crc_t%} crc)\
 {%else%}
 {%crc_t%} {%crc_finalize_function%}({%crc_t%} crc)\
@@ -402,12 +413,8 @@ long {%crc_reflect_function%}(long data, size_t data_len)\
 {%endif%}
 {%endif%}
 
-{%if $crc_reflect_in == True or $crc_reflect_out == True%}
-{%if $static_reflect_func == True%}
-static long {%crc_reflect_function%}(long data, size_t data_len);
-{%else%}
-long {%crc_reflect_function%}(long data, size_t data_len);
-{%endif%}
+{%if $use_reflect_func == True and $static_reflect_func == True%}
+static {%crc_reflect_function_def%};
 
 {%endif%}
 {%if $crc_algorithm == "bit-by-bit"%}
@@ -437,7 +444,7 @@ static const {%crc_t%} crc_table[{%crc_table_width%}] = {
 """
 
         self.table["c_bit_by_bit"] = """\
-{%if $crc_reflect_in == Undefined or $crc_reflect_in == True or $crc_reflect_out == Undefined or $crc_reflect_out == True%}
+{%if $use_reflect_func == True%}
 {%crc_reflect_function_body%}
 
 {%endif%}
@@ -517,7 +524,7 @@ static const {%crc_t%} crc_table[{%crc_table_width%}] = {
 """
 
         self.table["c_bit_by_bit_fast"] = """\
-{%if $crc_reflect_in == Undefined or $crc_reflect_in == True or $crc_reflect_out == Undefined or $crc_reflect_out == True%}
+{%if $use_reflect_func == True%}
 {%crc_reflect_function_body%}
 
 {%endif%}
@@ -584,7 +591,7 @@ static const {%crc_t%} crc_table[{%crc_table_width%}] = {
 
         self.table["c_table_driven"] = """\
 {%c_table%}
-{%if $crc_reflect_in == Undefined or $crc_reflect_in == True or $crc_reflect_out == Undefined or $crc_reflect_out == True%}
+{%if $use_reflect_func == True%}
 {%crc_reflect_function_body%}
 {%endif%}
 
@@ -654,7 +661,7 @@ void {%crc_table_gen_function%}(const {%cfg_t%} *cfg)
     if (cfg->reflect_in) {
         while (data_len--) {
 {%if $crc_table_idx_width == 8%}
-            tbl_idx = (crc ^ *data++) & {%crc_table_mask%};
+            tbl_idx = (crc ^ *data) & {%crc_table_mask%};
             crc = (crc_table[tbl_idx] ^ (crc >> 8)) & {%cfg_mask%};
 {%else%}
             tbl_idx = crc ^ (*data >> (0 * {%cfg_table_idx_width%}));
@@ -679,14 +686,14 @@ void {%crc_table_gen_function%}(const {%cfg_t%} *cfg)
             tbl_idx = crc ^ (*data >> (7 * {%cfg_table_idx_width%}));
             crc = crc_table[tbl_idx & {%crc_table_mask%}] ^ (crc >> {%cfg_table_idx_width%});
 {%endif%}
-            data++;
 {%endif%}
+            data++;
         }
         crc = {%crc_reflect_function%}(crc, {%cfg_width%});
     } else {
         while (data_len--) {
 {%if $crc_table_idx_width == 8%}
-            tbl_idx = ((crc >> ({%cfg_width%} - 8)) ^ *data++) & {%crc_table_mask%};
+            tbl_idx = ((crc >> ({%cfg_width%} - 8)) ^ *data) & {%crc_table_mask%};
             crc = (crc_table[tbl_idx] ^ (crc << 8)) & {%cfg_mask%};
 {%else%}
             tbl_idx = (crc >> ({%cfg_width%} - {%cfg_table_idx_width%})) ^ (*data >> (8 - (0 + 1) * {%cfg_table_idx_width%}));
@@ -711,14 +718,14 @@ void {%crc_table_gen_function%}(const {%cfg_t%} *cfg)
             tbl_idx = (crc >> ({%cfg_width%} - {%cfg_table_idx_width%})) ^ (*data >> (8 - (7 + 1) * {%cfg_table_idx_width%}));
             crc = crc_table[tbl_idx & {%crc_table_mask%}] ^ (crc << {%cfg_table_idx_width%});
 {%endif%}
-            data++;
 {%endif%}
+            data++;
         }
     }
 {%elif $crc_reflect_in == True%}
     while (data_len--) {
 {%if $crc_table_idx_width == 8%}
-        tbl_idx = (crc ^ *data++) & {%crc_table_mask%};
+        tbl_idx = (crc ^ *data) & {%crc_table_mask%};
         crc = crc_table[tbl_idx] ^ (crc >> 8);
 {%else%}
         tbl_idx = crc ^ (*data >> (0 * {%cfg_table_idx_width%}));
@@ -743,14 +750,14 @@ void {%crc_table_gen_function%}(const {%cfg_t%} *cfg)
         tbl_idx = crc ^ (*data >> (7 * {%cfg_table_idx_width%}));
         crc = crc_table[tbl_idx & {%crc_table_mask%}] ^ (crc >> {%cfg_table_idx_width%});
 {%endif%}
-        data++;
 {%endif%}
+        data++;
     }
     crc = {%crc_reflect_function%}(crc, {%cfg_width%});
 {%elif $crc_reflect_in == False%}
     while (data_len--) {
 {%if $crc_table_idx_width == 8%}
-        tbl_idx = (crc >> ({%cfg_width%} - 8)) ^ *data++;
+        tbl_idx = (crc >> ({%cfg_width%} - 8)) ^ *data;
         crc = (crc_table[tbl_idx & {%crc_table_mask%}] ^ (crc << 8));
 {%else%}
         tbl_idx = (crc >> ({%cfg_width%} - {%cfg_table_idx_width%})) ^ (*data >> (8 - (0 + 1) * {%cfg_table_idx_width%}));
@@ -775,8 +782,8 @@ void {%crc_table_gen_function%}(const {%cfg_t%} *cfg)
         tbl_idx = (crc >> ({%cfg_width%} - {%cfg_table_idx_width%})) ^ (*data >> (8 - (7 + 1) * {%cfg_table_idx_width%}));
         crc = crc_table[tbl_idx & {%crc_table_mask%}] ^ (crc << {%cfg_table_idx_width%});
 {%endif%}
-        data++;
 {%endif%}
+        data++;
     }
 
 {%endif%}
@@ -875,12 +882,17 @@ int main({%if $undefined_parameters == True%}int argc, char *argv[]{%else%}void{
 {%if $crc_algorithm == "table-driven"%}
     {%crc_table_gen_function%}(&cfg);
 {%endif%}
+{%endif%}
+{%if $undefined_parameters == True%}
     crc = {%crc_init_function%}({%if $constant_crc_init == False%}&cfg{%endif%});
     crc = {%crc_update_function%}(&cfg, crc, (unsigned char *)str, strlen(str));
-    crc = {%crc_finalize_function%}(&cfg, crc);
 {%else%}
     crc = {%crc_init_function%}();
     crc = {%crc_update_function%}(crc, (unsigned char *)str, strlen(str));
+{%endif%}
+{%if $simple_crc_finalize_def != True%}
+    crc = {%crc_finalize_function%}(&cfg, crc);
+{%else%}
     crc = {%crc_finalize_function%}(crc);
 {%endif%}
 
@@ -899,7 +911,7 @@ static {%c_bool%} atob(const char *str);
 {%if $crc_poly == Undefined or $crc_xor_in == Undefined or $crc_xor_out == Undefined%}
 static int xtoi(const char *str);
 {%endif%}
-static int get_config(int argc, char *argv[], crc_cfg_t *cfg);
+static int get_config(int argc, char *argv[], {%cfg_t%} *cfg);
 
 
 {%if $crc_reflect_in == Undefined or $crc_reflect_out == Undefined%}
@@ -951,7 +963,7 @@ int xtoi(const char *str)
 {%endif%}
 
 
-int get_config(int argc, char *argv[], crc_cfg_t *cfg)
+int get_config(int argc, char *argv[], {%cfg_t%} *cfg)
 {
     int c;
     int this_option_optind;

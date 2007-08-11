@@ -1,4 +1,5 @@
 #  pycrc -- flexible CRC calculation utility and C source file generator
+# -*- coding: Latin-1 -*-
 
 #  Copyright (c) 2006-2007  Thomas Pircher  <tehpeh@gmx.net>
 #
@@ -26,6 +27,7 @@ Option parsing library for pycrc.
 use as follows:
 
    from crc_opt import Options
+
    opt = Options("0.6")
    opt.parse(sys.argv)
 
@@ -82,143 +84,98 @@ class MyOption(Option):
     TYPE_CHECKER["bool"] = check_bool
 
 
-# function obsolete_cb
-###############################################################################
-def obsolete_cb(option, opt_str, value, parser):
-    """
-    Prints a warning about an obsolete option
-    """
-    repl = ""
-    if opt_str == "--check_string":
-        repl = "--check-string"
-    if opt_str == "--check_file":
-        repl = "--check-file"
-    if opt_str == "--generate_h":
-        repl = "--generate h"
-        value = "h"
-    if opt_str == "--generate_c":
-        repl = "--generate c"
-        value = "c"
-    if opt_str == "--generate_c_main":
-        repl = "--generate c-main"
-        value = "c-main"
-    if opt_str == "--reflect_in":
-        repl = "--reflect-in"
-        value = check_bool(option, opt_str, value)
-    if opt_str == "--xor_in":
-        repl = "--xor-in"
-        value = check_hex(option, opt_str, value)
-    if opt_str == "--reflect_out":
-        repl = "--reflect-out"
-        value = check_bool(option, opt_str, value)
-    if opt_str == "--xor_out":
-        repl = "--xor-out"
-        value = check_hex(option, opt_str, value)
-    if opt_str == "--table_idx_width":
-        repl = "--table_idx-width"
-        value = check_hex(option, opt_str, value)
-    if opt_str == "--symbol_prefix":
-        repl = "--symbol-prefix"
-    if opt_str == "--output_file":
-        repl = "--output"
-    if repl == "":
-        sys.stderr.write("Warning: obsolete option %s\n" % opt_str)
-    else:
-        sys.stderr.write("Warning: obsolete option %s. Use %s instead\n" % (opt_str, repl))
-    setattr(parser.values, option.dest, value)
-
-
 # function model_cb
 ###############################################################################
 def model_cb(option, opt_str, value, parser):
     """
-    Handles the model option
+    This function sets up the single parameters if the 'model' option has been selected
+    by the user.
     """
     mod = value.lower();
     if   mod == "crc-8":
         setattr(parser.values, "width",         8)
-        setattr(parser.values, "poly",          0x07)
+        setattr(parser.values, "poly",          0x07L)
         setattr(parser.values, "reflect_in",    False)
-        setattr(parser.values, "xor_in",        0x0)
+        setattr(parser.values, "xor_in",        0x0L)
         setattr(parser.values, "reflect_out",   False)
-        setattr(parser.values, "xor_out",       0x0)
+        setattr(parser.values, "xor_out",       0x0L)
     elif mod == "crc-16":
         setattr(parser.values, "width",         16)
-        setattr(parser.values, "poly",          0x8005)
+        setattr(parser.values, "poly",          0x8005L)
         setattr(parser.values, "reflect_in",    True)
-        setattr(parser.values, "xor_in",        0x0)
+        setattr(parser.values, "xor_in",        0x0L)
         setattr(parser.values, "reflect_out",   True)
-        setattr(parser.values, "xor_out",       0x0)
-    elif mod == "citt":
+        setattr(parser.values, "xor_out",       0x0L)
+    elif mod == "ccitt":
         setattr(parser.values, "width",         16)
-        setattr(parser.values, "poly",          0x1021)
+        setattr(parser.values, "poly",          0x1021L)
         setattr(parser.values, "reflect_in",    False)
-        setattr(parser.values, "xor_in",        0xffff)
+        setattr(parser.values, "xor_in",        0xffffL)
         setattr(parser.values, "reflect_out",   False)
-        setattr(parser.values, "xor_out",       0x0)
+        setattr(parser.values, "xor_out",       0x0L)
     elif mod == "kermit":
         setattr(parser.values, "width",         16)
-        setattr(parser.values, "poly",          0x1021)
+        setattr(parser.values, "poly",          0x1021L)
         setattr(parser.values, "reflect_in",    True)
-        setattr(parser.values, "xor_in",        0x0)
+        setattr(parser.values, "xor_in",        0x0L)
         setattr(parser.values, "reflect_out",   True)
-        setattr(parser.values, "xor_out",       0x0)
+        setattr(parser.values, "xor_out",       0x0L)
     elif mod == "x-25":
         setattr(parser.values, "width",         16)
-        setattr(parser.values, "poly",          0x1021)
+        setattr(parser.values, "poly",          0x1021L)
         setattr(parser.values, "reflect_in",    True)
-        setattr(parser.values, "xor_in",        0xffff)
+        setattr(parser.values, "xor_in",        0xffffL)
         setattr(parser.values, "reflect_out",   True)
-        setattr(parser.values, "xor_out",       0xffff)
+        setattr(parser.values, "xor_out",       0xffffL)
     elif mod == "xmodem":
         setattr(parser.values, "width",         16)
-        setattr(parser.values, "poly",          0x8408)
+        setattr(parser.values, "poly",          0x8408L)
         setattr(parser.values, "reflect_in",    True)
-        setattr(parser.values, "xor_in",        0x0)
+        setattr(parser.values, "xor_in",        0x0L)
         setattr(parser.values, "reflect_out",   True)
-        setattr(parser.values, "xor_out",       0x0)
+        setattr(parser.values, "xor_out",       0x0L)
     elif mod == "zmodem":
         setattr(parser.values, "width",         16)
-        setattr(parser.values, "poly",          0x1021)
+        setattr(parser.values, "poly",          0x1021L)
         setattr(parser.values, "reflect_in",    False)
-        setattr(parser.values, "xor_in",        0x0)
+        setattr(parser.values, "xor_in",        0x0L)
         setattr(parser.values, "reflect_out",   False)
-        setattr(parser.values, "xor_out",       0x0)
+        setattr(parser.values, "xor_out",       0x0L)
     elif mod == "crc-32":
         setattr(parser.values, "width",         32)
-        setattr(parser.values, "poly",          0x4c11db7)
+        setattr(parser.values, "poly",          0x4c11db7L)
         setattr(parser.values, "reflect_in",    True)
-        setattr(parser.values, "xor_in",        0xffffffff)
+        setattr(parser.values, "xor_in",        0xffffffffL)
         setattr(parser.values, "reflect_out",   True)
-        setattr(parser.values, "xor_out",       0xffffffff)
+        setattr(parser.values, "xor_out",       0xffffffffL)
     elif mod == "crc-32c":
         setattr(parser.values, "width",         32)
-        setattr(parser.values, "poly",          0x1edc6f41)
+        setattr(parser.values, "poly",          0x1edc6f41L)
         setattr(parser.values, "reflect_in",    True)
-        setattr(parser.values, "xor_in",        0xffffffff)
+        setattr(parser.values, "xor_in",        0xffffffffL)
         setattr(parser.values, "reflect_out",   True)
-        setattr(parser.values, "xor_out",       0xffffffff)
+        setattr(parser.values, "xor_out",       0xffffffffL)
     elif mod == "posix":
         setattr(parser.values, "width",         32)
-        setattr(parser.values, "poly",          0x4c11db7)
+        setattr(parser.values, "poly",          0x4c11db7L)
         setattr(parser.values, "reflect_in",    False)
-        setattr(parser.values, "xor_in",        0x0)
+        setattr(parser.values, "xor_in",        0x0L)
         setattr(parser.values, "reflect_out",   False)
-        setattr(parser.values, "xor_out",       0xffffffff)
+        setattr(parser.values, "xor_out",       0xffffffffL)
     elif mod == "jam":
         setattr(parser.values, "width",         32)
-        setattr(parser.values, "poly",          0x4c11db7)
+        setattr(parser.values, "poly",          0x4c11db7L)
         setattr(parser.values, "reflect_in",    True)
-        setattr(parser.values, "xor_in",        0xffffffff)
+        setattr(parser.values, "xor_in",        0xffffffffL)
         setattr(parser.values, "reflect_out",   True)
-        setattr(parser.values, "xor_out",       0x0)
+        setattr(parser.values, "xor_out",       0x0L)
     elif mod == "xfer":
         setattr(parser.values, "width",         32)
-        setattr(parser.values, "poly",          0x000000af)
+        setattr(parser.values, "poly",          0x000000afL)
         setattr(parser.values, "reflect_in",    False)
-        setattr(parser.values, "xor_in",        0x0)
+        setattr(parser.values, "xor_in",        0x0L)
         setattr(parser.values, "reflect_out",   False)
-        setattr(parser.values, "xor_out",       0x0)
+        setattr(parser.values, "xor_out",       0x0L)
     else:
         raise OptionValueError("Error: unsupported model %s" % (value))
         sys.exit(1)
@@ -290,17 +247,12 @@ following parameters:
         parser.add_option("--check-string",
                         action="store", type="string", dest="check_string",
                         help="calculate the checksum of the given string ('123456789' default)", metavar="STRING")
-        parser.add_option("--check_string", action="callback", callback=obsolete_cb, type="string", dest="check_string", help="This option is obsolete. Use --check-string instead", metavar="STRING")
         parser.add_option("--check-file",
                         action="store", type="string", dest="check_file",
                         help="calculate the checksum of the given file", metavar="FILE")
-        parser.add_option("--check_file", action="callback", callback=obsolete_cb, type="string", dest="check_file", help="This option is obsolete. Use --check_file instead", metavar="FILE")
         parser.add_option("--generate",
                         action="store", type="string", dest="generate", default=None,
                         help="choose which type of code to generate from {c, h, c-main, table}", metavar="CODE")
-        parser.add_option("--generate_h", action="callback", callback=obsolete_cb, dest="generate", help="This option is obsolete. Use \"--generate h\" instead")
-        parser.add_option("--generate_c", action="callback", callback=obsolete_cb, dest="generate", help="This option is obsolete. Use \"--generate c\" instead")
-        parser.add_option("--generate_c_main", action="callback", callback=obsolete_cb, dest="generate", help="This option is obsolete. Use \"--generate c-main\" instead")
         parser.add_option("--std",
                         action="store", type="string", dest="c_std", default="C99",
                         help="C standard style of the generated code from {C89, ANSI, C99}", metavar="STD")
@@ -309,7 +261,7 @@ following parameters:
                         help="choose an algorithm from {bit-by-bit, bit-by-bit-fast, table-driven, all}", metavar="ALGO")
         parser.add_option("--model",
                         action="callback", callback=model_cb, type="string", dest="model", default=None,
-                        help="choose a parameter set from {crc-8, crc-16, citt, kermit, x-25, xmodem, zmodem, crc-32, crc-32c, posix, jam, xfer}", metavar="MODEL")
+                        help="choose a parameter set from {crc-8, crc-16, ccitt, kermit, x-25, xmodem, zmodem, crc-32, crc-32c, posix, jam, xfer}", metavar="MODEL")
         parser.add_option("--width",
                         action="store", type="hex", dest="width",
                         help="use WIDTH bits in the polynom", metavar="WIDTH")
@@ -319,31 +271,24 @@ following parameters:
         parser.add_option("--reflect-in",
                         action="store", type="bool", dest="reflect_in",
                         help="reflect input bytes", metavar="BOOL")
-        parser.add_option("--reflect_in", action="callback", callback=obsolete_cb, type="string", dest="reflect_in", help="This option is obsolete. Use --reflect-in instead", metavar="BOOL")
         parser.add_option("--xor-in",
                         action="store", type="hex", dest="xor_in",
                         help="use HEX as initial value", metavar="HEX")
-        parser.add_option("--xor_in", action="callback", callback=obsolete_cb, type="string", dest="xor_in", help="This option is obsolete. Use --xor-in instead", metavar="HEX")
         parser.add_option("--reflect-out",
                         action="store", type="bool", dest="reflect_out",
                         help="reflect output bytes", metavar="BOOL")
-        parser.add_option("--reflect_out", action="callback", callback=obsolete_cb, type="string", dest="reflect_out", help="This option is obsolete. Use --reflect-out instead", metavar="BOOL")
         parser.add_option("--xor-out",
                         action="store", type="hex", dest="xor_out",
                         help="xor the final crc value with HEX", metavar="HEX")
-        parser.add_option("--xor_out", action="callback", callback=obsolete_cb, type="string", dest="xor_out", help="This option is obsolete. Use --xor-out instead", metavar="HEX")
         parser.add_option("--table-idx-width",
                         action="store", type="int", dest="table_idx_width",
                         help="use WIDTH bits to index the crc table; WIDTH one of {1, 2, 4, 8}", metavar="WIDTH")
-        parser.add_option("--table_idx_width", action="callback", callback=obsolete_cb, type="string", dest="table_idx_width", help="This option is obsolete. Use --table-idx-width instead", metavar="WIDTH")
         parser.add_option("--symbol-prefix",
                         action="store", type="string", dest="symbol_prefix",
                         help="when generating source code, use STRING as prefix to the generated symbols", metavar="STRING")
-        parser.add_option("--symbol_prefix", action="callback", callback=obsolete_cb, type="string", dest="symbol_prefix", help="This option is obsolete. Use --symbol-prefix instead", metavar="STRING")
         parser.add_option("-o", "--output",
                         action="store", type="string", dest="output_file",
                         help="write the generated code to file instead to stdout", metavar="FILE")
-        parser.add_option("--output_file", action="callback", callback=obsolete_cb, type="string", dest="output_file", help="This option is obsolete. Use --output instead", metavar="FILE")
 
         (options, args) = parser.parse_args()
 
