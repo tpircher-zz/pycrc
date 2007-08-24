@@ -210,7 +210,7 @@ class Options(object):
         self.TableIdxWidth  = 8
         self.TableWidth     = 1 << self.TableIdxWidth
         self.Verbose        = False
-        self.String         = "123456789"
+        self.CheckString    = "123456789"
 
         self.Algorithm      = 0x00
         self.SymbolPrefix   = "crc_"
@@ -422,7 +422,7 @@ following parameters:
             sys.exit(1)
 
         if self.UndefinedCrcParameters and (self.Action == "check_string" or self.Action == "check_file" or self.Action == "generate_table"):
-            sys.stderr.write("Error: undefined parameters: Add %s or use the --model switch\n" % ", ".join(undefined_params))
+            sys.stderr.write("Error: undefined parameters: Add %s or use --model\n" % ", ".join(undefined_params))
             sys.exit(1)
         self.Verbose            = options.verbose
 

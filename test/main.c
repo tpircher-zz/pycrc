@@ -255,7 +255,6 @@ int main(int argc, char *argv[])
         crc_test = crc_init(&cfg);
         for (i = 0; str[i]; i++)
         {
-            fprintf(stderr, "i = %d, str[i] = 0x%02x\n", i, str[i]);
             crc_test = crc_update(&cfg, crc_test, str + i, 1);
         }
         crc_test = crc_finalize(&cfg, crc_test);

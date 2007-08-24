@@ -26,9 +26,17 @@
 Lexical analyzer for pycrc.
 use as follows:
 
-   #from crc_opt import Options
-   #opt = Options("0.6")
-   #opt.parse(sys.argv)
+    from crc_opt import Options
+    from crc_symtable import SymbolTable
+    from crc_lexer import LangLexer
+
+    lex = LangLexer()
+    lex.set_str(str)
+
+    tok = self.lex.peek()
+    print tok
+    print self.lex.text
+    self.lex.advance()
 
 This file is part of pycrc.
 """
@@ -89,8 +97,10 @@ class LangLexer(Lexer):
     A lexical analyser
     """
 
-    tok_text    = 12
-    tok_control = 13
+    tok_text        = 12
+    tok_control     = 13
+    tok_block_start = 14
+    tok_block_end   = 15
 
     # constructor
     ###############################################################################
@@ -105,20 +115,36 @@ class LangLexer(Lexer):
             self.text = ""
             return self.tok_EOF
         m = self.re_control.search(self.str)
-        if m == None:
-            self.text = self.str
-            self.text_len = len(self.text)
-            return self.tok_text
-        elif m.start() == 0:
+        if m != None and  m.start() == 0:
             self.text = m.group(1)
             self.text_len = m.end()
             return self.tok_control
+
+        if m == None:
+            text_end = len(self.str)
         else:
-            self.text = m.string[:m.start()]
-            self.text_len = m.start()
-            return self.tok_text
-        self.text = ""
-        return self.tok_unknown
+            text_end = m.start()
+
+        i = self.str.find("{:")
+        if i >= 0:
+            if i == 0:
+                self.text = self.str[:2]
+                self.text_len = 2
+                return self.tok_block_start
+            if i < text_end:
+                text_end = i
+        i = self.str.find(":}")
+        if i >= 0:
+            if i == 0:
+                self.text = self.str[:2]
+                self.text_len = 2
+                return self.tok_block_end
+            if i < text_end:
+                text_end = i
+
+        self.text = self.str[:text_end]
+        self.text_len = text_end
+        return self.tok_text
 
 
 # Class ExpLexer

@@ -25,13 +25,13 @@
 """
 CRC routines for pycrc.
 If you want to study the Python implementation of the CRC routines, then you are
-in the right place.
+looking at the right place.
 
 
 Examples
 ========
 
-This is an example use of the different slgorithms:
+This is an example use of the different algorithms:
 
 >>> from crc_algorithms import Crc
 >>> 

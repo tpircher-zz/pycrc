@@ -23,12 +23,18 @@
 
 
 """
-Code generator for pycrc.
+Macro Language parser for pycrc.
 use as follows:
 
-   #from crc_opt import Options
-   #opt = Options("0.6")
-   #opt.parse(sys.argv)
+    from crc_opt import Options
+    from crc_parser import MacroParser
+
+    opt = Options("0.6")
+    opt.parse(sys.argv)
+    mp = MacroParser(opt)
+    if mp.parse(out):
+        print mp.out_str
+
 
 This file is part of pycrc.
 """
@@ -56,11 +62,11 @@ class ParseError(Exception):
         return self.reason
 
 
-# Class CodeGenerator
+# Class MacroParser
 ###############################################################################
-class CodeGenerator(object):
+class MacroParser(object):
     """
-    The code generator class
+    The macro language parser and code generator class
     """
     opt = None
     sym = None
@@ -83,10 +89,10 @@ class CodeGenerator(object):
     #
     # DATA = { LITERAL | CONTROL } .
     # CONTROL = IF | "{%" LITERAL "%}" .
-    # IF = "{%" "if" EXPRESSION "%}" DATA
-    #       { "{%" "elif" EXPRESSION "%}" { DATA } }
-    #       [ "{%" "else" "%}" { DATA } ]
-    #       "{%" "endif" "%}" .
+    # IF = "{%" "if" EXPRESSION "%}" "{:" { DATA } ":}"
+    #       { "{%" "elif" EXPRESSION "%}" "{:" { DATA } ":}" }
+    #       [ "{%" "else" "%}" "{:" { DATA } ":}" ]
+    #       .
     # STRING = """" LITERAL """" .
     # ID = "{%" LITERAL "%}" .
     # LITERAL = letter { letter } .
@@ -118,17 +124,14 @@ class CodeGenerator(object):
             if tok == self.lex.tok_text:
                 if (self.if_stack[0] & self.mDoPrint) == self.mDoPrint:
                     self.out_str += self.lex.text
-                self.lex.advance()
+                self.lex.advance(skip_nl = False)
             elif tok == self.lex.tok_control:
-                if (self.lex.text == "else") or (self.lex.text.startswith("elif ")) or (self.lex.text == "endif"):
-                    if len(self.if_stack) == 0:
-                        sys.stderr.write("Error: unexpected else of endif\n")
-                        return False
-                    return True
                 if not self.__parse_control(self.lex.text):
                     return False
+            elif tok == self.lex.tok_block_end:
+                return True
             else:
-                sys.stderr.write("Error: unknown token %s\n" % self.lex.text)
+                sys.stderr.write("Error: wrong token %s\n" % self.lex.text)
                 return False
             tok = self.lex.peek()
         return True
@@ -141,44 +144,34 @@ class CodeGenerator(object):
         """
         tok = self.lex.peek()
         if tok == self.lex.tok_control:
-            if self.lex.text.startswith("if"):
-                if not self.__parse_if(self.lex.text):
-                    sys.stderr.write("Error: if parsing failed\n")
+            if self.lex.text.startswith("if "):
+                if not self.__parse_if(self.lex.text) or \
+                    not self.__parse_block_start() or \
+                    not self.__parse_data() or \
+                    not self.__parse_block_end():
                     return False
-                self.lex.advance(skip_nl = True)
-                if not self.__parse_data():
-                    return False
+                tok = self.lex.peek()
                 while self.lex.text.startswith("elif "):
-                    if not self.__parse_elif(self.lex.text):
-                        sys.stderr.write("Error: elif parsing failed\n")
+                    if not self.__parse_elif(self.lex.text) or \
+                        not self.__parse_block_start() or \
+                        not self.__parse_data() or \
+                        not self.__parse_block_end():
                         return False
-                    self.lex.advance(skip_nl = True)
-                    if not self.__parse_data():
-                        sys.stderr.write("No data for elif\n")
-                        return False
+                    tok = self.lex.peek()
                 if self.lex.text == "else":
-                    if not self.__parse_else(self.lex.text):
-                        sys.stderr.write("Error: else parsing failed\n")
+                    if not self.__parse_else(self.lex.text) or \
+                        not self.__parse_block_start() or \
+                        not self.__parse_data() or \
+                        not self.__parse_block_end():
                         return False
-                    self.lex.advance(skip_nl = True)
-                    if not self.__parse_data():
-                        sys.stderr.write("No data for else\n")
-                        return False
-                if self.lex.text != "endif":
-                    sys.stderr.write("missing endif\n")
-                    return False
-                if not self.__parse_endif(self.lex.text):
-                    sys.stderr.write("endif parsing failed\n")
-                    return False
-                self.lex.advance(skip_nl = True)
+                self.if_stack.pop(0)
                 return True
-            elif (self.lex.text == "else") or (self.lex.text.startswith("elif ")) or (self.lex.text == "endif"):
-                sys.stderr.write("unexpected endif or else\n")
+            elif self.lex.text == "else" or self.lex.text.startswith("elif "):
+                sys.stderr.write("unmatched %s clause\n" % self.lex.text[:4])
                 return False
             else:
                 if not self.__parse_literal(self.lex.text):
                     return False
-                self.lex.advance()
                 return True
         sys.stderr.write("unknown token in control\n")
         return False
@@ -205,6 +198,7 @@ class CodeGenerator(object):
         else:
             stack_state = 0
         self.if_stack.insert(0, stack_state)
+        self.lex.advance(skip_nl = True)
         return True
 
     # __parse_elif
@@ -230,6 +224,7 @@ class CodeGenerator(object):
             stack_state = 0
 
         self.if_stack[0] = stack_state
+        self.lex.advance(skip_nl = True)
         return True
 
     # __parse_else
@@ -244,18 +239,33 @@ class CodeGenerator(object):
         else:
             stack_state = 0
         self.if_stack[0] = stack_state
+        self.lex.advance(skip_nl = True)
         return True
 
-    # __parse_endif
+    # __parse_block_start
     ###############################################################################
-    def __parse_endif(self, str):
+    def __parse_block_start(self):
         """
-        parse a endif operation
+        parse a begin of a control block
         """
-        if len(self.if_stack) <= 1:
-            sys.stderr.write("unexpected endif\n")
+        tok = self.lex.peek()
+        if tok != self.lex.tok_block_start:
+            sys.stderr.write("begin block expected, at %s\n" % self.lex.text)
             return False
-        self.if_stack.pop(0)
+        self.lex.advance(skip_nl = True)
+        return True
+
+    # __parse_block_end
+    ###############################################################################
+    def __parse_block_end(self):
+        """
+        parse a end of a control block
+        """
+        tok = self.lex.peek()
+        if tok != self.lex.tok_block_end:
+            sys.stderr.write("end block expected, at %s\n" % self.lex.text)
+            return False
+        self.lex.advance(skip_nl = True)
         return True
 
     # __parse_literal
@@ -269,8 +279,9 @@ class CodeGenerator(object):
         except LookupError:
             sys.stderr.write("Error: unknown terminal %s\n" % self.lex.text)
             return False
-        self.lex.advance()
-        self.lex.prepend(data)
+        self.lex.advance(skip_nl = False)
+        if (self.if_stack[0] & self.mDoPrint) == self.mDoPrint:
+            self.lex.prepend(data)
         return True
 
     # __parse_expression
@@ -305,7 +316,7 @@ class CodeGenerator(object):
             if tok != self.explex.tok_or:
                 print "expecting 'or' and not '%s'" % self.explex.text
                 raise ParseError("Unexpected token")
-            self.explex.advance()
+            self.explex.advance(skip_nl = False)
 
         return False
 
@@ -323,7 +334,7 @@ class CodeGenerator(object):
 
             if tok != self.explex.tok_and:
                 return ret
-            self.explex.advance()
+            self.explex.advance(skip_nl = False)
 
         return False
 
@@ -338,13 +349,13 @@ class CodeGenerator(object):
         tok = self.explex.peek()
 
         if tok == self.explex.tok_par_open:
-            self.explex.advance()
+            self.explex.advance(skip_nl = False)
             ret = self.__parse_exp_exp()
             tok = self.explex.peek()
             if tok != self.explex.tok_par_close:
                 print "missing ')' before '%s'" % self.explex.text
                 raise ParseError("missing ')' before '%s'" % self.explex.text)
-            self.explex.advance()
+            self.explex.advance(skip_nl = False)
             self.explex.peek()
             return ret
 
@@ -355,7 +366,7 @@ class CodeGenerator(object):
             print "operator expected and not '%s' before '%s'" % (self.explex.text, self.explex.str)
             raise ParseError("operator expected and not '%s'" % self.explex.text)
         op_text = self.explex.text
-        self.explex.advance()
+        self.explex.advance(skip_nl = False)
         self.explex.peek()
         val2_str = self.explex.text
         val2 = self.__parse_exp_terminal()
@@ -429,5 +440,5 @@ class CodeGenerator(object):
         else:
             print "unexpected terminal '%s' before '%s'" % (self.explex.text, self.explex.str)
             raise ParseError("unexpected terminal '%s'" % self.explex.text)
-        self.explex.advance()
+        self.explex.advance(skip_nl = False)
         return ret

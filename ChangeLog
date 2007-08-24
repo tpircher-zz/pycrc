@@ -1,11 +1,30 @@
+2007-08-25  Thomas Pircher   <tehpeh@gmx.net>
+
+	* crc_opt.py: the parameter to --check-string was ignored. Closes issue
+	1781637
+	* pycrc.py: the parameter to --check-string was ignored. Closes issue
+	1781637
+
+2007-08-18  Thomas Pircher   <tehpeh@gmx.net>
+
+	* crc_symtable.py: simplified the table-driven code. Closes issue 1727128
+
+2007-08-18  Thomas Pircher   <tehpeh@gmx.net>
+
+	* crc_parser.py: changed the macro language syntax to a better format
+	* crc_lexer.py: changed the macro language syntax to a better format
+	* crc_symtable.py: changed the macro language syntax to a better format
+	* crc_parser.py: Renamed crc_code_gen.py to crc_parser.py
+	* all files: Documented thge usage of the crc_* modules
+
 #
 # Version 0.6.1, 2007-08-12
 #
 
 2007-08-12  Thomas Pircher   <tehpeh@gmx.net>
 
-	* test/test.sh Added test for C89 compilation
-	* test/main.c Added a test case to loop over the input bytes one by one
+	* test/test.sh: Added test for C89 compilation
+	* test/main.c: Added a test case to loop over the input bytes one by one
 	* crc_symtable.py: Bugfix in the source code generator for C89:
 	Compilation error due to mismatch of parameters in the crc_finalize
 	funtion

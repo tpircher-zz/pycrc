@@ -40,7 +40,7 @@ It supports the following CRC algorithms:
 
 from crc_opt import Options
 from crc_algorithms import Crc
-from crc_code_gen import CodeGenerator
+from crc_parser import MacroParser
 import sys
 
 
@@ -59,9 +59,9 @@ def print_parameters(opt):
     out += "XorOut       = {%crc_xor_out%}\n"
     out += "Algorithm    = {%crc_algorithm%}\n"
 
-    g = CodeGenerator(opt)
-    if g.parse(out):
-        return g.out_str
+    mp = MacroParser(opt)
+    if mp.parse(out):
+        return mp.out_str
     return ""
 
 
@@ -80,20 +80,20 @@ def check_string(opt):
     alg = Crc(opt)
     crc = this_crc = None
     if opt.Algorithm & opt.Algo_Bit_by_Bit:
-        this_crc = alg.bit_by_bit(opt.String)
+        this_crc = alg.bit_by_bit(opt.CheckString)
         if crc != None and this_crc != crc:
             sys.stderr.write("Error: different checksums: 0x%x, 0x%x\n" % (this_crc, crc))
             sys.exit(1)
         crc = this_crc
     if opt.Algorithm & opt.Algo_Bit_by_Bit_Fast:
-        this_crc = alg.bit_by_bit_fast(opt.String)
+        this_crc = alg.bit_by_bit_fast(opt.CheckString)
         if crc != None and this_crc != crc:
             sys.stderr.write("Error: different checksums: 0x%x, 0x%x\n" % (this_crc, crc))
             sys.exit(1)
         crc = this_crc
     if opt.Algorithm & opt.Algo_Table_Driven:
         opt.TableIdxWidth = 8            # FIXME cowardly refusing to use less bits for the table
-        this_crc = alg.table_driven(opt.String)
+        this_crc = alg.table_driven(opt.CheckString)
         if crc != None and this_crc != crc:
             sys.stderr.write("Error: different checksums: 0x%x, 0x%x\n" % (this_crc, crc))
             sys.exit(1)
@@ -171,7 +171,7 @@ def main():
     """
     Main function
     """
-    opt = Options("0.6.1");
+    opt = Options("0.6.2");
     opt.parse(sys.argv)
     if opt.Verbose:
         print print_parameters(opt)
@@ -182,7 +182,7 @@ def main():
         crc = check_file(opt)
         print "0x%x" % crc
     if opt.Action == "generate_h" or opt.Action == "generate_c" or opt.Action == "generate_c-main" or opt.Action == "generate_table":
-        g = CodeGenerator(opt)
+        mp = MacroParser(opt)
         if opt.Action == "generate_h":
             in_str = "{%h_template%}"
         elif opt.Action == "generate_c":
@@ -193,17 +193,20 @@ def main():
             in_str = "{%crc_table_init%}"
         else:
             sys.stderr.write("Error: unknown action %s\n" % opt.Action)
-        if g.parse(in_str):
-            if opt.OutputFile == None:
-                print g.out_str
-            else:
-                try:
-                    file = open(opt.OutputFile, "w")
-                    file.write(g.out_str)
-                    file.close()
-                except:
-                    sys.stderr.write("Error: cannot write to file %s\n" % opt.OutputFile)
-                    sys.exit(1)
+            sys.exit(1)
+        if not mp.parse(in_str):
+            sys.stderr.write("Error: Failure parsing internal macro language\n")
+            sys.exit(1)
+        if opt.OutputFile == None:
+            print mp.out_str
+        else:
+            try:
+                file = open(opt.OutputFile, "w")
+                file.write(mp.out_str)
+                file.close()
+            except:
+                sys.stderr.write("Error: cannot write to file %s\n" % opt.OutputFile)
+                sys.exit(1)
     return 0
 
 if __name__ == "__main__":

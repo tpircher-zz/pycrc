@@ -3,13 +3,50 @@ set -e
 
 PYCRC=`dirname $0`/../pycrc.py
 
-STD_TEST=1
-CHECK_COMPILED=1
-COMPILE_FIXED=0
-CHECK_FILE=0
-DO_RANDOM_LOOP=0
-TEST_ARGS_COMPILATION=0
+function usage {
+        echo >&2 "usage: $0 [OPTIONS]"
+        echo >&2 ""
+        echo >&2 "with OPTIONS in"
+        echo >&2 "        -c    test compiled version"
+        echo >&2 "        -n    test compiled version with fixed parameters"
+        echo >&2 "        -f    test file"
+        echo >&2 "        -r    test random parameters"
+        echo >&2 "        -p    test compiled C program with random arguments"
+        echo >&2 "        -a    do all tests"
+}
 
+
+crc_std_test=on
+crc_compiled_test=off
+crc_compile_noparam_test=off
+crc_file_test=off
+crc_random_loop_test=off
+crc_args_compile_test=off
+crc_all_tests=off
+
+while getopts cnfrpah opt; do
+    case "$opt" in
+        c)  crc_compiled_test=on;;
+        n)  crc_compile_noparam_test=on;;
+        f)  crc_file_test=on;;
+        r)  crc_random_loop_test=on;;
+        p)  crc_args_compile_test=on;;
+        a)  crc_all_tests=on;;
+        h)  usage
+            exit 0
+            ;;
+        \?) usage       # unknown flag
+            exit 1
+            ;;
+    esac
+done
+shift `expr $OPTIND - 1`
+
+function cleanup {
+    rm -f crc.c crc.h a.out crc-bb crc-bf crc-td2 crc-td4 crc-td8 file.txt
+}
+
+trap cleanup 0 1 2 3 15
 
 function testres {
     testres_lcmd="$1"
@@ -66,14 +103,14 @@ function testbin {
     testbin_lopt="$1"
     testbin_lres="$2"
 
-    if [ "$CHECK_COMPILED" -ne 0 ]; then
+    if [ "$crc_compiled_test" == on -o "$crc_all_tests" == on ]; then
         testres "./crc-bb  $testbin_lopt" "$testbin_lres"
         testres "./crc-bf  $testbin_lopt" "$testbin_lres"
         testres "./crc-td2 $testbin_lopt" "$testbin_lres"
         testres "./crc-td4 $testbin_lopt" "$testbin_lres"
         testres "./crc-td8 $testbin_lopt" "$testbin_lres"
 
-        if [ "$COMPILE_FIXED" -ne 0 ]; then
+        if [ "$crc_compile_noparam_test" == on -o "$crc_all_tests" == on ]; then
             testcmp bit-by-bit "$testbin_lopt" "" "$testbin_lres"
             testcmp bit-by-bit-fast "$testbin_lopt" "" "$testbin_lres"
             testcmp table-driven "$testbin_lopt --table-idx-width 2" "" "$testbin_lres"
@@ -88,13 +125,13 @@ function testfil {
     testfil_lopt="$1 --check-file file.txt"
     testfil_lres="$2"
 
-    if [ "$CHECK_FILE" -ne 0 ]; then
+    if [ "$crc_file_test" == on -o "$crc_all_tests" == on ]; then
         testres "$testfil_lopt" "$testfil_lres"
     fi
 }
 
 
-if [ "$CHECK_COMPILED" -ne 0 ]; then
+if [ "$crc_compiled_test" == on -o "$crc_all_tests" == on ]; then
     compile "bit-by-bit" "" "crc-bb"
     compile "bit-by-bit-fast" "" "crc-bf"
     compile "table-driven" "--table-idx-width 2" "crc-td2"
@@ -106,7 +143,7 @@ if [ ! -f file.txt ]; then
 fi
 
 
-if [ "$STD_TEST" -ne 0 ]; then
+if [ "$crc_std_test" == on -o "$crc_all_tests" == on ]; then
 #CRC-8
 res="0xf4"
 cmd="$PYCRC --model crc-8"
@@ -217,7 +254,7 @@ testbin "$opt" "$res"
 fi
 
 
-if [ "$DO_RANDOM_LOOP" -ne 0 ]; then
+if [ "$crc_random_loop_test" == on -o "$crc_all_tests" == on ]; then
     for width in 8 16 32; do
         for poly in 0x8005 0x4c11db7 0xa5a5a5a5; do
             for refxx in "--reflect-in 0 --reflect-out 0" "--reflect-in 0 --reflect-out 1" "--reflect-in 1 --reflect-out 0" "--reflect-in 1 --reflect-out 1"; do
@@ -233,7 +270,7 @@ if [ "$DO_RANDOM_LOOP" -ne 0 ]; then
 fi
 
 
-if [ "$TEST_ARGS_COMPILATION" -ne 0 ]; then
+if [ "$crc_args_compile_test" == on -o "$crc_all_tests" == on ]; then
     #zmodem
     res="0x31c3"
     opt_width="--width 16"
@@ -268,5 +305,4 @@ if [ "$TEST_ARGS_COMPILATION" -ne 0 ]; then
     done
 fi
 
-rm -f crc.c crc.h a.out crc-bb crc-bf crc-td2 crc-td4 crc-td8 file.txt
 echo Test OK

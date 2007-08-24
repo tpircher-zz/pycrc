@@ -14,8 +14,17 @@ script from any directory. On UN*X platforms, you might need to make the script
 executable: chmod +x pycrc.py
 
 
-If you have questions about using pycrc and the documentation does
-not answer them, please send mail to <tehpeh@gmx.net>.
+Getting help
+============
+
+If you have questions about using pycrc which is not answered satisfactorily by
+the documentation, please send a mail to the pycrc user mailing list
+<pycrc-users@lists.sourceforge.net>. The list info page is available at
+https://lists.sourceforge.net/lists/listinfo/pycrc-users
+
+If you have found a bug in pycrc, please take the time and file it to the issue
+tracker at https://sourceforge.net/tracker/?group_id=186891
+Thank you!
 
 
 Copyright of the generated source code
