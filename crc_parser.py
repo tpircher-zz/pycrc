@@ -1,6 +1,7 @@
-#  pycrc -- flexible CRC calculation utility and C source file generator
 # -*- coding: Latin-1 -*-
 
+#  pycrc -- parametrisable CRC calculation utility and C source code generator
+#
 #  Copyright (c) 2006-2007  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -400,25 +401,21 @@ class MacroParser(object):
             val1 = val1_num
             val2 = val2_num
 
-        try:
-            if op_text == "<":
-                return val1 < val2
-            if op_text == "<=":
-                return val1 <= val2
-            if op_text == "==":
-                return val1 == val2
-            if op_text == "!=":
-                return val1 != val2
-            if op_text == ">=":
-                return val1 >= val2
-            if op_text == ">":
-                return val1 > val2
-            else:
-                print "unknown operator '%s'" % op_text
-                raise ParseError("unknown operator")
-        except:
-            raise ParseError("operator type mismatch")
-        return False
+        if op_text == "<":
+            return val1 < val2
+        if op_text == "<=":
+            return val1 <= val2
+        if op_text == "==":
+            return val1 == val2
+        if op_text == "!=":
+            return val1 != val2
+        if op_text == ">=":
+            return val1 >= val2
+        if op_text == ">":
+            return val1 > val2
+        else:
+            print "unknown operator '%s'" % op_text
+            raise ParseError("unknown operator")
 
     # __parse_exp_terminal
     ###############################################################################

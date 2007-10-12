@@ -1,6 +1,7 @@
-#  pycrc -- flexible CRC calculation utility and C source file generator
 # -*- coding: Latin-1 -*-
 
+#  pycrc -- parametrisable CRC calculation utility and C source code generator
+#
 #  Copyright (c) 2006-2007  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -50,6 +51,7 @@ class SymbolTable:
     The symbol table class
     """
     opt = None
+    table = {}
 
     # __init__
     ###############################################################################
@@ -58,8 +60,21 @@ class SymbolTable:
         The class constructor
         """
         self.opt = opt
+        self.table["datetime"] = time.asctime()
+        self.table["program_version"] = self.opt.VersionStr
+        self.table["program_url"] = self.opt.WebAddress
+        if self.opt.OutputFile == None:
+            self.table["filename"] = "stdout"
+        else:
+            self.table["filename"] = self.opt.OutputFile
 
-        self.table = {}
+        if self.opt.OutputFile == None:
+            self.table["header_filename"] = "stdout.h"
+        elif self.opt.OutputFile[-2:] == ".c":
+            self.table["header_filename"] = self.opt.OutputFile[0:-1] + "h"
+        else:
+            self.table["header_filename"] = self.opt.OutputFile + ".h"
+
         self.table["crc_width"] = self.__pretty_str(self.opt.Width)
         self.table["crc_poly"] = self.__pretty_hex(self.opt.Poly, self.opt.Width)
         self.table["crc_reflect_in"] = self.__pretty_bool(self.opt.ReflectIn)
@@ -90,73 +105,7 @@ class SymbolTable:
         self.table["c_true"] = "{%if $c_std == C89%}{:1:}{%else%}{:true:}"
         self.table["c_false"] = "{%if $c_std == C89%}{:0:}{%else%}{:false:}"
 
-        if self.__get_init_value() == None:
-            self.table["constant_crc_init"] = self.__pretty_bool(False)
-        else:
-            self.table["constant_crc_init"] =  self.__pretty_bool(True)
-
-        if (self.opt.Algorithm == self.opt.Algo_Bit_by_Bit_Fast or self.opt.Algorithm == self.opt.Algo_Table_Driven) and \
-                (self.opt.Width != None and self.opt.ReflectOut != None and self.opt.XorOut != None):
-            self.table["inline_crc_finalize"] = self.__pretty_bool(True)
-        else:
-            self.table["inline_crc_finalize"] = self.__pretty_bool(False)
-
-        if self.opt.Algorithm != self.opt.Algo_Bit_by_Bit and (self.opt.Width != None and self.opt.ReflectOut != None and self.opt.XorOut != None) \
-                or self.opt.Algorithm == self.opt.Algo_Bit_by_Bit and \
-                (self.opt.Width != None and self.opt.ReflectOut != None and self.opt.XorOut != None and self.opt.Poly != None):
-            self.table["simple_crc_finalize_def"] = self.__pretty_bool(True)
-        else:
-            self.table["simple_crc_finalize_def"] = self.__pretty_bool(False)
-
-        if self.opt.ReflectOut == False and self.opt.ReflectIn == False:
-            self.table["use_reflect_func"] = self.__pretty_bool(False)
-        else:
-            self.table["use_reflect_func"] = self.__pretty_bool(True)
-
-        if self.opt.Algorithm == self.opt.Algo_Table_Driven:
-            self.table["static_reflect_func"] = self.__pretty_bool(False)
-        elif self.opt.ReflectOut != None and self.opt.Algorithm == self.opt.Algo_Bit_by_Bit_Fast:
-            self.table["static_reflect_func"] = self.__pretty_bool(False)
-        else:
-            self.table["static_reflect_func"] = self.__pretty_bool(True)
-
-        if self.opt.Algorithm == self.opt.Algo_Bit_by_Bit:
-            self.table["crc_algorithm"] = "bit-by-bit"
-        elif self.opt.Algorithm == self.opt.Algo_Bit_by_Bit_Fast:
-            self.table["crc_algorithm"] = "bit-by-bit-fast"
-        elif self.opt.Algorithm == self.opt.Algo_Table_Driven:
-            self.table["crc_algorithm"] = "table-driven"
-        else:
-            self.table["crc_algorithm"] = "UNKNOWN"
-
-        self.table["datetime"] = time.asctime()
-        self.table["program_version"] = self.opt.VersionStr
-        self.table["program_url"] = self.opt.WebAddress
-
-        if self.opt.OutputFile == None:
-            self.table["filename"] = "stdout"
-        else:
-            self.table["filename"] = self.opt.OutputFile
-
-        if self.opt.OutputFile == None:
-            self.table["header_filename"] = "stdout.h"
-        elif self.opt.OutputFile[-2:] == ".c":
-            self.table["header_filename"] = self.opt.OutputFile[0:-1] + "h"
-        else:
-            self.table["header_filename"] = self.opt.OutputFile + ".h"
-
-        self.table["header_protection"] = self.__pretty_hdrprotection()
-
-        if self.opt.Width == None:
-            self.table["underlying_crc_t"] = "unsigned long"
-        elif self.opt.Width <= 8:
-            self.table["underlying_crc_t"] = "uint8_t"
-        elif self.opt.Width <= 16:
-            self.table["underlying_crc_t"] = "uint16_t"
-        elif self.opt.Width <= 32:
-            self.table["underlying_crc_t"] = "uint32_t"
-        else:
-            self.table["underlying_crc_t"] = "unsigned long"
+        self.table["underlying_crc_t"] = self.__get_underlying_crc_t()
 
         self.table["crc_t"] = self.opt.SymbolPrefix + "t"
         self.table["cfg_t"] = self.opt.SymbolPrefix + "cfg_t"
@@ -166,30 +115,109 @@ class SymbolTable:
         self.table["crc_update_function"] = self.opt.SymbolPrefix + "update"
         self.table["crc_finalize_function"] = self.opt.SymbolPrefix + "finalize"
 
-        self.table["crc_table_init"] = self.__get_table_init()
-        self.table["crc_table_core_algorithm_ni"] = self.__get_table_core_algorithm_ni()
-        self.table["crc_table_core_algorithm_ri"] = self.__get_table_core_algorithm_ri()
 
-        ret = self.__get_init_value()
-        if ret == None:
-            self.table["crc_init_value"] = ""
-        else:
-            self.table["crc_init_value"] = ret
+    # getTerminal
+    ###############################################################################
+    def getTerminal(self, id):
+        """
+        return the expanded terminal, if it exists or None otherwise
+        """
 
-        self.table["crc_final_value"] = """\
+        if id != None:
+            if id == "":
+                return ""
+            if self.table.has_key(id):
+                return self.table[id]
+            key = self.__getTerminal(id)
+            if key != None:
+                self.table[id] = key
+                return key
+        raise LookupError
+
+    # __getTerminal
+    ###############################################################################
+    def __getTerminal(self, id):
+        """
+        return the expanded terminal, if it exists or None otherwise
+        """
+        if id == "constant_crc_init":
+            if self.__get_init_value() == None:
+                return  self.__pretty_bool(False)
+            else:
+                return   self.__pretty_bool(True)
+        
+        elif id == "inline_crc_finalize":
+            if (self.opt.Algorithm == self.opt.Algo_Bit_by_Bit_Fast or self.opt.Algorithm == self.opt.Algo_Table_Driven) and \
+                    (self.opt.Width != None and self.opt.ReflectOut != None and self.opt.XorOut != None):
+                return  self.__pretty_bool(True)
+            else:
+                return  self.__pretty_bool(False)
+
+        elif id == "simple_crc_finalize_def":
+            if self.opt.Algorithm != self.opt.Algo_Bit_by_Bit and (self.opt.Width != None and self.opt.ReflectOut != None and self.opt.XorOut != None) \
+                    or self.opt.Algorithm == self.opt.Algo_Bit_by_Bit and \
+                    (self.opt.Width != None and self.opt.ReflectOut != None and self.opt.XorOut != None and self.opt.Poly != None):
+                return  self.__pretty_bool(True)
+            else:
+                return  self.__pretty_bool(False)
+
+        elif id == "use_reflect_func":
+            if self.opt.ReflectOut == False and self.opt.ReflectIn == False:
+                return  self.__pretty_bool(False)
+            else:
+                return  self.__pretty_bool(True)
+
+        elif id == "static_reflect_func":
+            if self.opt.Algorithm == self.opt.Algo_Table_Driven:
+                return  self.__pretty_bool(False)
+            elif self.opt.ReflectOut != None and self.opt.Algorithm == self.opt.Algo_Bit_by_Bit_Fast:
+                return  self.__pretty_bool(False)
+            else:
+                return  self.__pretty_bool(True)
+
+        elif id == "crc_algorithm":
+            if self.opt.Algorithm == self.opt.Algo_Bit_by_Bit:
+                return  "bit-by-bit"
+            elif self.opt.Algorithm == self.opt.Algo_Bit_by_Bit_Fast:
+                return  "bit-by-bit-fast"
+            elif self.opt.Algorithm == self.opt.Algo_Table_Driven:
+                return  "table-driven"
+            else:
+                return  "UNKNOWN"
+
+        elif id == "crc_table_init":
+            return  self.__get_table_init()
+        elif id == "crc_table_core_algorithm_ni":
+            return  self.__get_table_core_algorithm_ni()
+        elif id == "crc_table_core_algorithm_ri":
+            return  self.__get_table_core_algorithm_ri()
+
+        elif id == "header_protection":
+            return  self.__pretty_hdrprotection()
+
+        elif id == "crc_init_value":
+            ret = self.__get_init_value()
+            if ret == None:
+                return  ""
+            else:
+                return  ret
+
+        elif id == "crc_final_value":
+            return  """\
 {%if $crc_reflect_out == True%}{:
 {%crc_reflect_function%}(crc, {%crc_width%}) ^ {%crc_xor_out%}\
 :}{%else%}{:
 crc ^ {%crc_xor_out%}\
 :}\
 """
-        self.table["h_template"] = """\
+        elif id == "h_template":
+            return  """\
 {%source_header%}
 #ifndef {%header_protection%}
 #define {%header_protection%}
 
 #include <stdint.h>
-#include <unistd.h>
+#include <stdlib.h>
 {%if $undefined_parameters == True and $c_std != C89%}{:
 #include <stdbool.h>
 :}
@@ -288,7 +316,8 @@ static inline {%crc_finalize_function_def%}{%%}
 #endif      /* {%header_protection%} */
 """
 
-        self.table["source_header"] = """\
+        elif id == "source_header":
+            return  """\
 /**
  * \\file {%filename%}
  * Functions and types for CRC checks.
@@ -306,7 +335,8 @@ static inline {%crc_finalize_function_def%}{%%}
  *****************************************************************************/\
 """
 
-        self.table["crc_reflect_doc"] = """\
+        elif id == "crc_reflect_doc":
+            return  """\
 /**
  * \\brief      Reflect all bits of a \\a data word of \\a data_len bytes.
  * \\param data         The data word to be reflected.
@@ -315,11 +345,13 @@ static inline {%crc_finalize_function_def%}{%%}
  *****************************************************************************/\
 """
 
-        self.table["crc_reflect_function_def"] = """\
+        elif id == "crc_reflect_function_def":
+            return  """\
 long {%crc_reflect_function%}(long data, size_t data_len)\
 """
 
-        self.table["crc_reflect_function_body"] = """\
+        elif id == "crc_reflect_function_body":
+            return  """\
 {%if $crc_reflect_in == Undefined or $crc_reflect_in == True or $crc_reflect_out == Undefined or $crc_reflect_out == True%}{:
 {%crc_reflect_doc%}
 {%crc_reflect_function_def%}{%%}
@@ -342,7 +374,8 @@ long {%crc_reflect_function%}(long data, size_t data_len)\
 :}\
 """
 
-        self.table["crc_table_gen_doc"] = """\
+        elif id == "crc_table_gen_doc":
+            return  """\
 /**
  * \\brief      Populate the private static crc table.
  * \\param cfg  A pointer to a initialised {%cfg_t%} structure.
@@ -350,11 +383,13 @@ long {%crc_reflect_function%}(long data, size_t data_len)\
  *****************************************************************************/\
 """
 
-        self.table["crc_table_gen_function_def"] = """\
+        elif id == "crc_table_gen_function_def":
+            return  """\
 void {%crc_table_gen_function%}(const {%cfg_t%} *cfg)\
 """
 
-        self.table["crc_init_doc"] = """\
+        elif id == "crc_init_doc":
+            return  """\
 /**
  * \\brief      Calculate the initial crc value.
 {%if $use_cfg_t == True%}{:
@@ -364,7 +399,8 @@ void {%crc_table_gen_function%}(const {%cfg_t%} *cfg)\
  *****************************************************************************/\
 """
     
-        self.table["crc_init_function_def"] = """\
+        elif id == "crc_init_function_def":
+            return  """\
 {%if $constant_crc_init == False%}{:
 {%crc_t%} {%crc_init_function%}(const {%cfg_t%} *cfg)\
 :}{%else%}{:
@@ -372,7 +408,8 @@ void {%crc_table_gen_function%}(const {%cfg_t%} *cfg)\
 :}\
 """
 
-        self.table["crc_update_doc"] = """\
+        elif id == "crc_update_doc":
+            return  """\
 /**
  * \\brief          Update the crc value with new data.
  * \\param crc      The current crc value.
@@ -385,7 +422,8 @@ void {%crc_table_gen_function%}(const {%cfg_t%} *cfg)\
  *****************************************************************************/\
 """
 
-        self.table["crc_update_function_def"] = """\
+        elif id == "crc_update_function_def":
+            return  """\
 {%if $undefined_parameters == True%}{:
 {%crc_t%} {%crc_update_function%}(const {%cfg_t%} *cfg, {%crc_t%} crc, const unsigned char *data, size_t data_len)\
 :}{%else%}{:
@@ -393,7 +431,8 @@ void {%crc_table_gen_function%}(const {%cfg_t%} *cfg)\
 :}\
 """
 
-        self.table["crc_finalize_doc"] = """\
+        elif id == "crc_finalize_doc":
+            return  """\
 /**
  * \\brief      Calculate the final crc value.
 {%if $use_cfg_t == True%}{:
@@ -404,7 +443,8 @@ void {%crc_table_gen_function%}(const {%cfg_t%} *cfg)\
  *****************************************************************************/\
 """
 
-        self.table["crc_finalize_function_def"] = """\
+        elif id == "crc_finalize_function_def":
+            return  """\
 {%if $simple_crc_finalize_def != True%}{:
 {%crc_t%} {%crc_finalize_function%}(const {%cfg_t%} *cfg, {%crc_t%} crc)\
 :}{%else%}{:
@@ -412,11 +452,12 @@ void {%crc_table_gen_function%}(const {%cfg_t%} *cfg)\
 :}\
 """
 
-        self.table["c_template"] = """\
+        elif id == "c_template":
+            return  """\
 {%source_header%}
 #include "{%header_filename%}"
 #include <stdint.h>
-#include <unistd.h>
+#include <stdlib.h>
 {%if $undefined_parameters == True or $crc_algorithm == "bit-by-bit" or $crc_algorithm == "bit-by-bit-fast"%}{:
 {%if $c_std != C89%}{:
 #include <stdbool.h>
@@ -436,7 +477,8 @@ static {%crc_reflect_function_def%};
 :}
 """
 
-        self.table["c_table"] = """\
+        elif id == "c_table":
+            return  """\
 /**
  * Static table used for the table_driven implementation.
 {%if $undefined_parameters == True%}{:
@@ -452,7 +494,8 @@ static const {%crc_t%} crc_table[{%crc_table_width%}] = {
 :}
 """
 
-        self.table["c_bit_by_bit"] = """\
+        elif id == "c_bit_by_bit":
+            return  """\
 {%if $use_reflect_func == True%}{:
 {%crc_reflect_function_body%}
 
@@ -532,7 +575,8 @@ static const {%crc_t%} crc_table[{%crc_table_width%}] = {
 }
 """
 
-        self.table["c_bit_by_bit_fast"] = """\
+        elif id == "c_bit_by_bit_fast":
+            return  """\
 {%if $use_reflect_func == True%}{:
 {%crc_reflect_function_body%}
 
@@ -598,7 +642,8 @@ static const {%crc_t%} crc_table[{%crc_table_width%}] = {
 :}
 """
 
-        self.table["c_table_driven"] = """\
+        elif id == "c_table_driven":
+            return  """\
 {%c_table%}
 {%if $use_reflect_func == True%}{:
 {%crc_reflect_function_body%}
@@ -711,10 +756,10 @@ static const {%crc_t%} crc_table[{%crc_table_width%}] = {
 :}
 """
 
-        self.table["main_template"] = """\
+        elif id == "main_template":
+            return  """\
 #include <stdio.h>
 {%if $undefined_parameters == True%}{:
-#include <unistd.h>
 #include <getopt.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -810,7 +855,8 @@ int main({%if $undefined_parameters == True%}{:int argc, char *argv[]:}{%else%}{
 }
 """
 
-        self.table["getopt_template"] = """\
+        elif id == "getopt_template":
+            return  """\
 {%if $crc_reflect_in == Undefined or $crc_reflect_out == Undefined%}{:
 static {%c_bool%} atob(const char *str);
 :}
@@ -970,20 +1016,6 @@ int get_config(int argc, char *argv[], {%cfg_t%} *cfg)
 """
 
 
-    # getTerminal
-    ###############################################################################
-    def getTerminal(self, id):
-        """
-        return the expanded terminal, if it exists or None otherwise
-        """
-
-        if id != None:
-            if id == "":
-                return ""
-            if self.table.has_key(id):
-                return self.table[id]
-        raise LookupError
-
     # __pretty_str
     ###############################################################################
     def __pretty_str(self, value):
@@ -1041,6 +1073,30 @@ int get_config(int argc, char *argv[], {%cfg_t%} *cfg)
         str = str.upper()
         str = str.translate(tr_str)
         return "__" + str + "__"
+
+    # __get_underlying_crc_t
+    ###############################################################################
+    def __get_underlying_crc_t(self):
+        """
+        Return the C type of the crc_t typedef
+        """
+        if self.opt.Width == None:
+            return "unsigned long"
+        if self.opt.CStd == "C89":
+            if self.opt.Width <= 8:
+                return "unsigned char"
+            elif self.opt.Width <= 16:
+                return "unsigned int"
+            else:
+                return "unsigned long"
+        else:       # C99
+            if self.opt.Width <= 8:
+                return "uint8_t"
+            elif self.opt.Width <= 16:
+                return "uint16_t"
+            elif self.opt.Width <= 32:
+                return "uint32_t"
+        return "unsigned long"
 
     # __get_init_value
     ###############################################################################

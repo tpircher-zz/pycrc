@@ -144,6 +144,15 @@ fi
 
 
 if [ "$crc_std_test" == on -o "$crc_all_tests" == on ]; then
+#CRC-5
+res="0x19"
+cmd="$PYCRC --model crc-5"
+opt="--width 5 --poly 0x05 --reflect-in 1 --xor-in 0x1f --reflect-out 1 --xor-out 0x1f"
+teststr "$cmd" "$res"
+teststr "$PYCRC $opt" "$res"
+testfil "$cmd" "$res"
+#testbin "$opt" "$res"      # don't test binaries with Width < 8 (table driven algorithm does not work)
+
 #CRC-8
 res="0xf4"
 cmd="$PYCRC --model crc-8"
@@ -153,10 +162,28 @@ teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
 testbin "$opt" "$res"
 
+#CRC-15
+res="0x59e"
+cmd="$PYCRC --model crc-15"
+opt="--width 15 --poly 0x4599 --reflect-in 0 --xor-in 0x0 --reflect-out 0 --xor-out 0x0"
+teststr "$cmd" "$res"
+teststr "$PYCRC $opt" "$res"
+testfil "$cmd" "$res"
+#testbin "$opt" "$res"      # don't test binaries with width not a multiple of 8 (table driven algorithm does not work)
+
 #CRC-16/ARC
 res="0xbb3d"
 cmd="$PYCRC --model crc-16"
 opt="--width 16 --poly 0x8005 --reflect-in 1 --xor-in 0x0 --reflect-out 1 --xor-out 0x0"
+teststr "$cmd" "$res"
+teststr "$PYCRC $opt" "$res"
+testfil "$cmd" "$res"
+testbin "$opt" "$res"
+
+#CRC-16-USB
+res="0xb4c8"
+cmd="$PYCRC --model crc-16-usb"
+opt="--width 16 --poly 0x8005 --reflect-in 1 --xor-in 0xffff --reflect-out 1 --xor-out 0xffff"
 teststr "$cmd" "$res"
 teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
@@ -207,6 +234,15 @@ teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
 testbin "$opt" "$res"
 
+#crc-24
+res="0x21cf02"
+cmd="$PYCRC --model crc-24"
+opt="--width 24 --poly 0x1864cfb --reflect-in 0 --xor-in 0xb704ce --reflect-out 0 --xor-out 0x0"
+teststr "$cmd" "$res"
+teststr "$PYCRC $opt" "$res"
+testfil "$cmd" "$res"
+#testbin "$opt" "$res"      # don't test binaries with width not a multiple of 8 (table driven algorithm does not work)
+
 #CRC-32
 res="0xcbf43926"
 cmd="$PYCRC --model crc-32"
@@ -251,6 +287,15 @@ teststr "$cmd" "$res"
 teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
 testbin "$opt" "$res"
+
+#CRC-64
+res="0x46a5a9388a5beffe"
+cmd="$PYCRC --model crc-64"
+opt="--width 64 --poly 0x000000000000001b --reflect-in 1 --xor-in 0x0 --reflect-out 1 --xor-out 0x0"
+teststr "$cmd" "$res"
+teststr "$PYCRC $opt" "$res"
+testfil "$cmd" "$res"
+#testbin "$opt" "$res"      # don't test binaries with width 64 bits (variables not wide enough...)
 fi
 
 

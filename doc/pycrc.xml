@@ -191,18 +191,23 @@
                 <option>--model=</option><replaceable>MODEL</replaceable>
             </term>
             <listitem>
-                <para>choose a parameter set from {<replaceable>crc-8</replaceable>, 
+                <para>choose a parameter set from {<replaceable>crc-5</replaceable>, 
+                    <replaceable>crc-8</replaceable>, 
+                    <replaceable>crc-15</replaceable>,
+                    <replaceable>crc-16-usb</replaceable>,
                     <replaceable>crc-16</replaceable>, 
                     <replaceable>ccitt</replaceable>, 
                     <replaceable>kermit</replaceable>, 
                     <replaceable>x-25</replaceable>, 
                     <replaceable>xmodem</replaceable>, 
                     <replaceable>zmodem</replaceable>, 
+                    <replaceable>crc-24</replaceable>,
                     <replaceable>crc-32</replaceable>,
                     <replaceable>crc-32c</replaceable>,
                     <replaceable>posix</replaceable>,
                     <replaceable>jam</replaceable>,
-                    <replaceable>xfer</replaceable>}</para>
+                    <replaceable>xfer</replaceable>,
+                    <replaceable>crc-64</replaceable>}</para>
             </listitem>
         </varlistentry>
         <varlistentry>
@@ -388,7 +393,7 @@
         <refsect2><title>Fully parametrised models</title>
             <funcsynopsis>
                 <funcsynopsisinfo>
-#include &lt;unistd.h&gt;
+#include &lt;stdlib.h&gt;
 typedef XXXX crc_t;             // this type is defined in the generated header file
                 </funcsynopsisinfo>
                 <funcprototype>
@@ -484,10 +489,10 @@ typedef struct {
                     <glossterm>Generate the source code of the table-driven algorithm for an embedded application.</glossterm>
                     <glossdef>
                         <para>
-                        <userinput>pycrc.py --model crc-16 --algorithm table-driven --table-idx-width 4 --generate_h -o crc.h</userinput>
+                        <userinput>pycrc.py --model crc-16 --algorithm table-driven --table-idx-width 4 --generate h -o crc.h</userinput>
                         </para>
                         <para>
-                        <userinput>pycrc.py --model crc-16 --algorithm table-driven --table-idx-width 4 --generate_c -o crc.c</userinput>
+                        <userinput>pycrc.py --model crc-16 --algorithm table-driven --table-idx-width 4 --generate c -o crc.c</userinput>
                         </para>
                         <para>
                          The table index width of 4 bits ensures a moderate memory consumption. In fact, the resulting table is 

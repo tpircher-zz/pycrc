@@ -1,6 +1,7 @@
-#  pycrc -- flexible CRC calculation utility and C source file generator
 # -*- coding: Latin-1 -*-
 
+#  pycrc -- parametrisable CRC calculation utility and C source code generator
+#
 #  Copyright (c) 2006-2007  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -81,10 +82,10 @@ class Crc(object):
 
         self.MSB_Mask = 0x1 << (opt.Width - 1)
         self.Mask = ((opt.MSB_Mask - 1) << 1) | 1
-        try:
+        if opt.TableIdxWidth != None:
             self.TableIdxWidth = opt.TableIdxWidth
             self.TableWidth = 1 << opt.TableIdxWidth
-        except:
+        else:
             self.TableIdxWidth = 8
             self.TableWidth = 1 << self.TableIdxWidth
 

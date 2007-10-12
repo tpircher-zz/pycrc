@@ -1,3 +1,24 @@
+#
+# Version 0.6.3, 2007-10-13
+#
+
+2007-10-13  Thomas Pircher   <tehpeh@gmx.net>
+
+	* crc_symtable.py: fixed some portability problems in the generated code.
+	Thanks to Helmut Bauer. Closes issue 1812894
+
+2007-09-10  Thomas Pircher   <tehpeh@gmx.net>
+
+	* crc_opt.py: added new models: crc-5, crc-15, crc-16-usb, crc-24, crc-64.
+	The new models are taken from Ray Burr's CrcMoose.
+	* pycrc.py: --check-file works now with --width < 8. Closes issue 1794343
+	* pycrc.py: Removed unnecessary restriction on the width when using the
+	bit-by-bit-fast algorithm. Closes issue 1794344
+
+#
+# Version 0.6.2, 2007-08-25
+#
+
 2007-08-25  Thomas Pircher   <tehpeh@gmx.net>
 
 	* crc_opt.py: the parameter to --check-string was ignored. Closes issue

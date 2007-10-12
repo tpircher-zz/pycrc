@@ -1,6 +1,7 @@
-#  pycrc -- flexible CRC calculation utility and C source file generator
 # -*- coding: Latin-1 -*-
 
+#  pycrc -- parametrisable CRC calculation utility and C source code generator
+#
 #  Copyright (c) 2006-2007  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -92,9 +93,23 @@ def model_cb(option, opt_str, value, parser):
     by the user.
     """
     mod = value.lower();
-    if   mod == "crc-8":
+    if mod == "crc-5":
+        setattr(parser.values, "width",         5)
+        setattr(parser.values, "poly",          0x05L)
+        setattr(parser.values, "reflect_in",    True)
+        setattr(parser.values, "xor_in",        0x1fL)
+        setattr(parser.values, "reflect_out",   True)
+        setattr(parser.values, "xor_out",       0x1fL)
+    elif   mod == "crc-8":
         setattr(parser.values, "width",         8)
         setattr(parser.values, "poly",          0x07L)
+        setattr(parser.values, "reflect_in",    False)
+        setattr(parser.values, "xor_in",        0x0L)
+        setattr(parser.values, "reflect_out",   False)
+        setattr(parser.values, "xor_out",       0x0L)
+    elif mod == "crc-15":
+        setattr(parser.values, "width",         15)
+        setattr(parser.values, "poly",          0x4599L)
         setattr(parser.values, "reflect_in",    False)
         setattr(parser.values, "xor_in",        0x0L)
         setattr(parser.values, "reflect_out",   False)
@@ -106,6 +121,13 @@ def model_cb(option, opt_str, value, parser):
         setattr(parser.values, "xor_in",        0x0L)
         setattr(parser.values, "reflect_out",   True)
         setattr(parser.values, "xor_out",       0x0L)
+    elif mod == "crc-16-usb":
+        setattr(parser.values, "width",         16)
+        setattr(parser.values, "poly",          0x8005L)
+        setattr(parser.values, "reflect_in",    True)
+        setattr(parser.values, "xor_in",        0xffffL)
+        setattr(parser.values, "reflect_out",   True)
+        setattr(parser.values, "xor_out",       0xffffL)
     elif mod == "ccitt":
         setattr(parser.values, "width",         16)
         setattr(parser.values, "poly",          0x1021L)
@@ -139,6 +161,13 @@ def model_cb(option, opt_str, value, parser):
         setattr(parser.values, "poly",          0x1021L)
         setattr(parser.values, "reflect_in",    False)
         setattr(parser.values, "xor_in",        0x0L)
+        setattr(parser.values, "reflect_out",   False)
+        setattr(parser.values, "xor_out",       0x0L)
+    elif mod == "crc-24":
+        setattr(parser.values, "width",         24)
+        setattr(parser.values, "poly",          0x864cfbL)
+        setattr(parser.values, "reflect_in",    False)
+        setattr(parser.values, "xor_in",        0xb704ceL)
         setattr(parser.values, "reflect_out",   False)
         setattr(parser.values, "xor_out",       0x0L)
     elif mod == "crc-32":
@@ -176,6 +205,13 @@ def model_cb(option, opt_str, value, parser):
         setattr(parser.values, "xor_in",        0x0L)
         setattr(parser.values, "reflect_out",   False)
         setattr(parser.values, "xor_out",       0x0L)
+    elif mod == "crc-64":
+        setattr(parser.values, "width",         64)
+        setattr(parser.values, "poly",          0x000000000000001bL)
+        setattr(parser.values, "reflect_in",    True)
+        setattr(parser.values, "xor_in",        0x0L)
+        setattr(parser.values, "reflect_out",   True)
+        setattr(parser.values, "xor_out",       0x0L)
     else:
         raise OptionValueError("Error: unsupported model %s" % (value))
         sys.exit(1)
@@ -190,6 +226,7 @@ class Options(object):
     """
     Bitmap of the algorithms
     """
+    Algo_None               = 0x00
     Algo_Bit_by_Bit         = 0x01
     Algo_Bit_by_Bit_Fast    = 0x02
     Algo_Table_Driven       = 0x04
@@ -212,7 +249,7 @@ class Options(object):
         self.Verbose        = False
         self.CheckString    = "123456789"
 
-        self.Algorithm      = 0x00
+        self.Algorithm      = self.Algo_None
         self.SymbolPrefix   = "crc_"
         self.OutputFile     = None
         self.Action         = "check_string"
@@ -261,7 +298,7 @@ following parameters:
                         help="choose an algorithm from {bit-by-bit, bit-by-bit-fast, table-driven, all}", metavar="ALGO")
         parser.add_option("--model",
                         action="callback", callback=model_cb, type="string", dest="model", default=None,
-                        help="choose a parameter set from {crc-8, crc-16, ccitt, kermit, x-25, xmodem, zmodem, crc-32, crc-32c, posix, jam, xfer}", metavar="MODEL")
+                        help="choose a parameter set from {crc-5, crc-8, crc-15, crc-16, crc-16-usb, ccitt, kermit, x-25, xmodem, zmodem, crc-24, crc-32, crc-32c, posix, jam, xfer, crc-64}", metavar="MODEL")
         parser.add_option("--width",
                         action="store", type="hex", dest="width",
                         help="use WIDTH bits in the polynom", metavar="WIDTH")
@@ -366,11 +403,11 @@ following parameters:
                 sys.stderr.write("Error: unknown algorithm %s\n" % options.algorithm)
                 sys.exit(1)
         if self.Width != None and (self.Width % 8) != 0:
-            if options.algorithm == "bit-by-bit-fast" or options.algorithm == "table-driven":
-                sys.stderr.write("Error: width non aligned to byte boundaries, algorithm %s not applicable\n" % options.algorithm)
+            if options.algorithm == "table-driven":
+                sys.stderr.write("Error: width parameter is not aligned to byte boundaries; algorithm %s not applicable\n" % options.algorithm)
                 sys.exit(1)
             else:
-                self.Algorithm &= ~(self.Algo_Bit_by_Bit_Fast | self.Algo_Table_Driven)
+                self.Algorithm &= ~self.Algo_Table_Driven
         if self.Width != None and self.Width < 8:
             if options.algorithm == "table-driven":
                 sys.stderr.write("Error: width < 8, algorithm %s not applicable\n" % options.algorithm)

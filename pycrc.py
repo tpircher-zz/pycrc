@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: Latin-1 -*-
 
-#  pycrc -- flexible CRC calculation utility and C source file generator
+#  pycrc -- parametrisable CRC calculation utility and C source code generator
 #
 #  Copyright (c) 2006-2007  Thomas Pircher  <tehpeh@gmx.net>
 #
@@ -25,7 +25,8 @@
 
 
 """
-pycrc is a flexible CRC calculation utility and C source file generator written in Python.
+pycrc is a fully parametrisable Cyclic Redundancy Check (CRC) calculation
+utility and C source code generator written in Python.
 
 It can:
     -  generate the checksum of a string
@@ -102,23 +103,22 @@ def check_string(opt):
 
 # function crc_file_update
 ###############################################################################
-def crc_file_update(opt, alg, tbl, register, str):
+def crc_file_update(opt, alg, register, str):
     """
-    Update the CRC using the table_driven CRC algorithm.
+    Update the CRC using the bit-by-bit-fast CRC algorithm.
     """
-    if not opt.ReflectIn:
-        register = opt.XorIn
-        for i in range(len(str)):
-            octet = ord(str[i])
-            tblidx = ((register >> (opt.Width - 8)) ^ octet) & 0xff
-            register = ((register << 8) ^ tbl[tblidx]) & opt.Mask
-    else:
-        register = alg.reflect(opt.XorIn, opt.Width)
-        for i in range(len(str)):
-            octet = ord(str[i])
-            tblidx = (register ^ octet) & 0xff
-            register = ((register >> 8) ^ tbl[tblidx]) & opt.Mask
-        register = alg.reflect(register, opt.Width)
+    for i in range(len(str)):
+        octet = ord(str[i])
+        if alg.ReflectIn:
+            octet = alg.reflect(octet, 8)
+        for j in range(8):
+            bit = register & alg.MSB_Mask
+            register <<= 1
+            if octet & (0x80 >> j):
+                bit ^= alg.MSB_Mask
+            if bit:
+                register ^= alg.Poly
+        register &= alg.Mask    
     return register
 
 # function check_file
@@ -131,14 +131,11 @@ def check_file(opt):
     if opt.UndefinedCrcParameters:
         sys.stderr.write("Error: undefined parameters\n")
         sys.exit(1)
-    opt.TableIdxWidth = 8            # FIXME cowardly refusing to use less bits for the table
-
     alg = Crc(opt)
-    tbl = alg.gen_table()
 
     try:
         file = open(opt.CheckFile, 'rb')
-    except:
+    except IOError:
         sys.stderr.write("Error: can't open file %s\n" % opt.CheckFile)
         sys.exit(1)
 
@@ -148,14 +145,14 @@ def check_file(opt):
         register = alg.reflect(opt.XorIn, opt.Width)
     try:
         str = file.read()
-    except:
+    except IOError:
         sys.stderr.write("Error: can't open read %s\n" % opt.CheckFile)
         sys.exit(1)
     while len(str):
-        register = crc_file_update(opt, alg, tbl, register, str)
+        register = crc_file_update(opt, alg, register, str)
         try:
             str = file.read()
-        except:
+        except IOError:
             sys.stderr.write("Error: can't open read %s\n" % opt.CheckFile)
             sys.exit(1)
     file.close()
@@ -171,7 +168,7 @@ def main():
     """
     Main function
     """
-    opt = Options("0.6.2");
+    opt = Options("0.6.3")
     opt.parse(sys.argv)
     if opt.Verbose:
         print print_parameters(opt)
@@ -204,7 +201,7 @@ def main():
                 file = open(opt.OutputFile, "w")
                 file.write(mp.out_str)
                 file.close()
-            except:
+            except IOError:
                 sys.stderr.write("Error: cannot write to file %s\n" % opt.OutputFile)
                 sys.exit(1)
     return 0
