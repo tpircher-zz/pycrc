@@ -148,13 +148,13 @@ class SymbolTable:
         
         elif id == "inline_crc_finalize":
             if (self.opt.Algorithm == self.opt.Algo_Bit_by_Bit_Fast or self.opt.Algorithm == self.opt.Algo_Table_Driven) and \
-                    (self.opt.Width != None and self.opt.ReflectOut != None and self.opt.XorOut != None):
+                    (self.opt.Width != None and self.opt.ReflectIn != None and self.opt.ReflectOut != None and self.opt.XorOut != None):
                 return  self.__pretty_bool(True)
             else:
                 return  self.__pretty_bool(False)
 
         elif id == "simple_crc_finalize_def":
-            if self.opt.Algorithm != self.opt.Algo_Bit_by_Bit and (self.opt.Width != None and self.opt.ReflectOut != None and self.opt.XorOut != None) \
+            if self.opt.Algorithm != self.opt.Algo_Bit_by_Bit and (self.opt.Width != None and self.opt.ReflectIn != None and self.opt.ReflectOut != None and self.opt.XorOut != None) \
                     or self.opt.Algorithm == self.opt.Algo_Bit_by_Bit and \
                     (self.opt.Width != None and self.opt.ReflectOut != None and self.opt.XorOut != None and self.opt.Poly != None):
                 return  self.__pretty_bool(True)
@@ -204,7 +204,12 @@ class SymbolTable:
 
         elif id == "crc_final_value":
             return  """\
-{%if $crc_reflect_out == True%}{:
+{%if $crc_algorithm == "table-driven"%}{:
+{%if $crc_reflect_in == $crc_reflect_out%}{:
+crc ^ {%crc_xor_out%}\
+:}{%else%}{:
+{%crc_reflect_function%}(crc, {%crc_width%}) ^ {%crc_xor_out%}\
+:}:}{%elif $crc_reflect_out == True%}{:
 {%crc_reflect_function%}(crc, {%crc_width%}) ^ {%crc_xor_out%}\
 :}{%else%}{:
 crc ^ {%crc_xor_out%}\
@@ -717,7 +722,6 @@ static const {%crc_t%} crc_table[{%crc_table_width%}] = {
 {%crc_table_core_algorithm_ri%}
             data++;
         }
-        crc = {%crc_reflect_function%}(crc, {%cfg_width%});
     } else {
         while (data_len--) {
 {%crc_table_core_algorithm_ni%}
@@ -733,9 +737,6 @@ static const {%crc_t%} crc_table[{%crc_table_width%}] = {
 :}
         data++;
     }
-{%if $crc_reflect_in == True%}{:
-    crc = {%crc_reflect_function%}(crc, {%cfg_width%});
-:}
 :}
     return crc & {%cfg_mask%};
 }
@@ -744,11 +745,17 @@ static const {%crc_t%} crc_table[{%crc_table_width%}] = {
 {%crc_finalize_doc%}
 {%crc_finalize_function_def%}{%%}
 {
-{%if $crc_reflect_out == Undefined%}{:
-    if (cfg->reflect_out) {
+{%if $crc_reflect_in == Undefined or $crc_reflect_out == Undefined%}{:
+{%if $crc_reflect_in == Undefined and $crc_reflect_out == Undefined%}{:
+    if (cfg->reflect_in == !cfg->reflect_out)
+:}{%elif $crc_reflect_out == Undefined%}{:
+    if ({%if $crc_reflect_in == True%}{:!:}cfg->reflect_out)
+:}{%elif $crc_reflect_in == Undefined%}{:
+    if ({%if $crc_reflect_out == True%}{:!:}cfg->reflect_in)
+:} {
         crc = {%crc_reflect_function%}(crc, {%cfg_width%});
     }
-:}{%elif $crc_reflect_out == True%}{:
+:}{%elif $crc_reflect_in != $crc_reflect_out%}{:
     crc = {%crc_reflect_function%}(crc, {%cfg_width%});
 :}
     return (crc ^ {%cfg_xor_out%}) & {%cfg_mask%};
@@ -773,12 +780,12 @@ static const {%crc_t%} crc_table[{%crc_table_width%}] = {
 static char str[256] = "123456789";
 static {%c_bool%} verbose = {%c_false%};
 
-void print_params({%if $undefined_parameters == True%}{:const {%cfg_t%} *cfg:}{%else%}{::});
+void print_params({%if $undefined_parameters == True%}{:const {%cfg_t%} *cfg:}{%else%}{:void:});
 {%if $undefined_parameters == True%}{:
 {%getopt_template%}
 :}
 
-void print_params({%if $undefined_parameters == True%}{:const {%cfg_t%} *cfg:}{%else%}{::})
+void print_params({%if $undefined_parameters == True%}{:const {%cfg_t%} *cfg:}{%else%}{:void:})
 {
     char format[20];
 

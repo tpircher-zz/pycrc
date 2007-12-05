@@ -168,7 +168,7 @@ def main():
     """
     Main function
     """
-    opt = Options("0.6.3")
+    opt = Options("0.6.4")
     opt.parse(sys.argv)
     if opt.Verbose:
         print print_parameters(opt)

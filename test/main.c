@@ -25,7 +25,7 @@
 static bool atob(const char *str);
 static int xtoi(const char *str);
 static int get_config(int argc, char *argv[], crc_cfg_t *cfg);
-#ifdef CRC_ALGO_BIT_BY_BIT
+#if CRC_ALGO_BIT_BY_BIT
 static crc_t crc_verify(const crc_cfg_t *cfg, crc_t crc_pre_final, crc_t crc);
 static long crc_reflect(long data, size_t data_len);
 #endif
@@ -235,7 +235,7 @@ int main(int argc, char *argv[])
 
     ret = get_config(argc, argv, &cfg);
     if (ret == 0) {
-#       ifdef CRC_ALGO_TABLE_DRIVEN
+#       if CRC_ALGO_TABLE_DRIVEN
         crc_table_gen(&cfg);
 #       endif       // CRC_ALGO_TABLE_DRIVEN
         crc = crc_init(&cfg);
