@@ -1,4 +1,38 @@
 #
+# Version 0.6.5, 2008-03-03
+#
+
+2008-03-02  Thomas Pircher   <tehpeh@gmx.net>
+
+	* crc_models.py: added dallas-1-wire 8 bit CRC.
+
+2008-02-07  Thomas Pircher   <tehpeh@gmx.net>
+
+	* crc_symtable.py: fixed a problem with the generated code for
+	bit-by-bit-fast algorithms. Thanks to Hans Bacher.
+
+2007-12-19  Thomas Pircher   <tehpeh@gmx.net>
+
+	* crc_models.py: added r-crc-16 model (DECT (cordless digital standard)
+	packets A-field according to ETSI EN 300 175-3 v2.1.1).
+	Thanks to "raimondo".
+
+2007-12-10  Thomas Pircher   <tehpeh@gmx.net>
+
+	* crc_symtable.py: added extern "C" declaration to the generated C header
+	file. Thanks to Nathan Royer.
+
+2007-12-10  Thomas Pircher   <tehpeh@gmx.net>
+
+	* crc_algorithms.py: changed the API to take the CRC model direct as
+	parameter. Deleted the need for an obscure "opt" object.
+
+2007-12-09  Thomas Pircher   <tehpeh@gmx.net>
+
+	* crc_opt.py: added --crc-type and --include-file options.
+	* crc_models.py: added new file to handle CRC models
+
+#
 # Version 0.6.4, 2007-12-05
 #
 
@@ -119,7 +153,7 @@
 2007-03-25  Thomas Pircher   <tehpeh@gmx.net>
 
 	* pycrc.py: Fixed bug 1686404: unhandled exception when called with
-	both options --table_idx_with and --check_file
+	both options --table_idx_width and --check_file
 	* pycrc.py: Eliminated useless declaration of crc_reflect, when not used
 	* pycrc.py: Corrected typos in the documentation
 

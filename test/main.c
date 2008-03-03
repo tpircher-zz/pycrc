@@ -138,7 +138,7 @@ int get_config(int argc, char *argv[], crc_cfg_t *cfg)
                 verbose = true;
                 break;
             case 't':
-                // ignore --table_idx_with option
+                // ignore --table_idx_width option
                 break;
             case '?':
                 return -1;
@@ -187,7 +187,7 @@ crc_t crc_verify(const crc_cfg_t *cfg, crc_t crc_pre_final, crc_t crc)
     }
     // no crc_finalize, because if the CRC calculation is correct, result == 0.
     // A crc_finalize would XOR-in again some ones into the solution.
-    // In theory the finalize function of the bit_by_bit algorithm
+    // In theory the finalize function of the bit-by-bit algorithm
     // would also loop over cfg->width zero bits, but since
     // a) result == 0, and
     // b) input data == 0

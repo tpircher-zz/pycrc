@@ -3,7 +3,7 @@ XSLTPARAM		= --nonet --novalid
 HTML_STYLESHEET	= /usr/share/xml/docbook/stylesheet/nwalsh/xhtml/docbook.xsl
 MAN_STYLESHEET	= /usr/share/xml/docbook/stylesheet/nwalsh/manpages/docbook.xsl
 
-TARGETS		= pycrc.html pycrc.1 faq.html faq.txt
+TARGETS		= pycrc.html pycrc.1
 
 all: $(TARGETS)
 

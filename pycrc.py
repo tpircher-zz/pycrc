@@ -3,7 +3,7 @@
 
 #  pycrc -- parametrisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2007  Thomas Pircher  <tehpeh@gmx.net>
+#  Copyright (c) 2006-2008  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal
@@ -78,7 +78,10 @@ def check_string(opt):
     if opt.Algorithm == 0:
         opt.Algorithm = opt.Algo_Bit_by_Bit | opt.Algo_Bit_by_Bit_Fast | opt.Algo_Table_Driven
 
-    alg = Crc(opt)
+    alg = Crc(width = opt.Width, poly = opt.Poly,
+        reflect_in = opt.ReflectIn, xor_in = opt.XorIn,
+        reflect_out = opt.ReflectOut, xor_out = opt.XorOut,
+        table_idx_width = opt.TableIdxWidth)
     crc = this_crc = None
     if opt.Algorithm & opt.Algo_Bit_by_Bit:
         this_crc = alg.bit_by_bit(opt.CheckString)
@@ -131,7 +134,10 @@ def check_file(opt):
     if opt.UndefinedCrcParameters:
         sys.stderr.write("Error: undefined parameters\n")
         sys.exit(1)
-    alg = Crc(opt)
+    alg = Crc(width = opt.Width, poly = opt.Poly,
+        reflect_in = opt.ReflectIn, xor_in = opt.XorIn,
+        reflect_out = opt.ReflectOut, xor_out = opt.XorOut,
+        table_idx_width = opt.TableIdxWidth)
 
     try:
         file = open(opt.CheckFile, 'rb')
@@ -168,7 +174,7 @@ def main():
     """
     Main function
     """
-    opt = Options("0.6.4")
+    opt = Options()
     opt.parse(sys.argv)
     if opt.Verbose:
         print print_parameters(opt)

@@ -2,7 +2,7 @@
 
 #  pycrc -- parametrisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2007  Thomas Pircher  <tehpeh@gmx.net>
+#  Copyright (c) 2006-2008  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal
@@ -35,17 +35,10 @@ Examples
 This is an example use of the different algorithms:
 
 >>> from crc_algorithms import Crc
->>> 
->>> class Options(object):
->>>     Width           = 16
->>>     Poly            = 0x8005
->>>     ReflectIn       = True
->>>     XorIn           = 0x0000
->>>     ReflectOut      = True
->>>     XorOut          = 0x0000
->>> 
->>> opt = Options()
->>> crc = Crc(opt)
+>>>
+>>> crc = Crc(width = 16, poly = 0x8005,
+...           reflect_in = True, xor_in = 0x0000,
+...           reflect_out = True, xor_out = 0x0000)
 >>> print "0x%x" % crc.bit_by_bit("123456789")
 >>> print "0x%x" % crc.bit_by_bit_fast("123456789")
 >>> print "0x%x" % crc.table_driven("123456789")
@@ -62,29 +55,30 @@ class Crc(object):
 
     # constructor
     ###############################################################################
-    def __init__(self, opt):
+    def __init__(self, width, poly, reflect_in, xor_in, reflect_out, xor_out, table_idx_width = None):
         """The Crc constructor.
 
-        The opt parameter is an object containing the following members:
-            Width
-            Poly
-            ReflectIn
-            XorIn
-            ReflectOut
-            XorOut
+        The parameters are as follows:
+            width
+            poly
+            reflect_in
+            xor_in
+            reflect_out
+            xor_out
         """
-        self.Width          = opt.Width
-        self.Poly           = opt.Poly
-        self.ReflectIn      = opt.ReflectIn
-        self.XorIn          = opt.XorIn
-        self.ReflectOut     = opt.ReflectOut
-        self.XorOut         = opt.XorOut
+        self.Width          = width
+        self.Poly           = poly
+        self.ReflectIn      = reflect_in
+        self.XorIn          = xor_in
+        self.ReflectOut     = reflect_out
+        self.XorOut         = xor_out
+        self.TableIdxWidth  = table_idx_width
 
-        self.MSB_Mask = 0x1 << (opt.Width - 1)
-        self.Mask = ((opt.MSB_Mask - 1) << 1) | 1
-        if opt.TableIdxWidth != None:
-            self.TableIdxWidth = opt.TableIdxWidth
-            self.TableWidth = 1 << opt.TableIdxWidth
+        self.MSB_Mask = 0x1 << (self.Width - 1)
+        self.Mask = ((self.MSB_Mask - 1) << 1) | 1
+        if self.TableIdxWidth != None:
+            self.TableIdxWidth = self.TableIdxWidth
+            self.TableWidth = 1 << self.TableIdxWidth
         else:
             self.TableIdxWidth = 8
             self.TableWidth = 1 << self.TableIdxWidth
@@ -104,7 +98,7 @@ class Crc(object):
     ###############################################################################
     def __handle_bit(self, register, new_bit):
         """
-        This function is part of the bit_by_bit algorithm.
+        This function is part of the bit-by-bit algorithm.
         It function takes one bit from the augmented message as argument and returns the new crc value
         """
         register_msb = register & self.MSB_Mask
@@ -150,8 +144,8 @@ class Crc(object):
     ###############################################################################
     def bit_by_bit_fast(self, str):
         """
-        This is a slightly modified version of the bit_by_bit algorithm: it does not need to loop over the augmented bit,
-        i.e. the Width 0-bits wich are appended to the input message in the bit_by_bit algorithm.
+        This is a slightly modified version of the bit-by-bit algorithm: it does not need to loop over the augmented bit,
+        i.e. the Width 0-bits wich are appended to the input message in the bit-by-bit algorithm.
         """
         register = self.XorIn
 

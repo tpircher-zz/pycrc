@@ -1,7 +1,7 @@
 This directory contains the pycrc general purpose CRC utility and C source file
 generator. See http://www.tty1.net/pycrc/ for more details.
 
-See the file doc/FAQ for frequently asked questions.
+See the files doc/faq.html or doc/faq.html for frequently asked questions.
 
 
 Installation
@@ -24,7 +24,7 @@ https://lists.sourceforge.net/lists/listinfo/pycrc-users
 
 If you have found a bug in pycrc, please take the time and file it to the issue
 tracker at https://sourceforge.net/tracker/?group_id=186891
-Thank you!
+Thanks for your collaboration.
 
 
 Copyright of the generated source code

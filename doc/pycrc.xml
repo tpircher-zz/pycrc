@@ -2,12 +2,12 @@
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
                     "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
 <!ENTITY program_name       "pycrc">
-<!ENTITY program_version    "0.6">
+<!ENTITY program_version    "0.6.5">
 <!ENTITY author_firstname   "Thomas">
 <!ENTITY author_surname     "Pircher">
 <!ENTITY author_email       "tehpeh@gmx.net">
 <!ENTITY author             "&author_firstname; &author_surname;">
-<!ENTITY date               "2007-05-12">
+<!ENTITY date               "2008-03-02">
 <!ENTITY bit-by-bit         "bit-by-bit">
 <!ENTITY bit-by-bit-fast    "bit-by-bit-fast">
 <!ENTITY table-driven       "table-driven">
@@ -193,10 +193,12 @@
             <listitem>
                 <para>choose a parameter set from {<replaceable>crc-5</replaceable>, 
                     <replaceable>crc-8</replaceable>, 
+                    <replaceable>dallas-1-wire</replaceable>, 
                     <replaceable>crc-15</replaceable>,
                     <replaceable>crc-16-usb</replaceable>,
                     <replaceable>crc-16</replaceable>, 
                     <replaceable>ccitt</replaceable>, 
+                    <replaceable>r-crc-16</replaceable>, 
                     <replaceable>kermit</replaceable>, 
                     <replaceable>x-25</replaceable>, 
                     <replaceable>xmodem</replaceable>, 
@@ -273,6 +275,22 @@
             </term>
             <listitem>
                 <para>when generating source code, use <replaceable>STRING</replaceable> as prefix to the generated symbols</para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
+                <option>--crc-type=</option><replaceable>STRING</replaceable>
+            </term>
+            <listitem>
+                <para>when generating source code, use <replaceable>STRING</replaceable> as crc_t type</para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
+                <option>--include-file=</option><replaceable>FILE</replaceable>
+            </term>
+            <listitem>
+                <para>when generating source code, include also <replaceable>FILE</replaceable> as header file</para>
             </listitem>
         </varlistentry>
         <varlistentry>
@@ -380,7 +398,8 @@
 
     <refsect1><title>Code generation</title>
         <para>
-        The Code generator outputs strict ISO C99 code. For every chosen parameter set, at least three functions are defined:
+        In the default configuration, the generated code is strict ISO C99 code.
+        A minimal set of three functions are defined for each algorithm:
         <function>crc_init()</function>, <function>crc_update()</function> and <function>crc_finalize()</function>.
         According to the number of parameters given to &program_name;, a different interface definition is generated.
         Fully parametrised models have a simpler API, while the generated code for runtime-specified implementations adds a 
@@ -497,6 +516,11 @@ typedef struct {
                         <para>
                          The table index width of 4 bits ensures a moderate memory consumption. In fact, the resulting table is 
                          <code>16 * sizeof(crc_t)</code> bytes big.
+                        A variant of the last generated output is the <replaceable>c-main</replaceable> target:
+                        a simple <replaceable>main()</replaceable> function is generated in addition to the crc routines:
+                        </para>
+                        <para>
+                        <userinput>pycrc.py --model crc-16 --algorithm table-driven --table-idx-width 4 --generate c-main -o crc.c</userinput>
                         </para>
                     </glossdef>
                 </glossentry>

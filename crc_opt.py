@@ -2,7 +2,7 @@
 
 #  pycrc -- parametrisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2007  Thomas Pircher  <tehpeh@gmx.net>
+#  Copyright (c) 2006-2008  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@ use as follows:
 
    from crc_opt import Options
 
-   opt = Options("0.6")
+   opt = Options()
    opt.parse(sys.argv)
 
 This file is part of pycrc.
@@ -39,182 +39,8 @@ from optparse import OptionParser, Option, OptionValueError
 from copy import copy
 import string
 import sys
+from crc_models import CrcModels
 
-
-# function check_hex
-###############################################################################
-def check_hex(option, opt, value):
-    """
-    Checks if a value is given in a decimal integer of hexadecimal reppresentation.
-    Returns the converted value or rises an exception on error.
-    """
-    try:
-        if value.lower().startswith("0x"):
-            return string.atoi(value, 16)
-        else:
-            return string.atoi(value)
-    except ValueError:
-        raise OptionValueError("option %s: invalid integer or hexadecimal value: %r" % (opt, value))
-
-# function check_bool
-###############################################################################
-def check_bool(option, opt, value):
-    """
-    Checks if a value is given as a boolean value (either 0 or 1 or "true" or "false")
-    Returns the converted value or rises an exception on error.
-    """
-    if value.isdigit():
-        return string.atoi(value, 10) != 0
-    elif value.lower() == "false":
-        return False
-    elif value.lower() == "true":
-        return True
-    else:
-        raise OptionValueError("option %s: invalid boolean value: %r" % (opt, value))
-
-
-# Class MyOption
-###############################################################################
-class MyOption(Option):
-    """
-    New option parsing class extends the Option class
-    """
-    TYPES = Option.TYPES + ("hex", "bool")
-    TYPE_CHECKER = copy(Option.TYPE_CHECKER)
-    TYPE_CHECKER["hex"] = check_hex
-    TYPE_CHECKER["bool"] = check_bool
-
-
-# function model_cb
-###############################################################################
-def model_cb(option, opt_str, value, parser):
-    """
-    This function sets up the single parameters if the 'model' option has been selected
-    by the user.
-    """
-    mod = value.lower();
-    if mod == "crc-5":
-        setattr(parser.values, "width",         5)
-        setattr(parser.values, "poly",          0x05L)
-        setattr(parser.values, "reflect_in",    True)
-        setattr(parser.values, "xor_in",        0x1fL)
-        setattr(parser.values, "reflect_out",   True)
-        setattr(parser.values, "xor_out",       0x1fL)
-    elif   mod == "crc-8":
-        setattr(parser.values, "width",         8)
-        setattr(parser.values, "poly",          0x07L)
-        setattr(parser.values, "reflect_in",    False)
-        setattr(parser.values, "xor_in",        0x0L)
-        setattr(parser.values, "reflect_out",   False)
-        setattr(parser.values, "xor_out",       0x0L)
-    elif mod == "crc-15":
-        setattr(parser.values, "width",         15)
-        setattr(parser.values, "poly",          0x4599L)
-        setattr(parser.values, "reflect_in",    False)
-        setattr(parser.values, "xor_in",        0x0L)
-        setattr(parser.values, "reflect_out",   False)
-        setattr(parser.values, "xor_out",       0x0L)
-    elif mod == "crc-16":
-        setattr(parser.values, "width",         16)
-        setattr(parser.values, "poly",          0x8005L)
-        setattr(parser.values, "reflect_in",    True)
-        setattr(parser.values, "xor_in",        0x0L)
-        setattr(parser.values, "reflect_out",   True)
-        setattr(parser.values, "xor_out",       0x0L)
-    elif mod == "crc-16-usb":
-        setattr(parser.values, "width",         16)
-        setattr(parser.values, "poly",          0x8005L)
-        setattr(parser.values, "reflect_in",    True)
-        setattr(parser.values, "xor_in",        0xffffL)
-        setattr(parser.values, "reflect_out",   True)
-        setattr(parser.values, "xor_out",       0xffffL)
-    elif mod == "ccitt":
-        setattr(parser.values, "width",         16)
-        setattr(parser.values, "poly",          0x1021L)
-        setattr(parser.values, "reflect_in",    False)
-        setattr(parser.values, "xor_in",        0xffffL)
-        setattr(parser.values, "reflect_out",   False)
-        setattr(parser.values, "xor_out",       0x0L)
-    elif mod == "kermit":
-        setattr(parser.values, "width",         16)
-        setattr(parser.values, "poly",          0x1021L)
-        setattr(parser.values, "reflect_in",    True)
-        setattr(parser.values, "xor_in",        0x0L)
-        setattr(parser.values, "reflect_out",   True)
-        setattr(parser.values, "xor_out",       0x0L)
-    elif mod == "x-25":
-        setattr(parser.values, "width",         16)
-        setattr(parser.values, "poly",          0x1021L)
-        setattr(parser.values, "reflect_in",    True)
-        setattr(parser.values, "xor_in",        0xffffL)
-        setattr(parser.values, "reflect_out",   True)
-        setattr(parser.values, "xor_out",       0xffffL)
-    elif mod == "xmodem":
-        setattr(parser.values, "width",         16)
-        setattr(parser.values, "poly",          0x8408L)
-        setattr(parser.values, "reflect_in",    True)
-        setattr(parser.values, "xor_in",        0x0L)
-        setattr(parser.values, "reflect_out",   True)
-        setattr(parser.values, "xor_out",       0x0L)
-    elif mod == "zmodem":
-        setattr(parser.values, "width",         16)
-        setattr(parser.values, "poly",          0x1021L)
-        setattr(parser.values, "reflect_in",    False)
-        setattr(parser.values, "xor_in",        0x0L)
-        setattr(parser.values, "reflect_out",   False)
-        setattr(parser.values, "xor_out",       0x0L)
-    elif mod == "crc-24":
-        setattr(parser.values, "width",         24)
-        setattr(parser.values, "poly",          0x864cfbL)
-        setattr(parser.values, "reflect_in",    False)
-        setattr(parser.values, "xor_in",        0xb704ceL)
-        setattr(parser.values, "reflect_out",   False)
-        setattr(parser.values, "xor_out",       0x0L)
-    elif mod == "crc-32":
-        setattr(parser.values, "width",         32)
-        setattr(parser.values, "poly",          0x4c11db7L)
-        setattr(parser.values, "reflect_in",    True)
-        setattr(parser.values, "xor_in",        0xffffffffL)
-        setattr(parser.values, "reflect_out",   True)
-        setattr(parser.values, "xor_out",       0xffffffffL)
-    elif mod == "crc-32c":
-        setattr(parser.values, "width",         32)
-        setattr(parser.values, "poly",          0x1edc6f41L)
-        setattr(parser.values, "reflect_in",    True)
-        setattr(parser.values, "xor_in",        0xffffffffL)
-        setattr(parser.values, "reflect_out",   True)
-        setattr(parser.values, "xor_out",       0xffffffffL)
-    elif mod == "posix":
-        setattr(parser.values, "width",         32)
-        setattr(parser.values, "poly",          0x4c11db7L)
-        setattr(parser.values, "reflect_in",    False)
-        setattr(parser.values, "xor_in",        0x0L)
-        setattr(parser.values, "reflect_out",   False)
-        setattr(parser.values, "xor_out",       0xffffffffL)
-    elif mod == "jam":
-        setattr(parser.values, "width",         32)
-        setattr(parser.values, "poly",          0x4c11db7L)
-        setattr(parser.values, "reflect_in",    True)
-        setattr(parser.values, "xor_in",        0xffffffffL)
-        setattr(parser.values, "reflect_out",   True)
-        setattr(parser.values, "xor_out",       0x0L)
-    elif mod == "xfer":
-        setattr(parser.values, "width",         32)
-        setattr(parser.values, "poly",          0x000000afL)
-        setattr(parser.values, "reflect_in",    False)
-        setattr(parser.values, "xor_in",        0x0L)
-        setattr(parser.values, "reflect_out",   False)
-        setattr(parser.values, "xor_out",       0x0L)
-    elif mod == "crc-64":
-        setattr(parser.values, "width",         64)
-        setattr(parser.values, "poly",          0x000000000000001bL)
-        setattr(parser.values, "reflect_in",    True)
-        setattr(parser.values, "xor_in",        0x0L)
-        setattr(parser.values, "reflect_out",   True)
-        setattr(parser.values, "xor_out",       0x0L)
-    else:
-        raise OptionValueError("Error: unsupported model %s" % (value))
-        sys.exit(1)
 
 # Class Options
 ###############################################################################
@@ -222,6 +48,14 @@ class Options(object):
     """
     The options parsing and validationg class
     """
+
+    """
+    Program details
+    """
+    ProgramName    = "pycrc"
+    Version        = "0.6.5"
+    VersionStr     = "%s v%s" % (ProgramName, Version)
+    WebAddress     = "http://www.tty1.net/pycrc/"
 
     """
     Bitmap of the algorithms
@@ -233,11 +67,7 @@ class Options(object):
 
     # Class constructor
     ###############################################################################
-    def __init__(self, version):
-        self.ProgramName    = "pycrc"
-        self.Version        = version
-        self.VersionStr     = "%s v%s" % (self.ProgramName, self.Version)
-        self.WebAddress     = "http://www.tty1.net/pycrc/"
+    def __init__(self):
         self.Width          = None
         self.Poly           = None
         self.ReflectIn      = None
@@ -251,6 +81,8 @@ class Options(object):
 
         self.Algorithm      = self.Algo_None
         self.SymbolPrefix   = "crc_"
+        self.CrcType        = None
+        self.IncludeFile    = None
         self.OutputFile     = None
         self.Action         = "check_string"
         self.CStd           = None
@@ -277,6 +109,8 @@ The model can be defined by the --model switch or by specifying each of the
 following parameters:
     --width --poly --reflect-in --xor-in --reflect-out --xor-out"""
 
+        models = CrcModels()
+        model_list = ", ".join(models.getList())
         parser = OptionParser(option_class=MyOption, usage=usage, version=self.VersionStr)
         parser.add_option("-v", "--verbose",
                         action="store_true", dest="verbose", default=False,
@@ -297,8 +131,8 @@ following parameters:
                         action="store", type="string", dest="algorithm", default="all",
                         help="choose an algorithm from {bit-by-bit, bit-by-bit-fast, table-driven, all}", metavar="ALGO")
         parser.add_option("--model",
-                        action="callback", callback=model_cb, type="string", dest="model", default=None,
-                        help="choose a parameter set from {crc-5, crc-8, crc-15, crc-16, crc-16-usb, ccitt, kermit, x-25, xmodem, zmodem, crc-24, crc-32, crc-32c, posix, jam, xfer, crc-64}", metavar="MODEL")
+                        action="callback", callback=self.model_cb, type="string", dest="model", default=None,
+                        help="choose a parameter set from {%s}" % model_list, metavar="MODEL")
         parser.add_option("--width",
                         action="store", type="hex", dest="width",
                         help="use WIDTH bits in the polynom", metavar="WIDTH")
@@ -323,6 +157,12 @@ following parameters:
         parser.add_option("--symbol-prefix",
                         action="store", type="string", dest="symbol_prefix",
                         help="when generating source code, use STRING as prefix to the generated symbols", metavar="STRING")
+        parser.add_option("--crc-type",
+                        action="store", type="string", dest="crc_type",
+                        help="when generating source code, use STRING as crc_t type", metavar="STRING")
+        parser.add_option("--include-file",
+                        action="store", type="string", dest="include_file",
+                        help="when generating source code, use FILE as additional include file", metavar="FILE")
         parser.add_option("-o", "--output",
                         action="store", type="string", dest="output_file",
                         help="write the generated code to file instead to stdout", metavar="FILE")
@@ -426,6 +266,10 @@ following parameters:
                 sys.exit(1)
         if options.symbol_prefix != None:
             self.SymbolPrefix = options.symbol_prefix
+        if options.include_file != None:
+            self.IncludeFile = options.include_file
+        if options.crc_type != None:
+            self.CrcType = options.crc_type
         if options.output_file != None:
             self.OutputFile = options.output_file
         op_count = 0
@@ -462,4 +306,70 @@ following parameters:
             sys.stderr.write("Error: undefined parameters: Add %s or use --model\n" % ", ".join(undefined_params))
             sys.exit(1)
         self.Verbose            = options.verbose
+
+
+    # function model_cb
+    ##############################################################################
+    def model_cb(self, option, opt_str, value, parser):
+        """
+        This function sets up the single parameters if the 'model' option has been selected
+        by the user.
+        """
+        str = value.lower();
+        models = CrcModels();
+        model = models.getParams(str)
+        if models != None:
+            setattr(parser.values, 'width',         model['width'])
+            setattr(parser.values, 'poly',          model['poly'])
+            setattr(parser.values, 'reflect_in',    model['reflect_in'])
+            setattr(parser.values, 'xor_in',        model['xor_in'])
+            setattr(parser.values, 'reflect_out',   model['reflect_out'])
+            setattr(parser.values, 'xor_out',       model['xor_out'])
+        else:
+            raise OptionValueError("Error: unsupported model %s" % (value))
+            sys.exit(1)
+
+
+# function check_hex
+###############################################################################
+def check_hex(option, opt, value):
+    """
+    Checks if a value is given in a decimal integer of hexadecimal reppresentation.
+    Returns the converted value or rises an exception on error.
+    """
+    try:
+        if value.lower().startswith("0x"):
+            return string.atoi(value, 16)
+        else:
+            return string.atoi(value)
+    except ValueError:
+        raise OptionValueError("option %s: invalid integer or hexadecimal value: %r" % (opt, value))
+
+# function check_bool
+###############################################################################
+def check_bool(option, opt, value):
+    """
+    Checks if a value is given as a boolean value (either 0 or 1 or "true" or "false")
+    Returns the converted value or rises an exception on error.
+    """
+    if value.isdigit():
+        return string.atoi(value, 10) != 0
+    elif value.lower() == "false":
+        return False
+    elif value.lower() == "true":
+        return True
+    else:
+        raise OptionValueError("option %s: invalid boolean value: %r" % (opt, value))
+
+
+# Class MyOption
+###############################################################################
+class MyOption(Option):
+    """
+    New option parsing class extends the Option class
+    """
+    TYPES = Option.TYPES + ("hex", "bool")
+    TYPE_CHECKER = copy(Option.TYPE_CHECKER)
+    TYPE_CHECKER["hex"] = check_hex
+    TYPE_CHECKER["bool"] = check_bool
 

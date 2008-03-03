@@ -162,6 +162,15 @@ teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
 testbin "$opt" "$res"
 
+#DALLAS-1-WIRE
+res="0xa1"
+cmd="$PYCRC --model dallas-1-wire"
+opt="--width 8 --poly 0x31 --reflect-in 1 --xor-in 0 --reflect-out 1 --xor-out 0"
+teststr "$cmd" "$res"
+teststr "$PYCRC $opt" "$res"
+testfil "$cmd" "$res"
+testbin "$opt" "$res"
+
 #CRC-15
 res="0x59e"
 cmd="$PYCRC --model crc-15"
@@ -193,6 +202,15 @@ testbin "$opt" "$res"
 res="0x29b1"
 cmd="$PYCRC --model ccitt"
 opt="--width 16 --poly 0x1021 --reflect-in 0 --xor-in 0xffff --reflect-out 0 --xor-out 0x0"
+teststr "$cmd" "$res"
+teststr "$PYCRC $opt" "$res"
+testfil "$cmd" "$res"
+testbin "$opt" "$res"
+
+#R-CRC-16/DECT packets A-field according to ETSI EN 300 175-3 v2.1.1
+res="0x007e"
+cmd="$PYCRC --model r-crc-16"
+opt="--width 16 --poly 0x0589 --reflect-in 0 --xor-in 0x0 --reflect-out 0 --xor-out 0x0001"
 teststr "$cmd" "$res"
 teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"

@@ -2,7 +2,7 @@
 
 #  pycrc -- parametrisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2007  Thomas Pircher  <tehpeh@gmx.net>
+#  Copyright (c) 2006-2008  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal
@@ -106,7 +106,9 @@ class SymbolTable:
         self.table["c_false"] = "{%if $c_std == C89%}{:0:}{%else%}{:false:}"
 
         self.table["underlying_crc_t"] = self.__get_underlying_crc_t()
+        self.table["include_file"] = self.__get_include_file()
 
+        self.table["crc_prefix"] = self.opt.SymbolPrefix
         self.table["crc_t"] = self.opt.SymbolPrefix + "t"
         self.table["cfg_t"] = self.opt.SymbolPrefix + "cfg_t"
         self.table["crc_reflect_function"] = self.opt.SymbolPrefix + "reflect"
@@ -221,14 +223,21 @@ crc ^ {%crc_xor_out%}\
 #ifndef {%header_protection%}
 #define {%header_protection%}
 
+{%if $include_file != Undefined%}{:
+#include {%include_file%}
+:}
 #include <stdint.h>
 #include <stdlib.h>
 {%if $undefined_parameters == True and $c_std != C89%}{:
 #include <stdbool.h>
 :}
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
- * \\brief   The definition of the used algorithm.
+ * The definition of the used algorithm.
  *****************************************************************************/
 {%if $crc_algorithm == "bit-by-bit"%}{:
 #define CRC_ALGO_BIT_BY_BIT 1
@@ -239,7 +248,7 @@ crc ^ {%crc_xor_out%}\
 :}
 
 /**
- * \\brief   The type of the CRC values.
+ * The type of the CRC values.
  *
  * This type must be big enough to contain at least {%cfg_width%} bits.
  *****************************************************************************/
@@ -247,7 +256,7 @@ typedef {%underlying_crc_t%} {%crc_t%};
 
 {%if $undefined_parameters == True%}{:
 /**
- * \\brief   The configuration type of the CRC algorithm.
+ * The configuration type of the CRC algorithm.
  *****************************************************************************/
 typedef struct {
 {%if $crc_width == Undefined%}{:
@@ -318,6 +327,11 @@ static inline {%crc_finalize_function_def%}{%%}
 {%crc_finalize_function_def%};
 :}
 
+
+#ifdef __cplusplus
+}           /* closing brace for extern "C" */
+#endif
+
 #endif      /* {%header_protection%} */
 """
 
@@ -343,7 +357,8 @@ static inline {%crc_finalize_function_def%}{%%}
         elif id == "crc_reflect_doc":
             return  """\
 /**
- * \\brief      Reflect all bits of a \\a data word of \\a data_len bytes.
+ * Reflect all bits of a \\a data word of \\a data_len bytes.
+ *
  * \\param data         The data word to be reflected.
  * \\param data_len     The width of \\a data expressed in number of bits.
  * \\return     The reflected data.
@@ -382,7 +397,8 @@ long {%crc_reflect_function%}(long data, size_t data_len)\
         elif id == "crc_table_gen_doc":
             return  """\
 /**
- * \\brief      Populate the private static crc table.
+ * Populate the private static crc table.
+ *
  * \\param cfg  A pointer to a initialised {%cfg_t%} structure.
  * \\return     void
  *****************************************************************************/\
@@ -396,7 +412,8 @@ void {%crc_table_gen_function%}(const {%cfg_t%} *cfg)\
         elif id == "crc_init_doc":
             return  """\
 /**
- * \\brief      Calculate the initial crc value.
+ * Calculate the initial crc value.
+ *
 {%if $use_cfg_t == True%}{:
  * \\param cfg  A pointer to a initialised {%cfg_t%} structure.
 :}
@@ -416,7 +433,8 @@ void {%crc_table_gen_function%}(const {%cfg_t%} *cfg)\
         elif id == "crc_update_doc":
             return  """\
 /**
- * \\brief          Update the crc value with new data.
+ * Update the crc value with new data.
+ *
  * \\param crc      The current crc value.
 {%if $use_cfg_t == True%}{:
  * \\param cfg      A pointer to a initialised {%cfg_t%} structure.
@@ -439,7 +457,8 @@ void {%crc_table_gen_function%}(const {%cfg_t%} *cfg)\
         elif id == "crc_finalize_doc":
             return  """\
 /**
- * \\brief      Calculate the final crc value.
+ * Calculate the final crc value.
+ *
 {%if $use_cfg_t == True%}{:
  * \\param cfg  A pointer to a initialised {%cfg_t%} structure.
 :}
@@ -460,6 +479,9 @@ void {%crc_table_gen_function%}(const {%cfg_t%} *cfg)\
         elif id == "c_template":
             return  """\
 {%source_header%}
+{%if $include_file != Undefined%}{:
+#include {%include_file%}
+:}
 #include "{%header_filename%}"
 #include <stdint.h>
 #include <stdlib.h>
@@ -612,7 +634,7 @@ static const {%crc_t%} crc_table[{%crc_table_width%}] = {
         c = *data++;
 :}
 {%if $crc_reflect_in == True%}{:
-        for (i = 0x01; i <= 0x80; i <<= 1) {
+        for (i = 0x01; i & 0xff; i <<= 1) {
 :}{%else%}{:
         for (i = 0x80; i > 0; i >>= 1) {
 :}
@@ -752,7 +774,7 @@ static const {%crc_t%} crc_table[{%crc_table_width%}] = {
     if ({%if $crc_reflect_in == True%}{:!:}cfg->reflect_out)
 :}{%elif $crc_reflect_in == Undefined%}{:
     if ({%if $crc_reflect_out == True%}{:!:}cfg->reflect_in)
-:} {
+:}    {
         crc = {%crc_reflect_function%}(crc, {%cfg_width%});
     }
 :}{%elif $crc_reflect_in != $crc_reflect_out%}{:
@@ -765,6 +787,9 @@ static const {%crc_t%} crc_table[{%crc_table_width%}] = {
 
         elif id == "main_template":
             return  """\
+{%if $include_file != Undefined%}{:
+#include {%include_file%}
+:}
 #include <stdio.h>
 {%if $undefined_parameters == True%}{:
 #include <getopt.h>
@@ -801,7 +826,8 @@ void print_params({%if $undefined_parameters == True%}{:const {%cfg_t%} *cfg:}{%
 }
 
 /**
- * \\brief      C main function.
+ * C main function.
+ *
  * \\return     0 on success, != 0 on error.
  *****************************************************************************/
 int main({%if $undefined_parameters == True%}{:int argc, char *argv[]:}{%else%}{:void:})
@@ -992,7 +1018,7 @@ int get_config(int argc, char *argv[], {%cfg_t%} *cfg)
                 verbose = {%c_true%};
                 break;
             case 't':
-                /* ignore --table_idx_with option */
+                /* ignore --table_idx_width option */
                 break;
             case '?':
                 return -1;
@@ -1087,6 +1113,8 @@ int get_config(int argc, char *argv[], {%cfg_t%} *cfg)
         """
         Return the C type of the crc_t typedef
         """
+        if self.opt.CrcType != None:
+            return self.opt.CrcType
         if self.opt.Width == None:
             return "unsigned long"
         if self.opt.CStd == "C89":
@@ -1104,6 +1132,19 @@ int get_config(int argc, char *argv[], {%cfg_t%} *cfg)
             elif self.opt.Width <= 32:
                 return "uint32_t"
         return "unsigned long"
+
+    # __get_include_file
+    ###############################################################################
+    def __get_include_file(self):
+        """
+        Return an addittional include instruction if specified
+        """
+        if self.opt.IncludeFile == None:
+            return None
+        if self.opt.IncludeFile[0] == '"' or self.opt.IncludeFile[0] == '<':
+            return self.opt.IncludeFile
+        return '"%s"' % self.opt.IncludeFile
+
 
     # __get_init_value
     ###############################################################################
@@ -1134,7 +1175,10 @@ int get_config(int argc, char *argv[], {%cfg_t%} *cfg)
             if self.opt.ReflectIn == None or self.opt.XorIn == None or self.opt.Width == None:
                 return None
             if self.opt.ReflectIn:
-                crc = Crc(self.opt)
+                crc = Crc(width = self.opt.Width, poly = self.opt.Poly,
+                        reflect_in = self.opt.ReflectIn, xor_in = self.opt.XorIn,
+                        reflect_out = self.opt.ReflectOut, xor_out = self.opt.XorOut,
+                        table_idx_width = self.opt.TableIdxWidth)
                 init = crc.reflect(self.opt.XorIn, self.opt.Width)
             else:
                 init = self.opt.XorIn
@@ -1152,7 +1196,10 @@ int get_config(int argc, char *argv[], {%cfg_t%} *cfg)
             return "0"
         if self.opt.UndefinedCrcParameters:
             return "0"
-        crc = Crc(self.opt)
+        crc = Crc(width = self.opt.Width, poly = self.opt.Poly,
+                reflect_in = self.opt.ReflectIn, xor_in = self.opt.XorIn,
+                reflect_out = self.opt.ReflectOut, xor_out = self.opt.XorOut,
+                table_idx_width = self.opt.TableIdxWidth)
         tbl = crc.gen_table()
         if self.opt.Width >= 32:
             values_per_line = 4
