@@ -53,7 +53,8 @@
 
     <refsect1><title>Description</title>
         <para>
-            &program_name; provides a parametrised CRC reference implementation written in Python and a source code generator for C.
+            <ulink url="http://www.tty1.net/pycrc/">&program_name;</ulink>
+            provides a parametrised CRC reference implementation written in Python and a source code generator for C.
             Different variants of the CRC algorithm are supported and range from a fast but space-consuming implementation to slower 
             but smaller code suitable especially for embedded applications.
             The following operations are implemented:
@@ -528,17 +529,22 @@ typedef struct {
         </para>
     </refsect1>
 
+    <refsect1><title>Homepage</title>
+        <para>
+            &program_name; can be downloaded from <ulink url="http://www.tty1.net/pycrc/">http://www.tty1.net/pycrc/</ulink>.
+        </para>
+    </refsect1>
+
     <refsect1><title>Author</title>
         <para>
-            Written by &author; <email>&author_email;</email>
+            Written by &author; <email>&author_email;</email>.
         </para>
     </refsect1>
 
     <refsect1><title>Copyright</title>
         <para>
-            This work is licensed under the Creative Commons Attribution-Share Alike 2.5 License. To view a copy of this license, visit 
-            <ulink url="http://creativecommons.org/licenses/by-sa/2.5/" /> or send a letter to 
-            Creative Commons, 543 Howard Street, 5th Floor, San Francisco, California, 94105, USA.
+            This work is licensed under a 
+            <ulink url="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-Share Alike 3.0 Unported License</ulink>.
         </para>
     </refsect1>
 

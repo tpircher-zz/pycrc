@@ -817,9 +817,9 @@ void print_params({%if $undefined_parameters == True%}{:const {%cfg_t%} *cfg:}{%
     snprintf(format, sizeof(format), "%%-16s = 0x%%0%dx\\n", (unsigned int)({%cfg_width%} + 3) / 4);
     printf("%-16s = %d\\n", "width", (unsigned int){%cfg_width%});
     printf(format, "poly", (unsigned int){%cfg_poly%});
-    printf("%-16s = %s\\n", "reflect_in", {%if crc_reflect_in == Undefined%}{:{%cfg_reflect_in%} ? "true": "false":}{%else%}{:{%if crc_reflect_in == True%}{:"true":}{%else%}{:"false":}:});
+    printf("%-16s = %s\\n", "reflect_in", {%if crc_reflect_in == Undefined%}{:{%cfg_reflect_in%} ? "true": "false":}{%else%}{:{%if $crc_reflect_in == True%}{:"true":}{%else%}{:"false":}:});
     printf(format, "xor_in", {%cfg_xor_in%});
-    printf("%-16s = %s\\n", "reflect_out", {%if crc_reflect_out == Undefined%}{:{%cfg_reflect_out%} ? "true": "false":}{%else%}{:{%if crc_reflect_out == True%}{:"true":}{%else%}{:"false":}:});
+    printf("%-16s = %s\\n", "reflect_out", {%if crc_reflect_out == Undefined%}{:{%cfg_reflect_out%} ? "true": "false":}{%else%}{:{%if $crc_reflect_out == True%}{:"true":}{%else%}{:"false":}:});
     printf(format, "xor_out", (unsigned int){%cfg_xor_out%});
     printf(format, "crc_mask", (unsigned int){%cfg_mask%});
     printf(format, "msb_mask", (unsigned int){%cfg_msb_mask%});

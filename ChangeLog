@@ -1,3 +1,13 @@
+2008-06-05  Thomas Pircher   <tehpeh@gmx.net>
+
+	* crc_symtable.py: fixed a bug in the print_params function. Closes issue
+	1985197. Thanks to Artur Lipowski.
+
+2008-03-03  Thomas Pircher   <tehpeh@gmx.net>
+
+	* pycrc.xml: new license: Creative Commons Attribution-Share Alike 3.0
+	Unported License.
+
 #
 # Version 0.6.5, 2008-03-03
 #
