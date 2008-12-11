@@ -1,3 +1,18 @@
+#
+# Version 0.6.7, 2008-12-11
+#
+
+2008-12-11  Thomas Pircher   <tehpeh@gmx.net>
+
+	* all files: run Python's 2to3 script on the files.
+	* all files: check the code on a x64 platform.
+	* crc_opt.py: fixed a bug that raised an exception when an unknown model
+	was selected.
+
+#
+# Version 0.6.6, 2008-06-05
+#
+
 2008-06-05  Thomas Pircher   <tehpeh@gmx.net>
 
 	* crc_symtable.py: fixed a bug in the print_params function. Closes issue

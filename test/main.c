@@ -150,7 +150,7 @@ int get_config(int argc, char *argv[], crc_cfg_t *cfg)
                 return -1;
         }
     }
-    cfg->msb_mask = 1 << (cfg->width - 1);
+    cfg->msb_mask = 1UL << (cfg->width - 1);
     cfg->crc_mask = (cfg->msb_mask - 1) | cfg->msb_mask;
 
     cfg->poly &= cfg->crc_mask;

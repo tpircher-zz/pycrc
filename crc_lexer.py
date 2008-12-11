@@ -35,8 +35,8 @@ use as follows:
     lex.set_str(str)
 
     tok = self.lex.peek()
-    print tok
-    print self.lex.text
+    print(tok)
+    print(self.lex.text)
     self.lex.advance()
 
 This file is part of pycrc.

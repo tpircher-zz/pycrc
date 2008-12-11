@@ -480,7 +480,7 @@ typedef struct {
     crc_t xor_out;
 
     // internal parameters
-    crc_t msb_mask;             // initialise as 0x01 &lt;&lt; (cfg-&gt;width - 1)
+    crc_t msb_mask;             // initialise as 1UL &lt;&lt; (cfg-&gt;width - 1)
     crc_t crc_mask;             // initialise as (cfg-&gt;msb_mask - 1) | cfg-&gt;msb_mask
 } crc_cfg_t;
             </programlisting>

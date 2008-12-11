@@ -177,13 +177,13 @@ def main():
     opt = Options()
     opt.parse(sys.argv)
     if opt.Verbose:
-        print print_parameters(opt)
+        print(print_parameters(opt))
     if opt.Action == "check_string":
         crc = check_string(opt)
-        print "0x%x" % crc
+        print("0x%x" % crc)
     if opt.Action == "check_file":
         crc = check_file(opt)
-        print "0x%x" % crc
+        print("0x%x" % crc)
     if opt.Action == "generate_h" or opt.Action == "generate_c" or opt.Action == "generate_c-main" or opt.Action == "generate_table":
         mp = MacroParser(opt)
         if opt.Action == "generate_h":
@@ -201,7 +201,7 @@ def main():
             sys.stderr.write("Error: Failure parsing internal macro language\n")
             sys.exit(1)
         if opt.OutputFile == None:
-            print mp.out_str
+            print(mp.out_str)
         else:
             try:
                 file = open(opt.OutputFile, "w")

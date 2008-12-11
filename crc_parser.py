@@ -34,7 +34,7 @@ use as follows:
     opt.parse(sys.argv)
     mp = MacroParser(opt)
     if mp.parse(out):
-        print mp.out_str
+        print(mp.out_str)
 
 
 This file is part of pycrc.
@@ -315,7 +315,7 @@ class MacroParser(object):
             if tok == self.explex.tok_EOF:
                 return ret
             if tok != self.explex.tok_or:
-                print "expecting 'or' and not '%s'" % self.explex.text
+                print("expecting 'or' and not '%s'" % self.explex.text)
                 raise ParseError("Unexpected token")
             self.explex.advance(skip_nl = False)
 
@@ -354,7 +354,7 @@ class MacroParser(object):
             ret = self.__parse_exp_exp()
             tok = self.explex.peek()
             if tok != self.explex.tok_par_close:
-                print "missing ')' before '%s'" % self.explex.text
+                print("missing ')' before '%s'" % self.explex.text)
                 raise ParseError("missing ')' before '%s'" % self.explex.text)
             self.explex.advance(skip_nl = False)
             self.explex.peek()
@@ -364,7 +364,7 @@ class MacroParser(object):
         val1 = self.__parse_exp_terminal()
         tok = self.explex.peek()
         if tok != self.explex.tok_op:
-            print "operator expected and not '%s' before '%s'" % (self.explex.text, self.explex.str)
+            print("operator expected and not '%s' before '%s'" % (self.explex.text, self.explex.str))
             raise ParseError("operator expected and not '%s'" % self.explex.text)
         op_text = self.explex.text
         self.explex.advance(skip_nl = False)
@@ -382,7 +382,7 @@ class MacroParser(object):
                 text = val1_str
             else:
                 text = val2_str
-            print "undefined parameter '%s'" % text
+            print("undefined parameter '%s'" % text)
             raise ParseError("undefined parameter")
 
         val1_num = val2_num = None
@@ -414,7 +414,7 @@ class MacroParser(object):
         if op_text == ">":
             return val1 > val2
         else:
-            print "unknown operator '%s'" % op_text
+            print("unknown operator '%s'" % op_text)
             raise ParseError("unknown operator")
 
     # __parse_exp_terminal
@@ -435,7 +435,7 @@ class MacroParser(object):
         elif tok == self.explex.tok_str:
             ret = self.explex.text
         else:
-            print "unexpected terminal '%s' before '%s'" % (self.explex.text, self.explex.str)
+            print("unexpected terminal '%s' before '%s'" % (self.explex.text, self.explex.str))
             raise ParseError("unexpected terminal '%s'" % self.explex.text)
         self.explex.advance(skip_nl = False)
         return ret

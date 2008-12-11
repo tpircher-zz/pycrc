@@ -30,16 +30,16 @@ use as follows:
    from crc_models import CrcModels
 
    models = CrcModels()
-   print models.getList()
+   print(models.getList())
    m = models.getParams("crc-32")
    if m != None:
-       print m['width']
-       print m['poly']
-       print m['reflect_in']
-       print m['xor_in']
-       print m['reflect_out']
-       print m['xor_out']
-       print m['check']
+       print(m['width'])
+       print(m['poly'])
+       print(m['reflect_in'])
+       print(m['xor_in'])
+       print(m['reflect_out'])
+       print(m['xor_out'])
+       print(m['check'])
 
 This file is part of pycrc.
 """
@@ -60,192 +60,192 @@ class CrcModels(object):
     models.append({
         'name':         'crc-5',
         'width':         5,
-        'poly':          0x05L,
+        'poly':          0x05,
         'reflect_in':    True,
-        'xor_in':        0x1fL,
+        'xor_in':        0x1f,
         'reflect_out':   True,
-        'xor_out':       0x1fL,
-        'check':         0x19L,
+        'xor_out':       0x1f,
+        'check':         0x19,
     })
     models.append({
         'name':         'crc-8',
         'width':         8,
-        'poly':          0x07L,
+        'poly':          0x07,
         'reflect_in':    False,
-        'xor_in':        0x0L,
+        'xor_in':        0x0,
         'reflect_out':   False,
-        'xor_out':       0x0L,
-        'check':         0xf4L,
+        'xor_out':       0x0,
+        'check':         0xf4,
     })
     models.append({
         'name':         'dallas-1-wire',
         'width':         8,
-        'poly':          0x31L,
+        'poly':          0x31,
         'reflect_in':    True,
-        'xor_in':        0x0L,
+        'xor_in':        0x0,
         'reflect_out':   True,
-        'xor_out':       0x0L,
-        'check':         0xa1L,
+        'xor_out':       0x0,
+        'check':         0xa1,
     })
     models.append({
         'name':         'crc-15',
         'width':         15,
-        'poly':          0x4599L,
+        'poly':          0x4599,
         'reflect_in':    False,
-        'xor_in':        0x0L,
+        'xor_in':        0x0,
         'reflect_out':   False,
-        'xor_out':       0x0L,
-        'check':         0x59eL,
+        'xor_out':       0x0,
+        'check':         0x59e,
     })
     models.append({
         'name':         'crc-16',
         'width':         16,
-        'poly':          0x8005L,
+        'poly':          0x8005,
         'reflect_in':    True,
-        'xor_in':        0x0L,
+        'xor_in':        0x0,
         'reflect_out':   True,
-        'xor_out':       0x0L,
-        'check':         0xbb3dL,
+        'xor_out':       0x0,
+        'check':         0xbb3d,
     })
     models.append({
         'name':         'crc-16-usb',
         'width':         16,
-        'poly':          0x8005L,
+        'poly':          0x8005,
         'reflect_in':    True,
-        'xor_in':        0xffffL,
+        'xor_in':        0xffff,
         'reflect_out':   True,
-        'xor_out':       0xffffL,
-        'check':         0xb4c8L,
+        'xor_out':       0xffff,
+        'check':         0xb4c8,
     })
     models.append({
         'name':         'ccitt',
         'width':         16,
-        'poly':          0x1021L,
+        'poly':          0x1021,
         'reflect_in':    False,
-        'xor_in':        0xffffL,
+        'xor_in':        0xffff,
         'reflect_out':   False,
-        'xor_out':       0x0L,
-        'check':         0x29b1L,
+        'xor_out':       0x0,
+        'check':         0x29b1,
     })
     models.append({
         'name':          'r-crc-16',
         'width':         16,
-        'poly':          0x0589L,
+        'poly':          0x0589,
         'reflect_in':    False,
-        'xor_in':        0x0L,
+        'xor_in':        0x0,
         'reflect_out':   False,
-        'xor_out':       0x0001L,
-        'check':         0x007eL,
+        'xor_out':       0x0001,
+        'check':         0x007e,
     })
     models.append({
         'name':         'kermit',
         'width':         16,
-        'poly':          0x1021L,
+        'poly':          0x1021,
         'reflect_in':    True,
-        'xor_in':        0x0L,
+        'xor_in':        0x0,
         'reflect_out':   True,
-        'xor_out':       0x0L,
-        'check':         0x2189L,
+        'xor_out':       0x0,
+        'check':         0x2189,
     })
     models.append({
         'name':         'x-25',
         'width':         16,
-        'poly':          0x1021L,
+        'poly':          0x1021,
         'reflect_in':    True,
-        'xor_in':        0xffffL,
+        'xor_in':        0xffff,
         'reflect_out':   True,
-        'xor_out':       0xffffL,
-        'check':         0x906eL,
+        'xor_out':       0xffff,
+        'check':         0x906e,
     })
     models.append({
         'name':         'xmodem',
         'width':         16,
-        'poly':          0x8408L,
+        'poly':          0x8408,
         'reflect_in':    True,
-        'xor_in':        0x0L,
+        'xor_in':        0x0,
         'reflect_out':   True,
-        'xor_out':       0x0L,
-        'check':         0xc73L,
+        'xor_out':       0x0,
+        'check':         0xc73,
     })
     models.append({
         'name':         'zmodem',
         'width':         16,
-        'poly':          0x1021L,
+        'poly':          0x1021,
         'reflect_in':    False,
-        'xor_in':        0x0L,
+        'xor_in':        0x0,
         'reflect_out':   False,
-        'xor_out':       0x0L,
-        'check':         0x31c3L,
+        'xor_out':       0x0,
+        'check':         0x31c3,
     })
     models.append({
         'name':         'crc-24',
         'width':         24,
-        'poly':          0x864cfbL,
+        'poly':          0x864cfb,
         'reflect_in':    False,
-        'xor_in':        0xb704ceL,
+        'xor_in':        0xb704ce,
         'reflect_out':   False,
-        'xor_out':       0x0L,
-        'check':         0x21cf02L,
+        'xor_out':       0x0,
+        'check':         0x21cf02,
     })
     models.append({
         'name':         'crc-32',
         'width':         32,
-        'poly':          0x4c11db7L,
+        'poly':          0x4c11db7,
         'reflect_in':    True,
-        'xor_in':        0xffffffffL,
+        'xor_in':        0xffffffff,
         'reflect_out':   True,
-        'xor_out':       0xffffffffL,
-        'check':         0xcbf43926L,
+        'xor_out':       0xffffffff,
+        'check':         0xcbf43926,
     })
     models.append({
         'name':         'crc-32c',
         'width':         32,
-        'poly':          0x1edc6f41L,
+        'poly':          0x1edc6f41,
         'reflect_in':    True,
-        'xor_in':        0xffffffffL,
+        'xor_in':        0xffffffff,
         'reflect_out':   True,
-        'xor_out':       0xffffffffL,
-        'check':         0xe3069283L,
+        'xor_out':       0xffffffff,
+        'check':         0xe3069283,
     })
     models.append({
         'name':         'posix',
         'width':         32,
-        'poly':          0x4c11db7L,
+        'poly':          0x4c11db7,
         'reflect_in':    False,
-        'xor_in':        0x0L,
+        'xor_in':        0x0,
         'reflect_out':   False,
-        'xor_out':       0xffffffffL,
-        'check':         0x765e7680L,
+        'xor_out':       0xffffffff,
+        'check':         0x765e7680,
     })
     models.append({
         'name':         'jam',
         'width':         32,
-        'poly':          0x4c11db7L,
+        'poly':          0x4c11db7,
         'reflect_in':    True,
-        'xor_in':        0xffffffffL,
+        'xor_in':        0xffffffff,
         'reflect_out':   True,
-        'xor_out':       0x0L,
-        'check':         0x340bc6d9L,
+        'xor_out':       0x0,
+        'check':         0x340bc6d9,
     })
     models.append({
         'name':         'xfer',
         'width':         32,
-        'poly':          0x000000afL,
+        'poly':          0x000000af,
         'reflect_in':    False,
-        'xor_in':        0x0L,
+        'xor_in':        0x0,
         'reflect_out':   False,
-        'xor_out':       0x0L,
-        'check':         0xbd0be338L,
+        'xor_out':       0x0,
+        'check':         0xbd0be338,
     })
     models.append({
         'name':         'crc-64',
         'width':         64,
-        'poly':          0x000000000000001bL,
+        'poly':          0x000000000000001b,
         'reflect_in':    True,
-        'xor_in':        0x0L,
+        'xor_in':        0x0,
         'reflect_out':   True,
-        'xor_out':       0x0L,
-        'check':         0x46a5a9388a5beffeL,
+        'xor_out':       0x0,
+        'check':         0x46a5a9388a5beffe,
     })
 
 

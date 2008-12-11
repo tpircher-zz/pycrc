@@ -53,7 +53,7 @@ class Options(object):
     Program details
     """
     ProgramName    = "pycrc"
-    Version        = "0.6.6"
+    Version        = "0.6.7"
     VersionStr     = "%s v%s" % (ProgramName, Version)
     WebAddress     = "http://www.tty1.net/pycrc/"
 
@@ -318,7 +318,7 @@ following parameters:
         str = value.lower();
         models = CrcModels();
         model = models.getParams(str)
-        if models != None:
+        if model != None:
             setattr(parser.values, 'width',         model['width'])
             setattr(parser.values, 'poly',          model['poly'])
             setattr(parser.values, 'reflect_in',    model['reflect_in'])

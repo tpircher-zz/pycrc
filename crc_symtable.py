@@ -128,7 +128,7 @@ class SymbolTable:
         if id != None:
             if id == "":
                 return ""
-            if self.table.has_key(id):
+            if id in self.table:
                 return self.table[id]
             key = self.__getTerminal(id)
             if key != None:
@@ -281,7 +281,7 @@ typedef struct {
 
     /* internal parameters */
     {%crc_t%} msb_mask;         /*!< a bitmask with the Most Significant Bit set to 1
-                                 initialise as 0x01 << (width - 1) */
+                                 initialise as 1UL << (width - 1) */
     {%crc_t%} crc_mask;         /*!< a bitmask with all width bits set to 1
                                  initialise as (cfg->msb_mask - 1) | cfg->msb_mask */
 :}
@@ -1031,7 +1031,7 @@ int get_config(int argc, char *argv[], {%cfg_t%} *cfg)
         }
     }
 {%if $crc_width == Undefined%}{:
-    cfg->msb_mask = 1 << (cfg->width - 1);
+    cfg->msb_mask = 1UL << (cfg->width - 1);
     cfg->crc_mask = (cfg->msb_mask - 1) | cfg->msb_mask;
 :}
 
