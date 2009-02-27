@@ -1,4 +1,28 @@
 #
+# Version 0.7, 2009-02-27
+#
+
+2009-02-15  Thomas Pircher   <tehpeh@gmx.net>
+
+	* crc_algorithms.py: code tidy-up.
+	* crc_algorithms.py, crc_opt.py: added --direct option.
+	* crc_symtable.py: added --direct option for the generated code.
+
+2009-02-03  Thomas Pircher   <tehpeh@gmx.net>
+
+	* crc_opt.py: added --check-hexstring option. Closes issue 2545183.
+	Thanks to Arnim Littek.
+
+2009-01-31  Thomas Pircher   <tehpeh@gmx.net>
+
+	* crc_opt.py: added a check for extra arguments on the command line.
+	Closes issue 2545185. Thanks to Arnim Littek.
+
+2008-12-24  Thomas Pircher   <tehpeh@gmx.net>
+
+	* doc/pycrc.xml: Added one more example.
+
+#
 # Version 0.6.7, 2008-12-11
 #
 

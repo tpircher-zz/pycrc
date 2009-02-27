@@ -3,7 +3,7 @@
 
 #  pycrc -- parametrisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2008  Thomas Pircher  <tehpeh@gmx.net>
+#  Copyright (c) 2006-2009  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal
@@ -42,6 +42,7 @@ It supports the following CRC algorithms:
 from crc_opt import Options
 from crc_algorithms import Crc
 from crc_parser import MacroParser
+import binascii
 import sys
 
 
@@ -59,11 +60,12 @@ def print_parameters(opt):
     out += "ReflectOut   = {%crc_reflect_out%}\n"
     out += "XorOut       = {%crc_xor_out%}\n"
     out += "Algorithm    = {%crc_algorithm%}\n"
+    out += "Direct       = {%crc_direct%}\n"
 
     mp = MacroParser(opt)
-    if mp.parse(out):
-        return mp.out_str
-    return ""
+    if not mp.parse(out):
+        sys.exit(1)
+    return mp.out_str
 
 
 # function check_string
@@ -72,6 +74,7 @@ def check_string(opt):
     """
     Returns the calculated CRC sum of a string
     """
+    error = False
     if opt.UndefinedCrcParameters:
         sys.stderr.write("Error: undefined parameters\n")
         sys.exit(1)
@@ -82,27 +85,52 @@ def check_string(opt):
         reflect_in = opt.ReflectIn, xor_in = opt.XorIn,
         reflect_out = opt.ReflectOut, xor_out = opt.XorOut,
         table_idx_width = opt.TableIdxWidth)
-    crc = this_crc = None
+    crc = None
     if opt.Algorithm & opt.Algo_Bit_by_Bit:
-        this_crc = alg.bit_by_bit(opt.CheckString)
-        if crc != None and this_crc != crc:
-            sys.stderr.write("Error: different checksums: 0x%x, 0x%x\n" % (this_crc, crc))
-            sys.exit(1)
-        crc = this_crc
+        bbb_crc = alg.bit_by_bit(opt.CheckString)
+        if crc != None and bbb_crc != crc:
+            error = True;
+        crc = bbb_crc
     if opt.Algorithm & opt.Algo_Bit_by_Bit_Fast:
-        this_crc = alg.bit_by_bit_fast(opt.CheckString)
-        if crc != None and this_crc != crc:
-            sys.stderr.write("Error: different checksums: 0x%x, 0x%x\n" % (this_crc, crc))
-            sys.exit(1)
-        crc = this_crc
+        bbf_crc = alg.bit_by_bit_fast(opt.CheckString)
+        if crc != None and bbf_crc != crc:
+            error = True;
+        crc = bbf_crc
     if opt.Algorithm & opt.Algo_Table_Driven:
         opt.TableIdxWidth = 8            # FIXME cowardly refusing to use less bits for the table
-        this_crc = alg.table_driven(opt.CheckString)
-        if crc != None and this_crc != crc:
-            sys.stderr.write("Error: different checksums: 0x%x, 0x%x\n" % (this_crc, crc))
-            sys.exit(1)
-        crc = this_crc
+        tbl_crc = alg.table_driven(opt.CheckString)
+        if crc != None and tbl_crc != crc:
+            error = True;
+        crc - tbl_crc
+
+    if error:
+        sys.stderr.write("Error: different checksums:\n");
+        if opt.Algorithm & opt.Algo_Bit_by_Bit:
+            sys.stderr.write("       bit-by-bit:        0x%x\n" % bbb_crc);
+        if opt.Algorithm & opt.Algo_Bit_by_Bit_Fast:
+            sys.stderr.write("       bit-by-bit-fast:   0x%x\n" % bbf_crc);
+        if opt.Algorithm & opt.Algo_Table_Driven:
+            sys.stderr.write("       table_driven:      0x%x\n" % tbl_crc);
+        sys.exit(1)
     return crc
+
+# function check_hexstring
+###############################################################################
+def check_hexstring(opt):
+    """
+    Returns the calculated CRC sum of a string
+    """
+    if opt.UndefinedCrcParameters:
+        sys.stderr.write("Error: undefined parameters\n")
+        sys.exit(1)
+    try:
+        str = binascii.unhexlify(opt.CheckString)
+    except TypeError:
+        sys.stderr.write("Error: invalid hex string %s\n" % opt.CheckString)
+        sys.exit(1)
+
+    opt.CheckString = str
+    return check_string(opt)
 
 # function crc_file_update
 ###############################################################################
@@ -180,6 +208,9 @@ def main():
         print(print_parameters(opt))
     if opt.Action == "check_string":
         crc = check_string(opt)
+        print("0x%x" % crc)
+    if opt.Action == "check_hexstring":
+        crc = check_hexstring(opt)
         print("0x%x" % crc)
     if opt.Action == "check_file":
         crc = check_file(opt)

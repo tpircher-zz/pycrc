@@ -2,7 +2,7 @@
 
 #  pycrc -- parametrisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2008  Thomas Pircher  <tehpeh@gmx.net>
+#  Copyright (c) 2006-2009  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal
@@ -55,7 +55,7 @@ class Crc(object):
 
     # constructor
     ###############################################################################
-    def __init__(self, width, poly, reflect_in, xor_in, reflect_out, xor_out, table_idx_width = None):
+    def __init__(self, width, poly, reflect_in, xor_in, reflect_out, xor_out, direct = True, table_idx_width = None):
         """The Crc constructor.
 
         The parameters are as follows:
@@ -72,6 +72,7 @@ class Crc(object):
         self.XorIn          = xor_in
         self.ReflectOut     = reflect_out
         self.XorOut         = xor_out
+        self.Direct         = direct
         self.TableIdxWidth  = table_idx_width
 
         self.MSB_Mask = 0x1 << (self.Width - 1)
@@ -83,31 +84,55 @@ class Crc(object):
             self.TableIdxWidth = 8
             self.TableWidth = 1 << self.TableIdxWidth
 
+        if self.Direct:
+            self.DirectInit = self.XorIn
+            self.NonDirectInit = self.__get_nondirect_init(self.XorIn)
+        else:
+            self.DirectInit = self.__get_direct_init(self.XorIn)
+            self.NonDirectInit = self.XorIn
+
+
+    # function __get_direct_init
+    ###############################################################################
+    def __get_direct_init(self, init):
+        """
+        return the direct init if the non-direct algorithm has been selected.
+        """
+        crc = init
+        for i in range(self.Width):
+            bit = crc & self.MSB_Mask
+            crc <<= 1
+            if bit:
+                crc ^= self.Poly
+        return crc & self.Mask
+
+    # function __get_nondirect_init
+    ###############################################################################
+    def __get_nondirect_init(self, init):
+        """
+        return the non-direct init if the direct algorithm has been selected.
+        """
+        crc = init
+        for i in range(self.Width):
+            bit = crc & 0x01
+            if bit:
+                crc^= self.Poly
+            crc >>= 1
+            if bit:
+                crc |= self.MSB_Mask;
+        return crc & self.Mask
+
     # function reflect
     ###############################################################################
     def reflect(self, data, width):
         """
-        reflects a data word, i.e. reverts the bit order
+        reflect a data word, i.e. reverts the bit order.
         """
-        x = 0
-        for i in range(width):
-            x = x | (((data >> (width - i -1)) & 1) << i)
+        x = data & 0x01
+        for i in range(width - 1):
+            data >>= 1
+            x = (x << 1) | (data & 0x01)
         return x
-
-    # function handle_bit
-    ###############################################################################
-    def __handle_bit(self, register, new_bit):
-        """
-        This function is part of the bit-by-bit algorithm.
-        It function takes one bit from the augmented message as argument and returns the new crc value
-        """
-        register_msb = register & self.MSB_Mask
-        register = (register << 1) & self.Mask
-        if new_bit != 0:
-            register = register | 1
-        if register_msb != 0:
-            register = register ^ self.Poly
-        return register & self.Mask
 
     # function bit_by_bit
     ###############################################################################
@@ -116,55 +141,51 @@ class Crc(object):
         Classic simple and slow CRC implementation.
         This function iterates bit by bit over the augmented input message and returns the calculated CRC value at the end
         """
-        register = self.XorIn
-        for j in range(self.Width):
-            bit = register & 1
-            if bit != 0:
-                register = ((register ^ self.Poly) >> 1) | self.MSB_Mask
-            else:
-                register = register >> 1
-        register &= self.Mask
-
-        for i in range(len(str)):
-            octet = ord(str[i])
+        register = self.NonDirectInit
+        for c in str:
+            octet = ord(c)
             if self.ReflectIn:
                 octet = self.reflect(octet, 8)
-            for j in range(8):
-                new_bit = octet & (0x80 >> j)
-                register = self.__handle_bit(register, new_bit)
-        for j in range(self.Width):
-            register = self.__handle_bit(register, 0)
+            for i in range(8):
+                topbit = register & self.MSB_Mask
+                register = ((register << 1) & self.Mask) | ((octet >> 7) & 0x01)
+                octet <<= 1
+                if topbit:
+                    register ^= self.Poly
+
+        for i in range(self.Width):
+            topbit = register & self.MSB_Mask
+            register = ((register << 1) & self.Mask)
+            if topbit:
+                register ^= self.Poly
 
         if self.ReflectOut:
             register = self.reflect(register, self.Width)
-        register = register ^ self.XorOut
-        return register
+        return register ^ self.XorOut
 
     # function bit_by_bit_fast
     ###############################################################################
     def bit_by_bit_fast(self, str):
         """
-        This is a slightly modified version of the bit-by-bit algorithm: it does not need to loop over the augmented bit,
+        This is a slightly modified version of the bit-by-bit algorithm: it does not need to loop over the augmented bits,
         i.e. the Width 0-bits wich are appended to the input message in the bit-by-bit algorithm.
         """
-        register = self.XorIn
-
-        for i in range(len(str)):
-            octet = ord(str[i])
+        register = self.DirectInit
+        for c in str:
+            octet = ord(c)
             if self.ReflectIn:
                 octet = self.reflect(octet, 8)
-            for j in range(8):
+            for i in range(8):
                 bit = register & self.MSB_Mask
                 register <<= 1
-                if octet & (0x80 >> j):
+                if octet & (0x80 >> i):
                     bit ^= self.MSB_Mask
                 if bit:
                     register ^= self.Poly
             register &= self.Mask
         if self.ReflectOut:
             register = self.reflect(register, self.Width)
-        register = register ^ self.XorOut
-        return register
+        return register ^ self.XorOut
 
     # function gen_table
     ###############################################################################
@@ -198,22 +219,18 @@ class Crc(object):
         """
         tbl = self.gen_table()
 
+        register = self.DirectInit
         if not self.ReflectIn:
-            register = self.XorIn
-            for i in range(len(str)):
-                octet = ord(str[i])
-                tblidx = ((register >> (self.Width - 8)) ^ octet) & 0xff
+            for c in str:
+                tblidx = ((register >> (self.Width - 8)) ^ ord(c)) & 0xff
                 register = ((register << 8) ^ tbl[tblidx]) & self.Mask
         else:
-            register = self.reflect(self.XorIn, self.Width)
-            for i in range(len(str)):
-                octet = ord(str[i])
-                tblidx = (register ^ octet) & 0xff
+            register = self.reflect(register, self.Width)
+            for c in str:
+                tblidx = (register ^ ord(c)) & 0xff
                 register = ((register >> 8) ^ tbl[tblidx]) & self.Mask
             register = self.reflect(register, self.Width)
 
         if self.ReflectOut:
             register = self.reflect(register, self.Width)
-        register = register ^ self.XorOut
-        return register
-
+        return register ^ self.XorOut

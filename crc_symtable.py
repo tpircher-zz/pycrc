@@ -2,7 +2,7 @@
 
 #  pycrc -- parametrisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2008  Thomas Pircher  <tehpeh@gmx.net>
+#  Copyright (c) 2006-2009  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal
@@ -86,6 +86,7 @@ class SymbolTable:
         self.table["crc_table_mask"] = self.__pretty_hex(self.opt.TableWidth - 1, 8)
         self.table["crc_mask"] = self.__pretty_hex(self.opt.Mask, self.opt.Width)
         self.table["crc_msb_mask"] = self.__pretty_hex(self.opt.MSB_Mask, self.opt.Width)
+        self.table["crc_direct"] = self.__pretty_bool(self.opt.Direct)
 
         self.table["cfg_width"] = "{%if $crc_width != Undefined%}{:{%crc_width%}:}{%else%}{:cfg->width:}"
         self.table["cfg_poly"] = "{%if $crc_poly != Undefined%}{:{%crc_poly%}:}{%else%}{:cfg->poly:}"
@@ -185,7 +186,7 @@ class SymbolTable:
             elif self.opt.Algorithm == self.opt.Algo_Table_Driven:
                 return  "table-driven"
             else:
-                return  "UNKNOWN"
+                return  "UNDEFINED"
 
         elif id == "crc_table_init":
             return  self.__get_table_init()
@@ -351,6 +352,7 @@ static inline {%crc_finalize_function_def%}{%%}
  *    XorOut       = {%crc_xor_out%}
  *    ReflectOut   = {%crc_reflect_out%}
  *    Algorithm    = {%crc_algorithm%}
+ *    Direct       = {%crc_direct%}
  *****************************************************************************/\
 """
 
@@ -379,15 +381,11 @@ long {%crc_reflect_function%}(long data, size_t data_len)\
     unsigned int i;
     long ret;
 
-    ret = 0;
-    for (i = 0; i < data_len; i++)
+    ret = data & 0x01;
+    for (i = 1; i < data_len; i++)
     {
-        if (data & 0x01) {
-            ret = (ret << 1) | 1;
-        } else {
-            ret = ret << 1;
-        }
         data >>= 1;
+        ret = (ret << 1) | (data & 0x01);
     }
     return ret;
 }
@@ -1154,34 +1152,44 @@ int get_config(int argc, char *argv[], {%cfg_t%} *cfg)
         to the given options
         If no default option is given for a given parameter, value in the cfg_t structure must be used.
         """
-        if self.opt.Algorithm != self.opt.Algo_Bit_by_Bit and self.opt.Algorithm != self.opt.Algo_Bit_by_Bit_Fast and self.opt.Algorithm != self.opt.Algo_Table_Driven:
-            init = 0
-        elif self.opt.Algorithm == self.opt.Algo_Bit_by_Bit:
+        if self.opt.Algorithm == self.opt.Algo_Bit_by_Bit:
             if self.opt.ReflectIn == None or self.opt.XorIn == None or self.opt.Width == None or self.opt.Poly == None:
                 return None
-            register = self.opt.XorIn
-            for j in range(self.opt.Width):
-                bit = register & 1
-                if bit != 0:
-                    register = ((register ^ self.opt.Poly) >> 1) | self.opt.MSB_Mask
-                else:
-                    register = register >> 1
-            init = register & self.opt.Mask
+            crc = Crc(width = self.opt.Width, poly = self.opt.Poly,
+                    reflect_in = self.opt.ReflectIn, xor_in = self.opt.XorIn,
+                    reflect_out = self.opt.ReflectOut, xor_out = self.opt.XorOut,
+                    direct = self.opt.Direct, table_idx_width = self.opt.TableIdxWidth)
+            init = crc.NonDirectInit
         elif self.opt.Algorithm == self.opt.Algo_Bit_by_Bit_Fast:
             if self.opt.XorIn == None:
                 return None
-            init = self.opt.XorIn
+            if self.opt.Direct:
+                init = self.opt.XorIn
+            elif self.opt.Width == None or self.opt.Poly == None:
+                return None
+            else:
+                crc = Crc(width = self.opt.Width, poly = self.opt.Poly,
+                    reflect_in = self.opt.ReflectIn, xor_in = self.opt.XorIn,
+                    reflect_out = self.opt.ReflectOut, xor_out = self.opt.XorOut,
+                    table_idx_width = self.opt.TableIdxWidth)
+                init = crc.DirectInit
         elif self.opt.Algorithm == self.opt.Algo_Table_Driven:
             if self.opt.ReflectIn == None or self.opt.XorIn == None or self.opt.Width == None:
                 return None
-            if self.opt.ReflectIn:
-                crc = Crc(width = self.opt.Width, poly = self.opt.Poly,
-                        reflect_in = self.opt.ReflectIn, xor_in = self.opt.XorIn,
-                        reflect_out = self.opt.ReflectOut, xor_out = self.opt.XorOut,
-                        table_idx_width = self.opt.TableIdxWidth)
-                init = crc.reflect(self.opt.XorIn, self.opt.Width)
+            if (not self.opt.Direct) and (self.opt.Poly == None):
+                return None
+            if self.opt.Poly == None:
+                poly = 0
             else:
-                init = self.opt.XorIn
+                poly = self.opt.Poly
+            crc = Crc(width = self.opt.Width, poly = poly,
+                    reflect_in = self.opt.ReflectIn, xor_in = self.opt.XorIn,
+                    reflect_out = self.opt.ReflectOut, xor_out = self.opt.XorOut,
+                    direct = self.opt.Direct, table_idx_width = self.opt.TableIdxWidth)
+            if self.opt.ReflectIn:
+                init = crc.reflect(crc.DirectInit, self.opt.Width)
+            else:
+                init = crc.DirectInit
         else:
             init = 0
         return self.__pretty_hex(init, self.opt.Width)
@@ -1199,7 +1207,7 @@ int get_config(int argc, char *argv[], {%cfg_t%} *cfg)
         crc = Crc(width = self.opt.Width, poly = self.opt.Poly,
                 reflect_in = self.opt.ReflectIn, xor_in = self.opt.XorIn,
                 reflect_out = self.opt.ReflectOut, xor_out = self.opt.XorOut,
-                table_idx_width = self.opt.TableIdxWidth)
+                direct = self.opt.Direct, table_idx_width = self.opt.TableIdxWidth)
         tbl = crc.gen_table()
         if self.opt.Width >= 32:
             values_per_line = 4

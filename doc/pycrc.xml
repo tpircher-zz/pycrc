@@ -2,12 +2,12 @@
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
                     "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
 <!ENTITY program_name       "pycrc">
-<!ENTITY program_version    "0.6.5">
+<!ENTITY program_version    "0.7">
 <!ENTITY author_firstname   "Thomas">
 <!ENTITY author_surname     "Pircher">
 <!ENTITY author_email       "tehpeh@gmx.net">
 <!ENTITY author             "&author_firstname; &author_surname;">
-<!ENTITY date               "2008-03-02">
+<!ENTITY date               "2009-02-27">
 <!ENTITY bit-by-bit         "bit-by-bit">
 <!ENTITY bit-by-bit-fast    "bit-by-bit-fast">
 <!ENTITY table-driven       "table-driven">
@@ -156,6 +156,14 @@
         </varlistentry>
         <varlistentry>
             <term>
+                <option>--check-hexstring=</option><replaceable>STRING</replaceable>
+            </term>
+            <listitem>
+                <para>calculate the checksum of the given hexadecimal string</para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
                 <option>--check-file=</option><replaceable>FILE</replaceable>
             </term>
             <listitem>
@@ -185,6 +193,14 @@
             <listitem>
                 <para>choose an algorithm from {<replaceable>bit-by-bit</replaceable>, <replaceable>bit-by-bit-fast</replaceable>, 
                 <replaceable>table-driven</replaceable>, <replaceable>all</replaceable>}</para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
+                <option>--direct=</option><replaceable>BOOL</replaceable>
+            </term>
+            <listitem>
+                <para>use the direct algorithm, i.e. don't append <replaceable>&width;</replaceable> padding zero bytes to the message. (default: True)</para>
             </listitem>
         </varlistentry>
         <varlistentry>
@@ -515,13 +531,21 @@ typedef struct {
                         <userinput>pycrc.py --model crc-16 --algorithm table-driven --table-idx-width 4 --generate c -o crc.c</userinput>
                         </para>
                         <para>
-                         The table index width of 4 bits ensures a moderate memory consumption. In fact, the resulting table is 
-                         <code>16 * sizeof(crc_t)</code> bytes big.
+                         The table index width of 4 bits ensures a moderate memory consumption.
+                         In fact, the size of the resulting table is <code>16 * sizeof(crc_t)</code> bytes.
                         A variant of the last generated output is the <replaceable>c-main</replaceable> target:
                         a simple <replaceable>main()</replaceable> function is generated in addition to the crc routines:
                         </para>
                         <para>
                         <userinput>pycrc.py --model crc-16 --algorithm table-driven --table-idx-width 4 --generate c-main -o crc.c</userinput>
+                        </para>
+                    </glossdef>
+                </glossentry>
+                <glossentry>
+                    <glossterm>Generate the crc table only:</glossterm>
+                    <glossdef>
+                        <para>
+                        <userinput>pycrc.py --model kermit --generate table -o crc-table.txt</userinput>
                         </para>
                     </glossdef>
                 </glossentry>

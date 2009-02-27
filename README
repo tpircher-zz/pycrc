@@ -7,11 +7,11 @@ See the files doc/faq.html or doc/faq.html for frequently asked questions.
 Installation
 ============
 
-pycrc requires Python 2.2.3 or later.
+pycrc requires Python 2.4 or later. Python 3.x is supported.
 
 This program doesn't need any particular installation. You may execute the
-script from any directory. On UN*X platforms, you might need to make the script
-executable: chmod +x pycrc.py
+script from any directory. On UNIX-oid platforms, you might need to make the
+script executable: chmod +x pycrc.py
 
 
 Getting help
@@ -32,6 +32,6 @@ Copyright of the generated source code
 
 Prior to v0.6, pycrc was released under the GPL and an additional addition to
 the licence was required to permit to use the generated source code in products
-with a OSI unapproved licence. Since version 0.6, pycrc is released under the
-terms of the MIT licence and thus such an additional clause to the licence has
-become obsolete.
+with a OSI unapproved licence. As of version 0.6, pycrc is released under the
+terms of the MIT licence and such an additional clause to the licence is no
+more required.

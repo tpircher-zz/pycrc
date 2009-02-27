@@ -2,7 +2,7 @@
 
 #  pycrc -- parametrisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2008  Thomas Pircher  <tehpeh@gmx.net>
+#  Copyright (c) 2006-2009  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal
@@ -53,7 +53,7 @@ class Options(object):
     Program details
     """
     ProgramName    = "pycrc"
-    Version        = "0.6.7"
+    Version        = "0.7"
     VersionStr     = "%s v%s" % (ProgramName, Version)
     WebAddress     = "http://www.tty1.net/pycrc/"
 
@@ -80,6 +80,7 @@ class Options(object):
         self.CheckString    = "123456789"
 
         self.Algorithm      = self.Algo_None
+        self.Direct         = True
         self.SymbolPrefix   = "crc_"
         self.CrcType        = None
         self.IncludeFile    = None
@@ -117,7 +118,10 @@ following parameters:
                         help="print information about the model")
         parser.add_option("--check-string",
                         action="store", type="string", dest="check_string",
-                        help="calculate the checksum of the given string ('123456789' default)", metavar="STRING")
+                        help="calculate the checksum of the given string (default: '123456789')", metavar="STRING")
+        parser.add_option("--check-hexstring",
+                        action="store", type="string", dest="check_hexstring",
+                        help="calculate the checksum of the given hexadecimal number string", metavar="STRING")
         parser.add_option("--check-file",
                         action="store", type="string", dest="check_file",
                         help="calculate the checksum of the given file", metavar="FILE")
@@ -130,6 +134,9 @@ following parameters:
         parser.add_option("--algorithm",
                         action="store", type="string", dest="algorithm", default="all",
                         help="choose an algorithm from {bit-by-bit, bit-by-bit-fast, table-driven, all}", metavar="ALGO")
+        parser.add_option("--direct",
+                        action="store", type="bool", dest="direct",
+                        help="direct algorithm (default: True)", metavar="BOOL")
         parser.add_option("--model",
                         action="callback", callback=self.model_cb, type="string", dest="model", default=None,
                         help="choose a parameter set from {%s}" % model_list, metavar="MODEL")
@@ -231,6 +238,9 @@ following parameters:
         else:
             self.UndefinedCrcParameters = False
 
+        if options.direct != None:
+            self.Direct = options.direct
+
         if options.algorithm != None:
             alg = options.algorithm.lower()
             if alg == "bit-by-bit" or alg == "all":
@@ -277,6 +287,10 @@ following parameters:
             self.Action         = "check_string"
             self.CheckString    = options.check_string
             op_count += 1
+        if options.check_hexstring != None:
+            self.Action         = "check_hexstring"
+            self.CheckString    = options.check_hexstring
+            op_count += 1
         if options.check_file != None:
             self.Action         = "check_file"
             self.CheckFile      = options.check_file
@@ -302,7 +316,11 @@ following parameters:
             sys.stderr.write("Error: too many actions scecified\n")
             sys.exit(1)
 
-        if self.UndefinedCrcParameters and (self.Action == "check_string" or self.Action == "check_file" or self.Action == "generate_table"):
+        if len(args) != 0:
+            sys.stderr.write("Error: unrecognized argument(s): %s\n" % " ".join(args))
+            sys.exit(1)
+
+        if self.UndefinedCrcParameters and (self.Action == "check_string" or self.Action == "check_hexstring" or self.Action == "check_file" or self.Action == "generate_table"):
             sys.stderr.write("Error: undefined parameters: Add %s or use --model\n" % ", ".join(undefined_params))
             sys.exit(1)
         self.Verbose            = options.verbose
