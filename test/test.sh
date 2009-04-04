@@ -307,7 +307,17 @@ testbin "$opt" "$res"
 #JAMCRC
 res="0x340bc6d9"
 cmd="$PYCRC --model jam"
-opt="--width 32 --poly 0x04c11db7 --reflect-in 1 --xor-in 0xffffffff --reflect-out 1 --xor-out 0x0"
+opt="--width 32 --poly 0x4c11db7 --reflect-in 1 --xor-in 0xffffffff --reflect-out 1 --xor-out 0x0"
+teststr "$cmd" "$res"
+teststr "$PYCRC $opt --direct 0" "$res"
+teststr "$PYCRC $opt --direct 1" "$res"
+testfil "$cmd" "$res"
+testbin "$opt" "$res"
+
+#CRC-32MPEG
+res="0x376e6e7"
+cmd="$PYCRC --model crc-32mpeg"
+opt="--width 32 --poly 0x4c11db7 --reflect-in 0 --xor-in 0xffffffff --reflect-out 0 --xor-out 0x0"
 teststr "$cmd" "$res"
 teststr "$PYCRC $opt --direct 0" "$res"
 teststr "$PYCRC $opt --direct 1" "$res"

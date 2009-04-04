@@ -224,6 +224,17 @@ class CrcModels(object):
         'check':         0xe3069283,
     })
     models.append({
+        'name':         'crc-32mpeg',
+        'width':         32,
+        'poly':          0x4c11db7,
+        'reflect_in':    False,
+        'xor_in':        0xffffffff,
+        'reflect_out':   False,
+        'xor_out':       0x0,
+        'direct':        False,
+        'check':         0x0376e6e7,
+    })
+    models.append({
         'name':         'posix',
         'width':         32,
         'poly':          0x4c11db7,

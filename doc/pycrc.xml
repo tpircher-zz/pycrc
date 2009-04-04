@@ -2,12 +2,12 @@
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
                     "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
 <!ENTITY program_name       "pycrc">
-<!ENTITY program_version    "0.7">
+<!ENTITY program_version    "0.7.1">
 <!ENTITY author_firstname   "Thomas">
 <!ENTITY author_surname     "Pircher">
 <!ENTITY author_email       "tehpeh@gmx.net">
 <!ENTITY author             "&author_firstname; &author_surname;">
-<!ENTITY date               "2009-02-27">
+<!ENTITY date               "2009-04-05">
 <!ENTITY bit-by-bit         "bit-by-bit">
 <!ENTITY bit-by-bit-fast    "bit-by-bit-fast">
 <!ENTITY table-driven       "table-driven">
@@ -223,6 +223,7 @@
                     <replaceable>crc-24</replaceable>,
                     <replaceable>crc-32</replaceable>,
                     <replaceable>crc-32c</replaceable>,
+                    <replaceable>crc-32mpeg</replaceable>,
                     <replaceable>posix</replaceable>,
                     <replaceable>jam</replaceable>,
                     <replaceable>xfer</replaceable>,

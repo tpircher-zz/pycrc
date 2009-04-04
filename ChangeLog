@@ -1,4 +1,12 @@
 #
+# Version 0.7.1, 2009-04-05
+#
+
+2009-03-26  Thomas Pircher   <tehpeh@gmx.net>
+
+	* crc_models.py: added crc-32mpeg. Thanks to Thomas Edwards.
+
+#
 # Version 0.7, 2009-02-27
 #
 
