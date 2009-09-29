@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
 PYCRC=`dirname $0`/../pycrc.py

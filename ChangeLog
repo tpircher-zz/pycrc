@@ -1,4 +1,14 @@
 #
+# Version 0.7.2, 2009-09-30
+#
+
+2009-09-30  Thomas Pircher   <tehpeh@gmx.net>
+
+    * pycrc.py: fixed a bug that caused the result of the Python table-driven
+    code not being evaluated at all.
+    Closes issue 2870630. Thanks to Ildar Muslukhov.
+
+#
 # Version 0.7.1, 2009-04-05
 #
 

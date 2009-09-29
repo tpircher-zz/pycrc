@@ -29,7 +29,7 @@
 
     <refnamediv>
         <refname>&program_name;</refname>
-        <refpurpose>a parametrisable Cyclic Redundancy Check (CRC) calculation utility and C source code generator written in Python</refpurpose>
+        <refpurpose>pycrc is a free, easy to use Cyclic Redundancy Check (CRC) calculator and source code generator.</refpurpose>
     </refnamediv>
 
     <refentryinfo>
@@ -40,6 +40,7 @@
             <firstname>&author_firstname;</firstname>
             <surname>&author_surname;</surname>
             <email>&author_email;</email>
+            <contrib>Author of pycrc and of this manual page</contrib>
         </author>
         <date>&date;</date>
     </refentryinfo>
@@ -55,8 +56,8 @@
         <para>
             <ulink url="http://www.tty1.net/pycrc/">&program_name;</ulink>
             provides a parametrised CRC reference implementation written in Python and a source code generator for C.
-            Different variants of the CRC algorithm are supported and range from a fast but space-consuming implementation to slower 
-            but smaller code suitable especially for embedded applications.
+            The generated C source code can be optimized for simplicity, speed or tight memory constraints for embedded platforms.
+
             The following operations are implemented:
             <itemizedlist>
                 <listitem>

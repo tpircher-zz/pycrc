@@ -89,28 +89,28 @@ def check_string(opt):
     if opt.Algorithm & opt.Algo_Bit_by_Bit:
         bbb_crc = alg.bit_by_bit(opt.CheckString)
         if crc != None and bbb_crc != crc:
-            error = True;
+            error = True
         crc = bbb_crc
     if opt.Algorithm & opt.Algo_Bit_by_Bit_Fast:
         bbf_crc = alg.bit_by_bit_fast(opt.CheckString)
         if crc != None and bbf_crc != crc:
-            error = True;
+            error = True
         crc = bbf_crc
     if opt.Algorithm & opt.Algo_Table_Driven:
         opt.TableIdxWidth = 8            # FIXME cowardly refusing to use less bits for the table
         tbl_crc = alg.table_driven(opt.CheckString)
         if crc != None and tbl_crc != crc:
-            error = True;
-        crc - tbl_crc
+            error = True
+        crc = tbl_crc
 
     if error:
-        sys.stderr.write("Error: different checksums:\n");
+        sys.stderr.write("Error: different checksums:\n")
         if opt.Algorithm & opt.Algo_Bit_by_Bit:
-            sys.stderr.write("       bit-by-bit:        0x%x\n" % bbb_crc);
+            sys.stderr.write("       bit-by-bit:        0x%x\n" % bbb_crc)
         if opt.Algorithm & opt.Algo_Bit_by_Bit_Fast:
-            sys.stderr.write("       bit-by-bit-fast:   0x%x\n" % bbf_crc);
+            sys.stderr.write("       bit-by-bit-fast:   0x%x\n" % bbf_crc)
         if opt.Algorithm & opt.Algo_Table_Driven:
-            sys.stderr.write("       table_driven:      0x%x\n" % tbl_crc);
+            sys.stderr.write("       table_driven:      0x%x\n" % tbl_crc)
         sys.exit(1)
     return crc
 
