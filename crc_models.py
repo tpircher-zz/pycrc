@@ -224,7 +224,7 @@ class CrcModels(object):
         'check':         0xe3069283,
     })
     models.append({
-        'name':         'crc-32mpeg',
+        'name':         'crc-32-mpeg',
         'width':         32,
         'poly':          0x4c11db7,
         'reflect_in':    False,
@@ -277,6 +277,17 @@ class CrcModels(object):
         'xor_out':       0x0,
         'direct':        True,
         'check':         0x46a5a9388a5beffe,
+    })
+    models.append({
+        'name':         'crc-64-jones',
+        'width':         64,
+        'poly':          0xad93d23594c935a9,
+        'reflect_in':    True,
+        'xor_in':        0x0,
+        'reflect_out':   True,
+        'xor_out':       0x0,
+        'direct':        True,
+        'check':         0xe9c6d914c4b8d9ca,
     })
 
 

@@ -111,15 +111,7 @@
     </refsect1>
 
     <refsect1><title>Options</title>
-        <varlistentry>
-            <term>
-                <option></option>
-                <replaceable></replaceable>
-            </term>
-            <listitem>
-                <para></para>
-            </listitem>
-        </varlistentry>
+    <variablelist>
         <varlistentry>
             <term>
                 <option>--version</option>
@@ -228,7 +220,8 @@
                     <replaceable>posix</replaceable>,
                     <replaceable>jam</replaceable>,
                     <replaceable>xfer</replaceable>,
-                    <replaceable>crc-64</replaceable>}</para>
+                    <replaceable>crc-64</replaceable>,
+                    <replaceable>crc-64-jones</replaceable>}</para>
             </listitem>
         </varlistentry>
         <varlistentry>
@@ -324,8 +317,8 @@
             <listitem>
                 <para>write the generated code to file instead to stdout</para>
             </listitem>
-
         </varlistentry>
+    </variablelist>
     </refsect1>
 
     <refsect1><title>The CRC Parametric Model</title>

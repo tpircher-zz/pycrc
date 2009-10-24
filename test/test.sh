@@ -316,7 +316,7 @@ testbin "$opt" "$res"
 
 #CRC-32MPEG
 res="0x376e6e7"
-cmd="$PYCRC --model crc-32mpeg"
+cmd="$PYCRC --model crc-32-mpeg"
 opt="--width 32 --poly 0x4c11db7 --reflect-in 0 --xor-in 0xffffffff --reflect-out 0 --xor-out 0x0"
 teststr "$cmd" "$res"
 teststr "$PYCRC $opt --direct 0" "$res"
@@ -338,6 +338,16 @@ testbin "$opt" "$res"
 res="0x46a5a9388a5beffe"
 cmd="$PYCRC --model crc-64"
 opt="--width 64 --poly 0x000000000000001b --reflect-in 1 --xor-in 0x0 --reflect-out 1 --xor-out 0x0"
+teststr "$cmd" "$res"
+teststr "$PYCRC $opt --direct 0" "$res"
+teststr "$PYCRC $opt --direct 1" "$res"
+testfil "$cmd" "$res"
+#testbin "$opt" "$res"      # don't test binaries with width 64 bits (variables not wide enough...)
+
+#CRC-64-jones
+res="0xe9c6d914c4b8d9ca"
+cmd="$PYCRC --model crc-64-jones"
+opt="--width 64 --poly 0xad93d23594c935a9 --reflect-in 1 --xor-in 0x0 --reflect-out 1 --xor-out 0x0"
 teststr "$cmd" "$res"
 teststr "$PYCRC $opt --direct 0" "$res"
 teststr "$PYCRC $opt --direct 1" "$res"
