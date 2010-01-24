@@ -3,7 +3,7 @@
 
 #  pycrc -- parametrisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2009  Thomas Pircher  <tehpeh@gmx.net>
+#  Copyright (c) 2006-2010  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal
@@ -76,7 +76,7 @@ def check_string(opt):
     """
     error = False
     if opt.UndefinedCrcParameters:
-        sys.stderr.write("Error: undefined parameters\n")
+        sys.stderr.write("%s: error: undefined parameters\n" % sys.argv[0])
         sys.exit(1)
     if opt.Algorithm == 0:
         opt.Algorithm = opt.Algo_Bit_by_Bit | opt.Algo_Bit_by_Bit_Fast | opt.Algo_Table_Driven
@@ -104,7 +104,7 @@ def check_string(opt):
         crc = tbl_crc
 
     if error:
-        sys.stderr.write("Error: different checksums:\n")
+        sys.stderr.write("%s: error: different checksums!\n" % sys.argv[0])
         if opt.Algorithm & opt.Algo_Bit_by_Bit:
             sys.stderr.write("       bit-by-bit:        0x%x\n" % bbb_crc)
         if opt.Algorithm & opt.Algo_Bit_by_Bit_Fast:
@@ -121,12 +121,14 @@ def check_hexstring(opt):
     Returns the calculated CRC sum of a string
     """
     if opt.UndefinedCrcParameters:
-        sys.stderr.write("Error: undefined parameters\n")
+        sys.stderr.write("%s: error: undefined parameters\n" % sys.argv[0])
         sys.exit(1)
+    if len(opt.CheckString) % 2 != 0:
+        opt.CheckString = "0" + opt.CheckString
     try:
         str = binascii.unhexlify(opt.CheckString)
     except TypeError:
-        sys.stderr.write("Error: invalid hex string %s\n" % opt.CheckString)
+        sys.stderr.write("%s: error: invalid hex string %s\n" % (sys.argv[0], opt.CheckString))
         sys.exit(1)
 
     opt.CheckString = str
@@ -160,7 +162,7 @@ def check_file(opt):
     This algorithm uses the table_driven CRC algorithm.
     """
     if opt.UndefinedCrcParameters:
-        sys.stderr.write("Error: undefined parameters\n")
+        sys.stderr.write("%s: error: undefined parameters\n", sys.argv[0])
         sys.exit(1)
     alg = Crc(width = opt.Width, poly = opt.Poly,
         reflect_in = opt.ReflectIn, xor_in = opt.XorIn,
@@ -170,7 +172,7 @@ def check_file(opt):
     try:
         file = open(opt.CheckFile, 'rb')
     except IOError:
-        sys.stderr.write("Error: can't open file %s\n" % opt.CheckFile)
+        sys.stderr.write("%s: error: can't open file %s\n" % (sys.argv[0], opt.CheckFile))
         sys.exit(1)
 
     if not opt.ReflectIn:
@@ -180,14 +182,14 @@ def check_file(opt):
     try:
         str = file.read()
     except IOError:
-        sys.stderr.write("Error: can't open read %s\n" % opt.CheckFile)
+        sys.stderr.write("%s: error: can't open read %s\n" % (sys.argv[0], opt.CheckFile))
         sys.exit(1)
     while len(str):
         register = crc_file_update(opt, alg, register, str)
         try:
             str = file.read()
         except IOError:
-            sys.stderr.write("Error: can't open read %s\n" % opt.CheckFile)
+            sys.stderr.write("%s: error: can't open read %s\n" % (sys.argv[0], opt.CheckFile))
             sys.exit(1)
     file.close()
 
@@ -203,7 +205,7 @@ def main():
     Main function
     """
     opt = Options()
-    opt.parse(sys.argv)
+    opt.parse(sys.argv[1:])
     if opt.Verbose:
         print(print_parameters(opt))
     if opt.Action == "check_string":
@@ -226,10 +228,10 @@ def main():
         elif opt.Action == "generate_table":
             in_str = "{%crc_table_init%}"
         else:
-            sys.stderr.write("Error: unknown action %s\n" % opt.Action)
+            sys.stderr.write("%s: error: unknown action %s\n" % (sys.argv[0], opt.Action))
             sys.exit(1)
         if not mp.parse(in_str):
-            sys.stderr.write("Error: Failure parsing internal macro language\n")
+            sys.stderr.write("%s: error: Failure parsing internal macro language\n", sys.argv[0])
             sys.exit(1)
         if opt.OutputFile == None:
             print(mp.out_str)
@@ -239,7 +241,7 @@ def main():
                 file.write(mp.out_str)
                 file.close()
             except IOError:
-                sys.stderr.write("Error: cannot write to file %s\n" % opt.OutputFile)
+                sys.stderr.write("%s: error: cannot write to file %s\n" % (sys.argv[0], opt.OutputFile))
                 sys.exit(1)
     return 0
 

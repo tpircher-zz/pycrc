@@ -2,7 +2,7 @@
 
 #  pycrc -- parametrisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2009  Thomas Pircher  <tehpeh@gmx.net>
+#  Copyright (c) 2006-2010  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,7 @@ use as follows:
    from crc_opt import Options
 
    opt = Options()
-   opt.parse(sys.argv)
+   opt.parse(sys.argv[1:])
 
 This file is part of pycrc.
 """
@@ -53,7 +53,7 @@ class Options(object):
     Program details
     """
     ProgramName    = "pycrc"
-    Version        = "0.7.3"
+    Version        = "0.7.4"
     VersionStr     = "%s v%s" % (ProgramName, Version)
     WebAddress     = "http://www.tty1.net/pycrc/"
 
@@ -174,7 +174,7 @@ following parameters:
                         action="store", type="string", dest="output_file",
                         help="write the generated code to file instead to stdout", metavar="FILE")
 
-        (options, args) = parser.parse_args()
+        (options, args) = parser.parse_args(argv)
 
         undefined_params = []
         if options.width != None:
@@ -209,12 +209,15 @@ following parameters:
                 self.TableIdxWidth = options.table_idx_width
                 self.TableWidth = 1 << options.table_idx_width
             else:
-                sys.stderr.write("Error: unsupported table-idx-width %d\n" % options.table_idx_width)
+                sys.stderr.write("%s: error: unsupported table-idx-width %d\n" % (sys.argv[0], options.table_idx_width))
                 sys.exit(1)
+
+        if self.Poly != None and self.Poly % 2 == 0:
+                sys.stderr.write("%s: warning: the polynom 0x%x is even. A valid CRC polynom must be odd.\n" % (sys.argv[0], self.Poly))
 
         if self.Width != None:
             if self.Width <= 0:
-                sys.stderr.write("Error: Width must be strictly positive\n")
+                sys.stderr.write("%s: error: Width must be strictly positive\n" % sys.argv[0])
                 sys.exit(1)
             self.MSB_Mask = 0x1 << (self.Width - 1)
             self.Mask = ((self.MSB_Mask - 1) << 1) | 1
@@ -250,17 +253,17 @@ following parameters:
             if alg == "table-driven" or alg == "all":
                 self.Algorithm      |= self.Algo_Table_Driven
             if self.Algorithm == 0:
-                sys.stderr.write("Error: unknown algorithm %s\n" % options.algorithm)
+                sys.stderr.write("%s: error: unknown algorithm %s\n" % (sys.argv[0], options.algorithm))
                 sys.exit(1)
         if self.Width != None and (self.Width % 8) != 0:
             if options.algorithm == "table-driven":
-                sys.stderr.write("Error: width parameter is not aligned to byte boundaries; algorithm %s not applicable\n" % options.algorithm)
+                sys.stderr.write("%s: error: width parameter is not aligned to byte boundaries; algorithm %s not applicable\n" % (sys.argv[0], options.algorithm))
                 sys.exit(1)
             else:
                 self.Algorithm &= ~self.Algo_Table_Driven
         if self.Width != None and self.Width < 8:
             if options.algorithm == "table-driven":
-                sys.stderr.write("Error: width < 8, algorithm %s not applicable\n" % options.algorithm)
+                sys.stderr.write("%s: error: width < 8, algorithm %s not applicable\n" % (sys.argv[0], options.algorithm))
                 sys.exit(1)
             else:
                 self.Algorithm &= ~(self.Algo_Table_Driven)
@@ -272,7 +275,7 @@ following parameters:
             elif std == "C99":
                 self.CStd = std
             else:
-                sys.stderr.write("Error: unknown C standard %s\n" % options.c_std)
+                sys.stderr.write("%s: error: unknown C standard %s\n" % (sys.argv[0], options.c_std))
                 sys.exit(1)
         if options.symbol_prefix != None:
             self.SymbolPrefix = options.symbol_prefix
@@ -298,30 +301,30 @@ following parameters:
         if options.generate != None:
             arg = options.generate.lower()
             if arg != 'c' and arg != 'h' and arg != "c-main" and arg != "table":
-                sys.stderr.write("Error: unknown operation %s\n" % options.generate)
+                sys.stderr.write("%s: error: don't know how to generate %s\n" % (sys.argv[0], options.generate))
                 sys.exit(1)
             self.Action = "generate_" + arg
             op_count += 1
             if self.Action == "generate_table":
                 if self.Algorithm & self.Algo_Table_Driven == 0:
-                    sys.stderr.write("Error: the --generate table option is incompatible with the --algorithm option\n")
+                    sys.stderr.write("%s: error: the --generate table option is incompatible with the --algorithm option\n" % sys.argv[0])
                     sys.exit(1)
                 self.Algorithm = self.Algo_Table_Driven
             elif self.Algorithm != self.Algo_Bit_by_Bit and self.Algorithm != self.Algo_Bit_by_Bit_Fast and self.Algorithm != self.Algo_Table_Driven:
-                sys.stderr.write("Error: select an algorithm to be used in the generated file\n")
+                sys.stderr.write("%s: error: select an algorithm to be used in the generated file\n" % sys.argv[0])
                 sys.exit(1)
         if op_count == 0:
             self.Action         = "check_string"
         if op_count > 1:
-            sys.stderr.write("Error: too many actions scecified\n")
+            sys.stderr.write("%s: error: too many actions scecified\n" % sys.argv[0])
             sys.exit(1)
 
         if len(args) != 0:
-            sys.stderr.write("Error: unrecognized argument(s): %s\n" % " ".join(args))
+            sys.stderr.write("%s: error: unrecognized argument(s): %s\n" % (sys.argv[0], " ".join(args)))
             sys.exit(1)
 
         if self.UndefinedCrcParameters and (self.Action == "check_string" or self.Action == "check_hexstring" or self.Action == "check_file" or self.Action == "generate_table"):
-            sys.stderr.write("Error: undefined parameters: Add %s or use --model\n" % ", ".join(undefined_params))
+            sys.stderr.write("%s: error: undefined parameters: Add %s or use --model\n" % (sys.argv[0], ", ".join(undefined_params)))
             sys.exit(1)
         self.Verbose            = options.verbose
 

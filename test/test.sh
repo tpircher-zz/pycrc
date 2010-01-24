@@ -204,6 +204,16 @@ teststr "$PYCRC $opt --direct 1" "$res"
 testfil "$cmd" "$res"
 testbin "$opt" "$res"
 
+#CRC-16-MODBUS
+res="0x4b37"
+cmd="$PYCRC --model crc-16-modbus"
+opt="--width 16 --poly 0x8005 --reflect-in 1 --xor-in 0xffff --reflect-out 1 --xor-out 0x0"
+teststr "$cmd" "$res"
+teststr "$PYCRC $opt --direct 0" "$res"
+teststr "$PYCRC $opt --direct 1" "$res"
+testfil "$cmd" "$res"
+testbin "$opt" "$res"
+
 #CRC-16/CITT
 res="0x29b1"
 cmd="$PYCRC --model ccitt"
@@ -245,9 +255,9 @@ testfil "$cmd" "$res"
 testbin "$opt" "$res"
 
 #xmodem
-res="0x0c73"
+res="0x31c3"
 cmd="$PYCRC --model xmodem"
-opt="--width 16 --poly 0x8408 --reflect-in 1 --xor-in 0x0 --reflect-out 1 --xor-out 0x0"
+opt="--width 16 --poly 0x1021 --reflect-in 0 --xor-in 0x0 --reflect-out 0 --xor-out 0x0"
 teststr "$cmd" "$res"
 teststr "$PYCRC $opt --direct 0" "$res"
 teststr "$PYCRC $opt --direct 1" "$res"
@@ -345,9 +355,9 @@ testfil "$cmd" "$res"
 #testbin "$opt" "$res"      # don't test binaries with width 64 bits (variables not wide enough...)
 
 #CRC-64-jones
-res="0xe9c6d914c4b8d9ca"
+res="0xcaa717168609f281"
 cmd="$PYCRC --model crc-64-jones"
-opt="--width 64 --poly 0xad93d23594c935a9 --reflect-in 1 --xor-in 0x0 --reflect-out 1 --xor-out 0x0"
+opt="--width 64 --poly 0xad93d23594c935a9 --reflect-in 1 --xor-in 0xffffffffffffffff --reflect-out 1 --xor-out 0x0"
 teststr "$cmd" "$res"
 teststr "$PYCRC $opt --direct 0" "$res"
 teststr "$PYCRC $opt --direct 1" "$res"

@@ -1,3 +1,30 @@
+#
+# Version 0.7.4, 2010-01-24
+#
+
+2010-01-24  Thomas Pircher   <tehpeh@gmx.net>
+
+    * crc_models.py: changed the xor-in value of the crc-64-jones model.
+    * crc_models.py: Set xmodem parameters equal to the zmodem params.
+
+2009-12-29  Thomas Pircher   <tehpeh@gmx.net>
+
+    * pycrc.py, crc_opt.py, crc_parser: uniform error messages.
+    * crc_opt.py: added a warning for even polynoms.
+
+2009-11-12  Thomas Pircher   <tehpeh@gmx.net>
+
+    * crc_models.py: added crc-16-modbus. Closes issue 2896611.
+
+2009-11-07  Thomas Pircher   <tehpeh@gmx.net>
+
+    * crc_opt.py: Fix for unused variable argv.
+    Closes issue 2893224. Thanks to Marko von Oppen.
+
+#
+# Version 0.7.3, 2009-10-25
+#
+
 2009-10-25  Thomas Pircher   <tehpeh@gmx.net>
 
     * crc_models.py: renamed crc-32mpeg to crc-32-mpeg.

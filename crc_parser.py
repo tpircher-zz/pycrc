@@ -2,7 +2,7 @@
 
 #  pycrc -- parametrisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2009  Thomas Pircher  <tehpeh@gmx.net>
+#  Copyright (c) 2006-2010  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal
@@ -132,7 +132,7 @@ class MacroParser(object):
             elif tok == self.lex.tok_block_end:
                 return True
             else:
-                sys.stderr.write("Error: wrong token %s\n" % self.lex.text)
+                sys.stderr.write("%s: error: wrong token %s\n" % (sys.argv[0], self.lex.text))
                 return False
             tok = self.lex.peek()
         return True
@@ -168,13 +168,13 @@ class MacroParser(object):
                 self.if_stack.pop(0)
                 return True
             elif self.lex.text == "else" or self.lex.text.startswith("elif "):
-                sys.stderr.write("unmatched %s clause\n" % self.lex.text[:4])
+                sys.stderr.write("%s: error: unmatched %s clause\n" % (sys.argv[0], self.lex.text[:4]))
                 return False
             else:
                 if not self.__parse_literal(self.lex.text):
                     return False
                 return True
-        sys.stderr.write("unknown token in control\n")
+        sys.stderr.write("%s: %error: unknown token in control\n" % sys.argv[0])
         return False
 
     # __parse_if
@@ -187,7 +187,7 @@ class MacroParser(object):
         try:
             condition = self.__parse_expression(exp)
         except ParseError:
-            sys.stderr.write("parsing expression %s failed\n" % str)
+            sys.stderr.write("%s: %error: parsing expression %s failed\n" % (sys.argv[0], str))
             return False
 
         stack_state = self.if_stack[0]
@@ -214,7 +214,7 @@ class MacroParser(object):
             try:
                 condition = self.__parse_expression(exp)
             except ParseError:
-                sys.stderr.write("parsing expression %s failed\n" % str)
+                sys.stderr.write("%s: error: parsing of expression %s failed\n" % (sys.argv[0], str))
                 return False
 
             if condition:
@@ -251,7 +251,7 @@ class MacroParser(object):
         """
         tok = self.lex.peek()
         if tok != self.lex.tok_block_start:
-            sys.stderr.write("begin block expected, at %s\n" % self.lex.text)
+            sys.stderr.write("%s: error: begin block expected, at %s\n" % (sys.argv[0], self.lex.text))
             return False
         self.lex.advance(skip_nl = True)
         return True
@@ -264,7 +264,7 @@ class MacroParser(object):
         """
         tok = self.lex.peek()
         if tok != self.lex.tok_block_end:
-            sys.stderr.write("end block expected, at %s\n" % self.lex.text)
+            sys.stderr.write("%s: error: end block expected, at %s\n" % (sys.argv[0], self.lex.text))
             return False
         self.lex.advance(skip_nl = True)
         return True
@@ -278,7 +278,7 @@ class MacroParser(object):
         try:
             data = self.sym.getTerminal(str)
         except LookupError:
-            sys.stderr.write("Error: unknown terminal %s\n" % self.lex.text)
+            sys.stderr.write("%s: error: unknown terminal %s\n" % (sys.argv[0], self.lex.text))
             return False
         self.lex.advance(skip_nl = False)
         if (self.if_stack[0] & self.mDoPrint) == self.mDoPrint:

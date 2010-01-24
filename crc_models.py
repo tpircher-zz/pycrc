@@ -2,7 +2,7 @@
 
 #  pycrc -- parametrisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2009  Thomas Pircher  <tehpeh@gmx.net>
+#  Copyright (c) 2006-2010  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software",, to deal
@@ -125,6 +125,17 @@ class CrcModels(object):
         'check':         0xb4c8,
     })
     models.append({
+        'name':         'crc-16-modbus',
+        'width':         16,
+        'poly':          0x8005,
+        'reflect_in':    True,
+        'xor_in':        0xffff,
+        'reflect_out':   True,
+        'xor_out':       0x0,
+        'direct':        True,
+        'check':         0x4b37,
+    })
+    models.append({
         'name':         'ccitt',
         'width':         16,
         'poly':          0x1021,
@@ -171,13 +182,13 @@ class CrcModels(object):
     models.append({
         'name':         'xmodem',
         'width':         16,
-        'poly':          0x8408,
-        'reflect_in':    True,
+        'poly':          0x1021,
+        'reflect_in':    False,
         'xor_in':        0x0,
-        'reflect_out':   True,
+        'reflect_out':   False,
         'xor_out':       0x0,
         'direct':        True,
-        'check':         0xc73,
+        'check':         0x31c3,
     })
     models.append({
         'name':         'zmodem',
@@ -283,7 +294,7 @@ class CrcModels(object):
         'width':         64,
         'poly':          0xad93d23594c935a9,
         'reflect_in':    True,
-        'xor_in':        0x0,
+        'xor_in':        0xffffffffffffffff,
         'reflect_out':   True,
         'xor_out':       0x0,
         'direct':        True,

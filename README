@@ -10,15 +10,21 @@ Installation
 pycrc requires Python 2.4 or later. Python 3.x is supported.
 
 This program doesn't need any particular installation. You may execute the
-script from any directory. On UNIX-oid platforms, you might need to make the
-script executable: chmod +x pycrc.py
+script from any directory.
+Simply call the python interpreter with the script :
+
+python pycrc.py [options]
+
+On UNIX-like systems, you might want to make the script executable:
+
+chmod +x pycrc.py
 
 
 Getting help
 ============
 
-If you have questions about using pycrc which is not answered satisfactorily by
-the documentation, please send a mail to the pycrc user mailing list
+If you have questions about using pycrc which is not answered in a satisfactory
+way by the documentation, please send a mail to the pycrc user mailing list
 <pycrc-users@lists.sourceforge.net>. The list info page is available at
 https://lists.sourceforge.net/lists/listinfo/pycrc-users
 
