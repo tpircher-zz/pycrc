@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
 PYCRC=`dirname $0`/../pycrc.py
@@ -59,7 +59,7 @@ void test_tb4(unsigned char *buf, size_t buf_len, size_t num_runs, clock_t clock
  *****************************************************************************/
 void show_times(const char *dsc, unsigned int crc, size_t buflen, size_t num_runs, double t_user, double t_sys)
 {
-    printf("%s of %d bytes (%d * %d): 0x%08x\n", dsc, buflen*num_runs, buflen, num_runs, crc);
+    printf("%s of %ld bytes (%ld * %ld): 0x%08x\n", dsc, (long)buflen*num_runs, (long)buflen, (long)num_runs, crc);
     printf("%13s: %7.3f s\n", "user time", t_user);
     printf("%13s: %7.3f s\n", "system time", t_sys);
     printf("\n");

@@ -60,7 +60,6 @@ def print_parameters(opt):
     out += "ReflectOut   = {%crc_reflect_out%}\n"
     out += "XorOut       = {%crc_xor_out%}\n"
     out += "Algorithm    = {%crc_algorithm%}\n"
-    out += "Direct       = {%crc_direct%}\n"
 
     mp = MacroParser(opt)
     if not mp.parse(out):
@@ -97,7 +96,7 @@ def check_string(opt):
             error = True
         crc = bbf_crc
     if opt.Algorithm & opt.Algo_Table_Driven:
-        opt.TableIdxWidth = 8            # FIXME cowardly refusing to use less bits for the table
+        opt.TableIdxWidth = 8            # no point making the python implementation slower by using less than 8 bits as index.
         tbl_crc = alg.table_driven(opt.CheckString)
         if crc != None and tbl_crc != crc:
             error = True
@@ -113,6 +112,7 @@ def check_string(opt):
             sys.stderr.write("       table_driven:      0x%x\n" % tbl_crc)
         sys.exit(1)
     return crc
+
 
 # function check_hexstring
 ###############################################################################
@@ -134,6 +134,7 @@ def check_hexstring(opt):
     opt.CheckString = str
     return check_string(opt)
 
+
 # function crc_file_update
 ###############################################################################
 def crc_file_update(opt, alg, register, str):
@@ -151,8 +152,9 @@ def crc_file_update(opt, alg, register, str):
                 bit ^= alg.MSB_Mask
             if bit:
                 register ^= alg.Poly
-        register &= alg.Mask    
+        register &= alg.Mask
     return register
+
 
 # function check_file
 ###############################################################################
@@ -198,6 +200,7 @@ def check_file(opt):
     register = register ^ opt.XorOut
     return register
 
+
 # main function
 ###############################################################################
 def main():
@@ -208,30 +211,30 @@ def main():
     opt.parse(sys.argv[1:])
     if opt.Verbose:
         print(print_parameters(opt))
-    if opt.Action == "check_string":
+    if opt.Action == opt.Action_Check_String:
         crc = check_string(opt)
         print("0x%x" % crc)
-    if opt.Action == "check_hexstring":
+    if opt.Action == opt.Action_Check_Hex_String:
         crc = check_hexstring(opt)
         print("0x%x" % crc)
-    if opt.Action == "check_file":
+    if opt.Action == opt.Action_Check_File:
         crc = check_file(opt)
         print("0x%x" % crc)
-    if opt.Action == "generate_h" or opt.Action == "generate_c" or opt.Action == "generate_c-main" or opt.Action == "generate_table":
+    if opt.Action == opt.Action_Generate_H or opt.Action == opt.Action_Generate_C or opt.Action == opt.Action_Generate_C_Main or opt.Action == opt.Action_Generate_Table:
         mp = MacroParser(opt)
-        if opt.Action == "generate_h":
+        if opt.Action == opt.Action_Generate_H:
             in_str = "{%h_template%}"
-        elif opt.Action == "generate_c":
+        elif opt.Action == opt.Action_Generate_C:
             in_str = "{%c_template%}"
-        elif opt.Action == "generate_c-main":
+        elif opt.Action == opt.Action_Generate_C_Main:
             in_str = "{%c_template%}\n\n{%main_template%}"
-        elif opt.Action == "generate_table":
+        elif opt.Action == opt.Action_Generate_Table:
             in_str = "{%crc_table_init%}"
         else:
-            sys.stderr.write("%s: error: unknown action %s\n" % (sys.argv[0], opt.Action))
+            sys.stderr.write("%s: error: unknown action. Please file a bug report!\n" % sys.argv[0])
             sys.exit(1)
         if not mp.parse(in_str):
-            sys.stderr.write("%s: error: Failure parsing internal macro language\n", sys.argv[0])
+            sys.stderr.write("%s: error: Failure parsing internal macro language. Please file a bug report!\n", sys.argv[0])
             sys.exit(1)
         if opt.OutputFile == None:
             print(mp.out_str)

@@ -1,18 +1,22 @@
-//  Copyright (C) 2006-2007  Thomas Pircher
+//  Copyright (c) 2006-2010  Thomas Pircher  <tehpeh@gmx.net>
 //
-//  This program is free software; you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation; either version 2 of the License, or
-//  (at your option) any later version.
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to deal
+//  in the Software without restriction, including without limitation the rights
+//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//  copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
 //
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
+//  The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
 //
-//  You should have received a copy of the GNU General Public License along
-//  with this program; if not, write to the Free Software Foundation, Inc.,
-//  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//  THE SOFTWARE.
 
 #include "crc.h"
 #include <getopt.h>
@@ -23,11 +27,11 @@
 #include <string.h>
 
 static bool atob(const char *str);
-static int xtoi(const char *str);
+static crc_t xtoi(const char *str);
 static int get_config(int argc, char *argv[], crc_cfg_t *cfg);
 #if CRC_ALGO_BIT_BY_BIT
 static crc_t crc_verify(const crc_cfg_t *cfg, crc_t crc_pre_final, crc_t crc);
-static long crc_reflect(long data, size_t data_len);
+static unsigned long crc_reflect(unsigned long data, size_t data_len);
 #endif
 
 
@@ -49,9 +53,9 @@ bool atob(const char *str)
     return false;
 }
 
-int xtoi(const char *str)
+crc_t xtoi(const char *str)
 {
-    int ret = 0;
+    crc_t ret = 0;
 
     if (!str) {
         return 0;
@@ -152,6 +156,7 @@ int get_config(int argc, char *argv[], crc_cfg_t *cfg)
     }
     cfg->msb_mask = 1UL << (cfg->width - 1);
     cfg->crc_mask = (cfg->msb_mask - 1) | cfg->msb_mask;
+    cfg->crc_shift = cfg->width < 8 ? 8 - cfg->width : 0;
 
     cfg->poly &= cfg->crc_mask;
     cfg->xor_in &= cfg->crc_mask;
@@ -195,10 +200,10 @@ crc_t crc_verify(const crc_cfg_t *cfg, crc_t crc_pre_final, crc_t crc)
     return result;
 }
 
-long crc_reflect(long data, size_t data_len)
+unsigned long crc_reflect(unsigned long data, size_t data_len)
 {
     unsigned int i;
-    long ret;
+    unsigned long ret;
 
     ret = 0;
     for (i = 0; i < data_len; i++)
@@ -227,6 +232,7 @@ int main(int argc, char *argv[])
 
         0,      // crc_mask
         0,      // msb_mask
+        0,      // crc_shift
     };
     crc_t crc;
     crc_t crc_test, crc_pre_final;
@@ -273,7 +279,7 @@ int main(int argc, char *argv[])
             printf(format, "crc_mask", (unsigned int)cfg.crc_mask);
             printf(format, "msb_mask", (unsigned int)cfg.msb_mask);
         }
-        printf("0x%lx\n", (long)crc);
+        printf("0x%lx\n", (unsigned long)crc);
     }
     return !ret;
 }

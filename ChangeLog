@@ -1,4 +1,35 @@
 #
+# Version 0.7.5, 2010-03-28
+#
+
+2010-03-27  Thomas Pircher   <tehpeh@gmx.net>
+
+    * crc_symtable.py:
+    C/C++ code can now be generated for the table-driven algorithm with widths
+    that are not byte-ligned or less than 8.
+
+    W A R N I N G: introduced new variable crc_shift, member of the crc_cfg_t
+                   structure, that must be initialised manually when the width
+                   was undefined during C/C++ code generation.
+
+2010-03-27  Thomas Pircher   <tehpeh@gmx.net>
+
+    * crc_opt.py, crc_algorithms.py:
+    Python implementation of the table-driven algorithm can handle widths less
+    than 8.
+    * crc_symtable.py:
+    Suppressed warnings of unused cfg structure on partially defined models.
+
+2010-03-26  Thomas Pircher   <tehpeh@gmx.net>
+
+    * pycrc.py, crc_opt.py, crc_algorithms.py, crc_symtable.py:
+    Removed half-baken and confusing --direct option.
+
+2010-02-10  Thomas Pircher   <tehpeh@gmx.net>
+
+    * pycrc.py, crc_opt.py: minor code cleanup.
+
+#
 # Version 0.7.4, 2010-01-24
 #
 

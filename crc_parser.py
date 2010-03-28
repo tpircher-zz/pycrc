@@ -52,12 +52,12 @@ class ParseError(Exception):
     The exception class for the parser
     """
 
-    # __init__
+    # Class constructor
     ###############################################################################
     def __init__(self, reason):
         self.reason = reason
 
-    # __str__
+    # function __str__
     ###############################################################################
     def __str__(self):
         return self.reason
@@ -78,13 +78,14 @@ class MacroParser(object):
     mDoPrint        = 2
     mEvalElse       = 4
 
-    # constructor
+
+    # Class constructor
     ###############################################################################
     def __init__(self, opt):
         self.opt = opt
         self.sym = SymbolTable(opt)
 
-    # parse
+    # function parse
     #
     # the used grammar (more or less correctly) in Wirth Syntax Notation:
     #
@@ -114,7 +115,8 @@ class MacroParser(object):
         self.if_stack = [ self.mPrintMask | self.mDoPrint ]
         return self.__parse_data()
 
-    # __parse_data
+
+    # function __parse_data
     ###############################################################################
     def __parse_data(self):
         """
@@ -137,7 +139,8 @@ class MacroParser(object):
             tok = self.lex.peek()
         return True
 
-    # __parse_control
+
+    # function __parse_control
     ###############################################################################
     def __parse_control(self, str):
         """
@@ -177,7 +180,8 @@ class MacroParser(object):
         sys.stderr.write("%s: %error: unknown token in control\n" % sys.argv[0])
         return False
 
-    # __parse_if
+
+    # function __parse_if
     ###############################################################################
     def __parse_if(self, str):
         """
@@ -202,7 +206,8 @@ class MacroParser(object):
         self.lex.advance(skip_nl = True)
         return True
 
-    # __parse_elif
+
+    # function __parse_elif
     ###############################################################################
     def __parse_elif(self, str):
         """
@@ -228,7 +233,8 @@ class MacroParser(object):
         self.lex.advance(skip_nl = True)
         return True
 
-    # __parse_else
+
+    # function __parse_else
     ###############################################################################
     def __parse_else(self, str):
         """
@@ -243,7 +249,8 @@ class MacroParser(object):
         self.lex.advance(skip_nl = True)
         return True
 
-    # __parse_block_start
+
+    # function __parse_block_start
     ###############################################################################
     def __parse_block_start(self):
         """
@@ -256,7 +263,8 @@ class MacroParser(object):
         self.lex.advance(skip_nl = True)
         return True
 
-    # __parse_block_end
+
+    # function __parse_block_end
     ###############################################################################
     def __parse_block_end(self):
         """
@@ -269,7 +277,8 @@ class MacroParser(object):
         self.lex.advance(skip_nl = True)
         return True
 
-    # __parse_literal
+
+    # function __parse_literal
     ###############################################################################
     def __parse_literal(self, str):
         """
@@ -285,7 +294,8 @@ class MacroParser(object):
             self.lex.prepend(data)
         return True
 
-    # __parse_expression
+
+    # function __parse_expression
     ###############################################################################
     def __parse_expression(self, str):
         """
@@ -300,7 +310,8 @@ class MacroParser(object):
             raise ParseError("extra characters after expression");
         return ret
 
-    # __parse_exp_exp
+
+    # function __parse_exp_exp
     ###############################################################################
     def __parse_exp_exp(self):
         """
@@ -321,7 +332,8 @@ class MacroParser(object):
 
         return False
 
-    # __parse_exp_term
+
+    # function __parse_exp_term
     ###############################################################################
     def __parse_exp_term(self):
         """
@@ -339,7 +351,8 @@ class MacroParser(object):
 
         return False
 
-    # __parse_exp_factor
+
+    # function __parse_exp_factor
     ###############################################################################
     def __parse_exp_factor(self):
         """
@@ -417,7 +430,8 @@ class MacroParser(object):
             print("unknown operator '%s'" % op_text)
             raise ParseError("unknown operator")
 
-    # __parse_exp_terminal
+
+    # function __parse_exp_terminal
     ###############################################################################
     def __parse_exp_terminal(self):
         """

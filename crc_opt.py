@@ -53,7 +53,7 @@ class Options(object):
     Program details
     """
     ProgramName    = "pycrc"
-    Version        = "0.7.4"
+    Version        = "0.7.5"
     VersionStr     = "%s v%s" % (ProgramName, Version)
     WebAddress     = "http://www.tty1.net/pycrc/"
 
@@ -64,6 +64,15 @@ class Options(object):
     Algo_Bit_by_Bit         = 0x01
     Algo_Bit_by_Bit_Fast    = 0x02
     Algo_Table_Driven       = 0x04
+
+    Action_Check_String     = 0x01
+    Action_Check_Hex_String = 0x02
+    Action_Check_File       = 0x03
+    Action_Generate_H       = 0x04
+    Action_Generate_C       = 0x05
+    Action_Generate_C_Main  = 0x06
+    Action_Generate_Table   = 0x07
+
 
     # Class constructor
     ###############################################################################
@@ -80,13 +89,13 @@ class Options(object):
         self.CheckString    = "123456789"
 
         self.Algorithm      = self.Algo_None
-        self.Direct         = True
         self.SymbolPrefix   = "crc_"
         self.CrcType        = None
         self.IncludeFile    = None
         self.OutputFile     = None
-        self.Action         = "check_string"
+        self.Action         = self.Action_Check_String
         self.CStd           = None
+
 
     # function parse
     ###############################################################################
@@ -134,15 +143,12 @@ following parameters:
         parser.add_option("--algorithm",
                         action="store", type="string", dest="algorithm", default="all",
                         help="choose an algorithm from {bit-by-bit, bit-by-bit-fast, table-driven, all}", metavar="ALGO")
-        parser.add_option("--direct",
-                        action="store", type="bool", dest="direct",
-                        help="direct algorithm (default: True)", metavar="BOOL")
         parser.add_option("--model",
                         action="callback", callback=self.model_cb, type="string", dest="model", default=None,
                         help="choose a parameter set from {%s}" % model_list, metavar="MODEL")
         parser.add_option("--width",
                         action="store", type="hex", dest="width",
-                        help="use WIDTH bits in the polynom", metavar="WIDTH")
+                        help="use NUM bits in the polynomial", metavar="NUM")
         parser.add_option("--poly",
                         action="store", type="hex", dest="poly",
                         help="use HEX as Polynom", metavar="HEX")
@@ -160,7 +166,7 @@ following parameters:
                         help="xor the final crc value with HEX", metavar="HEX")
         parser.add_option("--table-idx-width",
                         action="store", type="int", dest="table_idx_width",
-                        help="use WIDTH bits to index the crc table; WIDTH one of {1, 2, 4, 8}", metavar="WIDTH")
+                        help="use NUM bits to index the crc table; NUM must be one of the values {1, 2, 4, 8}", metavar="NUM")
         parser.add_option("--symbol-prefix",
                         action="store", type="string", dest="symbol_prefix",
                         help="when generating source code, use STRING as prefix to the generated symbols", metavar="STRING")
@@ -213,7 +219,7 @@ following parameters:
                 sys.exit(1)
 
         if self.Poly != None and self.Poly % 2 == 0:
-                sys.stderr.write("%s: warning: the polynom 0x%x is even. A valid CRC polynom must be odd.\n" % (sys.argv[0], self.Poly))
+                sys.stderr.write("%s: warning: the polynomial 0x%x is even. A valid CRC polynomial must be odd.\n" % (sys.argv[0], self.Poly))
 
         if self.Width != None:
             if self.Width <= 0:
@@ -241,9 +247,6 @@ following parameters:
         else:
             self.UndefinedCrcParameters = False
 
-        if options.direct != None:
-            self.Direct = options.direct
-
         if options.algorithm != None:
             alg = options.algorithm.lower()
             if alg == "bit-by-bit" or alg == "all":
@@ -255,18 +258,6 @@ following parameters:
             if self.Algorithm == 0:
                 sys.stderr.write("%s: error: unknown algorithm %s\n" % (sys.argv[0], options.algorithm))
                 sys.exit(1)
-        if self.Width != None and (self.Width % 8) != 0:
-            if options.algorithm == "table-driven":
-                sys.stderr.write("%s: error: width parameter is not aligned to byte boundaries; algorithm %s not applicable\n" % (sys.argv[0], options.algorithm))
-                sys.exit(1)
-            else:
-                self.Algorithm &= ~self.Algo_Table_Driven
-        if self.Width != None and self.Width < 8:
-            if options.algorithm == "table-driven":
-                sys.stderr.write("%s: error: width < 8, algorithm %s not applicable\n" % (sys.argv[0], options.algorithm))
-                sys.exit(1)
-            else:
-                self.Algorithm &= ~(self.Algo_Table_Driven)
 
         if options.c_std != None:
             std = options.c_std.upper()
@@ -287,25 +278,33 @@ following parameters:
             self.OutputFile = options.output_file
         op_count = 0
         if options.check_string != None:
-            self.Action         = "check_string"
+            self.Action         = self.Action_Check_String
             self.CheckString    = options.check_string
             op_count += 1
         if options.check_hexstring != None:
-            self.Action         = "check_hexstring"
+            self.Action         = self.Action_Check_Hex_String
             self.CheckString    = options.check_hexstring
             op_count += 1
         if options.check_file != None:
-            self.Action         = "check_file"
+            self.Action         = self.Action_Check_File
             self.CheckFile      = options.check_file
             op_count += 1
         if options.generate != None:
             arg = options.generate.lower()
-            if arg != 'c' and arg != 'h' and arg != "c-main" and arg != "table":
+            if arg == 'h':
+                self.Action = self.Action_Generate_H
+            elif arg == 'c':
+                self.Action = self.Action_Generate_C
+            elif arg == 'c-main':
+                self.Action = self.Action_Generate_C_Main
+            elif arg == 'table':
+                self.Action = self.Action_Generate_Table
+            else:
                 sys.stderr.write("%s: error: don't know how to generate %s\n" % (sys.argv[0], options.generate))
                 sys.exit(1)
-            self.Action = "generate_" + arg
             op_count += 1
-            if self.Action == "generate_table":
+
+            if self.Action == self.Action_Generate_Table:
                 if self.Algorithm & self.Algo_Table_Driven == 0:
                     sys.stderr.write("%s: error: the --generate table option is incompatible with the --algorithm option\n" % sys.argv[0])
                     sys.exit(1)
@@ -313,8 +312,13 @@ following parameters:
             elif self.Algorithm != self.Algo_Bit_by_Bit and self.Algorithm != self.Algo_Bit_by_Bit_Fast and self.Algorithm != self.Algo_Table_Driven:
                 sys.stderr.write("%s: error: select an algorithm to be used in the generated file\n" % sys.argv[0])
                 sys.exit(1)
+        else:
+            if self.TableIdxWidth != 8:
+                sys.stderr.write("%s: warning: reverting to Table Index Width = 8 for internal CRC calculation\n" % sys.argv[0])
+                self.TableIdxWidth = 8
+                self.TableWidth = 1 << options.table_idx_width
         if op_count == 0:
-            self.Action         = "check_string"
+            self.Action = self.Action_Check_String
         if op_count > 1:
             sys.stderr.write("%s: error: too many actions scecified\n" % sys.argv[0])
             sys.exit(1)
@@ -323,7 +327,7 @@ following parameters:
             sys.stderr.write("%s: error: unrecognized argument(s): %s\n" % (sys.argv[0], " ".join(args)))
             sys.exit(1)
 
-        if self.UndefinedCrcParameters and (self.Action == "check_string" or self.Action == "check_hexstring" or self.Action == "check_file" or self.Action == "generate_table"):
+        if self.UndefinedCrcParameters and self.Action in set((self.Action_Check_String, self.Action_Check_Hex_String, self.Action_Check_File, self.Action_Generate_Table)):
             sys.stderr.write("%s: error: undefined parameters: Add %s or use --model\n" % (sys.argv[0], ", ".join(undefined_params)))
             sys.exit(1)
         self.Verbose            = options.verbose
@@ -365,6 +369,7 @@ def check_hex(option, opt, value):
             return string.atoi(value)
     except ValueError:
         raise OptionValueError("option %s: invalid integer or hexadecimal value: %r" % (opt, value))
+
 
 # function check_bool
 ###############################################################################

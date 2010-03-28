@@ -12,6 +12,7 @@ function usage {
         echo >&2 "        -f    test file"
         echo >&2 "        -r    test random parameters"
         echo >&2 "        -p    test compiled C program with random arguments"
+        echo >&2 "        -w    test variable width from 1 to 64"
         echo >&2 "        -a    do all tests"
 }
 
@@ -22,15 +23,17 @@ crc_compile_noparam_test=off
 crc_file_test=off
 crc_random_loop_test=off
 crc_args_compile_test=off
+crc_variable_width_test=off
 crc_all_tests=off
 
-while getopts cnfrpah opt; do
+while getopts cnfrpwah opt; do
     case "$opt" in
         c)  crc_compiled_test=on;;
         n)  crc_compile_noparam_test=on;;
         f)  crc_file_test=on;;
         r)  crc_random_loop_test=on;;
         p)  crc_args_compile_test=on;;
+        w)  crc_variable_width_test=on;;
         a)  crc_all_tests=on;;
         h)  usage
             exit 0
@@ -42,11 +45,13 @@ while getopts cnfrpah opt; do
 done
 shift `expr $OPTIND - 1`
 
+
 function cleanup {
     rm -f crc.c crc.h a.out crc-bb crc-bf crc-td2 crc-td4 crc-td8 file.txt
 }
 
 trap cleanup 0 1 2 3 15
+
 
 function testres {
     testres_lcmd="$1"
@@ -149,8 +154,7 @@ res="0x19"
 cmd="$PYCRC --model crc-5"
 opt="--width 5 --poly 0x05 --reflect-in 1 --xor-in 0x1f --reflect-out 1 --xor-out 0x1f"
 teststr "$cmd" "$res"
-teststr "$PYCRC $opt --direct 0" "$res"
-teststr "$PYCRC $opt --direct 1" "$res"
+teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
 #testbin "$opt" "$res"      # don't test binaries with Width < 8 (table driven algorithm does not work)
 
@@ -159,8 +163,7 @@ res="0xf4"
 cmd="$PYCRC --model crc-8"
 opt="--width 8 --poly 0x07 --reflect-in 0 --xor-in 0x0 --reflect-out 0 --xor-out 0x0"
 teststr "$cmd" "$res"
-teststr "$PYCRC $opt --direct 0" "$res"
-teststr "$PYCRC $opt --direct 1" "$res"
+teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
 testbin "$opt" "$res"
 
@@ -169,8 +172,7 @@ res="0xa1"
 cmd="$PYCRC --model dallas-1-wire"
 opt="--width 8 --poly 0x31 --reflect-in 1 --xor-in 0 --reflect-out 1 --xor-out 0"
 teststr "$cmd" "$res"
-teststr "$PYCRC $opt --direct 0" "$res"
-teststr "$PYCRC $opt --direct 1" "$res"
+teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
 testbin "$opt" "$res"
 
@@ -179,8 +181,7 @@ res="0x59e"
 cmd="$PYCRC --model crc-15"
 opt="--width 15 --poly 0x4599 --reflect-in 0 --xor-in 0x0 --reflect-out 0 --xor-out 0x0"
 teststr "$cmd" "$res"
-teststr "$PYCRC $opt --direct 0" "$res"
-teststr "$PYCRC $opt --direct 1" "$res"
+teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
 #testbin "$opt" "$res"      # don't test binaries with width not a multiple of 8 (table driven algorithm does not work)
 
@@ -189,8 +190,7 @@ res="0xbb3d"
 cmd="$PYCRC --model crc-16"
 opt="--width 16 --poly 0x8005 --reflect-in 1 --xor-in 0x0 --reflect-out 1 --xor-out 0x0"
 teststr "$cmd" "$res"
-teststr "$PYCRC $opt --direct 0" "$res"
-teststr "$PYCRC $opt --direct 1" "$res"
+teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
 testbin "$opt" "$res"
 
@@ -199,8 +199,7 @@ res="0xb4c8"
 cmd="$PYCRC --model crc-16-usb"
 opt="--width 16 --poly 0x8005 --reflect-in 1 --xor-in 0xffff --reflect-out 1 --xor-out 0xffff"
 teststr "$cmd" "$res"
-teststr "$PYCRC $opt --direct 0" "$res"
-teststr "$PYCRC $opt --direct 1" "$res"
+teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
 testbin "$opt" "$res"
 
@@ -209,8 +208,7 @@ res="0x4b37"
 cmd="$PYCRC --model crc-16-modbus"
 opt="--width 16 --poly 0x8005 --reflect-in 1 --xor-in 0xffff --reflect-out 1 --xor-out 0x0"
 teststr "$cmd" "$res"
-teststr "$PYCRC $opt --direct 0" "$res"
-teststr "$PYCRC $opt --direct 1" "$res"
+teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
 testbin "$opt" "$res"
 
@@ -219,8 +217,7 @@ res="0x29b1"
 cmd="$PYCRC --model ccitt"
 opt="--width 16 --poly 0x1021 --reflect-in 0 --xor-in 0xffff --reflect-out 0 --xor-out 0x0"
 teststr "$cmd" "$res"
-teststr "$PYCRC $opt --direct 0" "$res"
-teststr "$PYCRC $opt --direct 1" "$res"
+teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
 testbin "$opt" "$res"
 
@@ -229,8 +226,7 @@ res="0x007e"
 cmd="$PYCRC --model r-crc-16"
 opt="--width 16 --poly 0x0589 --reflect-in 0 --xor-in 0x0 --reflect-out 0 --xor-out 0x0001"
 teststr "$cmd" "$res"
-teststr "$PYCRC $opt --direct 0" "$res"
-teststr "$PYCRC $opt --direct 1" "$res"
+teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
 testbin "$opt" "$res"
 
@@ -239,8 +235,7 @@ res="0x2189"
 cmd="$PYCRC --model kermit"
 opt="--width 16 --poly 0x1021 --reflect-in 1 --xor-in 0x0 --reflect-out 1 --xor-out 0x0"
 teststr "$cmd" "$res"
-teststr "$PYCRC $opt --direct 0" "$res"
-teststr "$PYCRC $opt --direct 1" "$res"
+teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
 testbin "$opt" "$res"
 
@@ -249,8 +244,7 @@ res="0x906e"
 cmd="$PYCRC --model x-25"
 opt="--width 16 --poly 0x1021 --reflect-in 1 --xor-in 0xffff --reflect-out 1 --xor-out 0xffff"
 teststr "$cmd" "$res"
-teststr "$PYCRC $opt --direct 0" "$res"
-teststr "$PYCRC $opt --direct 1" "$res"
+teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
 testbin "$opt" "$res"
 
@@ -259,8 +253,7 @@ res="0x31c3"
 cmd="$PYCRC --model xmodem"
 opt="--width 16 --poly 0x1021 --reflect-in 0 --xor-in 0x0 --reflect-out 0 --xor-out 0x0"
 teststr "$cmd" "$res"
-teststr "$PYCRC $opt --direct 0" "$res"
-teststr "$PYCRC $opt --direct 1" "$res"
+teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
 testbin "$opt" "$res"
 
@@ -269,8 +262,7 @@ res="0x31c3"
 cmd="$PYCRC --model zmodem"
 opt="--width 16 --poly 0x1021 --reflect-in 0 --xor-in 0x0 --reflect-out 0 --xor-out 0x0"
 teststr "$cmd" "$res"
-teststr "$PYCRC $opt --direct 0" "$res"
-teststr "$PYCRC $opt --direct 1" "$res"
+teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
 testbin "$opt" "$res"
 
@@ -279,8 +271,7 @@ res="0x21cf02"
 cmd="$PYCRC --model crc-24"
 opt="--width 24 --poly 0x1864cfb --reflect-in 0 --xor-in 0xb704ce --reflect-out 0 --xor-out 0x0"
 teststr "$cmd" "$res"
-teststr "$PYCRC $opt --direct 0" "$res"
-teststr "$PYCRC $opt --direct 1" "$res"
+teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
 #testbin "$opt" "$res"      # don't test binaries with width not a multiple of 8 (table driven algorithm does not work)
 
@@ -289,8 +280,7 @@ res="0xcbf43926"
 cmd="$PYCRC --model crc-32"
 opt="--width 32 --poly 0x4c11db7 --reflect-in 1 --xor-in 0xffffffff --reflect-out 1 --xor-out 0xffffffff"
 teststr "$cmd" "$res"
-teststr "$PYCRC $opt --direct 0" "$res"
-teststr "$PYCRC $opt --direct 1" "$res"
+teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
 testbin "$opt" "$res"
 
@@ -299,8 +289,7 @@ res="0xe3069283"
 cmd="$PYCRC --model crc-32c"
 opt="--width 32 --poly 0x1edc6f41 --reflect-in 1 --xor-in 0xffffffff --reflect-out 1 --xor-out 0xffffffff"
 teststr "$cmd" "$res"
-teststr "$PYCRC $opt --direct 0" "$res"
-teststr "$PYCRC $opt --direct 1" "$res"
+teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
 testbin "$opt" "$res"
 
@@ -309,8 +298,7 @@ res="0x765e7680"
 cmd="$PYCRC --model posix"
 opt="--width 32 --poly 0x4c11db7 --reflect-in 0 --xor-in 0x0 --reflect-out 0 --xor-out 0xffffffff"
 teststr "$cmd" "$res"
-teststr "$PYCRC $opt --direct 0" "$res"
-teststr "$PYCRC $opt --direct 1" "$res"
+teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
 testbin "$opt" "$res"
 
@@ -319,8 +307,7 @@ res="0x340bc6d9"
 cmd="$PYCRC --model jam"
 opt="--width 32 --poly 0x4c11db7 --reflect-in 1 --xor-in 0xffffffff --reflect-out 1 --xor-out 0x0"
 teststr "$cmd" "$res"
-teststr "$PYCRC $opt --direct 0" "$res"
-teststr "$PYCRC $opt --direct 1" "$res"
+teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
 testbin "$opt" "$res"
 
@@ -329,8 +316,7 @@ res="0x376e6e7"
 cmd="$PYCRC --model crc-32-mpeg"
 opt="--width 32 --poly 0x4c11db7 --reflect-in 0 --xor-in 0xffffffff --reflect-out 0 --xor-out 0x0"
 teststr "$cmd" "$res"
-teststr "$PYCRC $opt --direct 0" "$res"
-teststr "$PYCRC $opt --direct 1" "$res"
+teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
 testbin "$opt" "$res"
 
@@ -339,8 +325,7 @@ res="0xbd0be338"
 cmd="$PYCRC --model xfer"
 opt="--width 32 --poly 0x000000af --reflect-in 0 --xor-in 0x0 --reflect-out 0 --xor-out 0x0"
 teststr "$cmd" "$res"
-teststr "$PYCRC $opt --direct 0" "$res"
-teststr "$PYCRC $opt --direct 1" "$res"
+teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
 testbin "$opt" "$res"
 
@@ -349,8 +334,7 @@ res="0x46a5a9388a5beffe"
 cmd="$PYCRC --model crc-64"
 opt="--width 64 --poly 0x000000000000001b --reflect-in 1 --xor-in 0x0 --reflect-out 1 --xor-out 0x0"
 teststr "$cmd" "$res"
-teststr "$PYCRC $opt --direct 0" "$res"
-teststr "$PYCRC $opt --direct 1" "$res"
+teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
 #testbin "$opt" "$res"      # don't test binaries with width 64 bits (variables not wide enough...)
 
@@ -359,8 +343,7 @@ res="0xcaa717168609f281"
 cmd="$PYCRC --model crc-64-jones"
 opt="--width 64 --poly 0xad93d23594c935a9 --reflect-in 1 --xor-in 0xffffffffffffffff --reflect-out 1 --xor-out 0x0"
 teststr "$cmd" "$res"
-teststr "$PYCRC $opt --direct 0" "$res"
-teststr "$PYCRC $opt --direct 1" "$res"
+teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
 #testbin "$opt" "$res"      # don't test binaries with width 64 bits (variables not wide enough...)
 fi
@@ -391,18 +374,18 @@ if [ "$crc_args_compile_test" == on -o "$crc_all_tests" == on ]; then
     opt_xorin="--xor-in 0x0"
     opt_refout="--reflect-out 0"
     opt_xorout="--xor-out 0x0"
-    for width in 0 1; do
-        if [ "$width" -eq 1 ]; then cmp_width="$opt_width"; arg_width=""; else cmp_width=""; arg_width="$opt_width"; fi
-        for poly in 0 1; do
-            if [ "$poly" -eq 1 ]; then cmp_poly="$opt_poly"; arg_poly=""; else cmp_poly=""; arg_poly="$opt_poly"; fi
-            for ref_in in 0 1; do
-                if [ "$ref_in" -eq 1 ]; then cmp_refin="$opt_refin"; arg_refin=""; else cmp_refin=""; arg_refin="$opt_refin"; fi
-                for ref_out in 0 1; do
-                    if [ "$ref_out" -eq 1 ]; then cmp_refout="$opt_refout"; arg_refout=""; else cmp_refout=""; arg_refout="$opt_refout"; fi
-                    for xor_in in 0 1; do
-                        if [ "$xor_in" -eq 1 ]; then cmp_xorin="$opt_xorin"; arg_xorin=""; else cmp_xorin=""; arg_xorin="$opt_xorin"; fi
-                        for xor_out in 0 1; do
-                            if [ "$xor_out" -eq 1 ]; then cmp_xorout="$opt_xorout"; arg_xorout=""; else cmp_xorout=""; arg_xorout="$opt_xorout"; fi
+    for b_width in 0 1; do
+        if [ "$b_width" -eq 1 ]; then cmp_width="$opt_width"; arg_width=""; else cmp_width=""; arg_width="$opt_width"; fi
+        for b_poly in 0 1; do
+            if [ "$b_poly" -eq 1 ]; then cmp_poly="$opt_poly"; arg_poly=""; else cmp_poly=""; arg_poly="$opt_poly"; fi
+            for b_ref_in in 0 1; do
+                if [ "$b_ref_in" -eq 1 ]; then cmp_refin="$opt_refin"; arg_refin=""; else cmp_refin=""; arg_refin="$opt_refin"; fi
+                for b_ref_out in 0 1; do
+                    if [ "$b_ref_out" -eq 1 ]; then cmp_refout="$opt_refout"; arg_refout=""; else cmp_refout=""; arg_refout="$opt_refout"; fi
+                    for b_xor_in in 0 1; do
+                        if [ "$b_xor_in" -eq 1 ]; then cmp_xorin="$opt_xorin"; arg_xorin=""; else cmp_xorin=""; arg_xorin="$opt_xorin"; fi
+                        for b_xor_out in 0 1; do
+                            if [ "$b_xor_out" -eq 1 ]; then cmp_xorout="$opt_xorout"; arg_xorout=""; else cmp_xorout=""; arg_xorout="$opt_xorout"; fi
 
                             cmp_opt="$cmp_width $cmp_poly $cmp_refin $cmp_refout $cmp_xorin $cmp_xorout"
                             arg_opt="$arg_width $arg_poly $arg_refin $arg_refout $arg_xorin $arg_xorout"
@@ -414,6 +397,40 @@ if [ "$crc_args_compile_test" == on -o "$crc_all_tests" == on ]; then
                 done
             done
         done
+    done
+fi
+
+
+if [ "$crc_variable_width_test" == on -o "$crc_all_tests" == on ]; then
+    opt_poly="--poly 0xad93d23594c935a9"
+    opt_refin="--reflect-in 1"
+    opt_xorin="--xor-in 0xffffffffffffffff"
+    opt_refout="--reflect-out 1"
+    opt_xorout="--xor-out 0x0000000000000000"
+    for width in 1 2 3 4 5 6 7 8 9 11 12 15 16 17 24 31 32 33 63 64; do
+    for b_width in 0 1; do
+        if [ "$b_width" -eq 1 ]; then cmp_width="--width $width"; arg_width=""; else cmp_width=""; arg_width="--width $width"; fi
+        for b_poly in 0 1; do
+            if [ "$b_poly" -eq 1 ]; then cmp_poly="$opt_poly"; arg_poly=""; else cmp_poly=""; arg_poly="$opt_poly"; fi
+            for b_ref_in in 0 1; do
+                if [ "$b_ref_in" -eq 1 ]; then cmp_refin="$opt_refin"; arg_refin=""; else cmp_refin=""; arg_refin="$opt_refin"; fi
+                for b_ref_out in 0 1; do
+                    if [ "$b_ref_out" -eq 1 ]; then cmp_refout="$opt_refout"; arg_refout=""; else cmp_refout=""; arg_refout="$opt_refout"; fi
+                    for b_xor_in in 0 1; do
+                        if [ "$b_xor_in" -eq 1 ]; then cmp_xorin="$opt_xorin"; arg_xorin=""; else cmp_xorin=""; arg_xorin="$opt_xorin"; fi
+                        for b_xor_out in 0 1; do
+                            if [ "$b_xor_out" -eq 1 ]; then cmp_xorout="$opt_xorout"; arg_xorout=""; else cmp_xorout=""; arg_xorout="$opt_xorout"; fi
+
+                            cmp_opt="$cmp_width $cmp_poly $cmp_refin $cmp_refout $cmp_xorin $cmp_xorout"
+                            arg_opt="$arg_width $arg_poly $arg_refin $arg_refout $arg_xorin $arg_xorout"
+                            res=`$PYCRC --algorithm bit-by-bit $cmp_opt $arg_opt`
+                            testcmp table-driven "$cmp_opt" "$arg_opt" "$res"
+                        done
+                    done
+                done
+            done
+        done
+    done
     done
 fi
 

@@ -57,12 +57,12 @@ class Lexer(object):
     tok_unknown = 0
     tok_EOF     = 1
 
-    # constructor
+    # Class constructor
     ###############################################################################
     def __init__(self, str = ""):
         self.set_str(str)
 
-    # set_str
+    # function set_str
     ###############################################################################
     def set_str(self, str):
         self.str = str
@@ -70,12 +70,12 @@ class Lexer(object):
         self.text_len = 0
         self.tok = self.tok_unknown
 
-    # peek
+    # function peek
     ###############################################################################
     def peek(self):
         return self.tok_unknown
 
-    # advance
+    # function advance
     ###############################################################################
     def advance(self, skip_nl = False):
         skip_len = self.text_len
@@ -83,7 +83,7 @@ class Lexer(object):
             skip_len = skip_len + 1     # FIXME: check on Windoze if I can do simply a +1 to skip the line ending...
         self.str = self.str[skip_len:]
 
-    # prepend
+    # function prepend
     ###############################################################################
     def prepend(self, str):
         self.text = ""
@@ -103,13 +103,15 @@ class LangLexer(Lexer):
     tok_block_start = 14
     tok_block_end   = 15
 
-    # constructor
+
+    # Class constructor
     ###############################################################################
     def __init__(self, str = ""):
         super(LangLexer, self).__init__(str)
         self.re_control = re.compile("\{%([^%}]*)%\}")
 
-    # peek
+
+    # function peek
     ###############################################################################
     def peek(self):
         if len(self.str) == 0:
@@ -148,6 +150,7 @@ class LangLexer(Lexer):
         return self.tok_text
 
 
+
 # Class ExpLexer
 ###############################################################################
 class ExpLexer(Lexer):
@@ -163,7 +166,8 @@ class ExpLexer(Lexer):
     tok_par_open    = 17
     tok_par_close   = 18
 
-    # constructor
+
+    # Class constructor
     ###############################################################################
     def __init__(self, str = ""):
         super(ExpLexer, self).__init__(str)
@@ -176,7 +180,8 @@ class ExpLexer(Lexer):
         self.re_is_int = re.compile("^[-+]?[0-9]+$")
         self.re_is_hex = re.compile("^(0[xX])?[0-9a-fA-F]+$")
 
-    # peek
+
+    # function peek
     ###############################################################################
     def peek(self):
         self.str = self.str.strip()
@@ -223,7 +228,8 @@ class ExpLexer(Lexer):
         self.text = ""
         return self.tok_unknown
 
-    # is_int
+
+    # function is_int
     ###############################################################################
     def is_int(self, str):
         try:
@@ -231,7 +237,8 @@ class ExpLexer(Lexer):
         except TypeError:
             return False
 
-    # is_hex
+
+    # function is_hex
     ###############################################################################
     def is_hex(self, str):
         try:
