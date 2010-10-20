@@ -3,13 +3,18 @@ XSLTPARAM		= --nonet --novalid
 HTML_STYLESHEET	= /usr/share/xml/docbook/stylesheet/nwalsh/xhtml/docbook.xsl
 MAN_STYLESHEET	= /usr/share/xml/docbook/stylesheet/nwalsh/manpages/docbook.xsl
 
-TARGETS		= pycrc.html pycrc.1
+source      = pycrc.xml
+targets		= $(source:.xml=.html) $(source:.xml=.1)
 
-all: $(TARGETS)
+all: $(targets)
 
 .PHONY: clean
 clean:
-	$(RM) $(TARGETS)
+	$(RM) $(targets)
+
+.PHONY: check
+check:
+	xmllint --valid --noout $(source)
 
 %.html: %.xml
 	$(XSLTPROC) $(XSLTPARAM) -o $@ $(HTML_STYLESHEET) $<

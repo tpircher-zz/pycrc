@@ -1,4 +1,23 @@
 #
+# Version 0.7.6, 2010-10-21
+#
+
+2010-10-21  Thomas Pircher   <tehpeh@gmx.net>
+
+    * crc_symtable.py:
+    Fixed a minor bug in the command line parsing of the generated main function.
+
+2010-08-07  Thomas Pircher   <tehpeh@gmx.net>
+
+    * crc_symtable.py, crc_parser.py, crc_lexer.py:
+    Rewritten macro parser from scratch. Simplified the macro language.
+
+2010-08-03  Thomas Pircher   <tehpeh@gmx.net>
+
+    * crc_symtable.py: changed a simple division (/) to a integer division (//)
+    for Python3 compatibility.
+
+#
 # Version 0.7.5, 2010-03-28
 #
 

@@ -180,11 +180,12 @@ class Crc(object):
     def gen_table(self):
         """
         This function generates the CRC table used for the table_driven CRC algorithm.
-        The Python version cannot handle tables of a different size rather than 8.
+        The Python version cannot handle tables of an index width other than 8.
         See the generated C code for tables with different sizes instead.
         """
-        tbl = {}
-        for i in range(1 << self.TableIdxWidth):
+        table_length = 1 << self.TableIdxWidth
+        tbl = [0] * table_length
+        for i in range(table_length):
             register = i
             if self.ReflectIn:
                 register = self.reflect(register, self.TableIdxWidth)

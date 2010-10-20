@@ -50,16 +50,16 @@ import sys
 ###############################################################################
 def print_parameters(opt):
     """
-    Generate a string with the options pretty-printed (used in the --verbose mode)
+    Generate a string with the options pretty-printed (used in the --verbose mode).
     """
     out  = ""
-    out += "Width        = {%crc_width%}\n"
-    out += "Poly         = {%crc_poly%}\n"
-    out += "ReflectIn    = {%crc_reflect_in%}\n"
-    out += "XorIn        = {%crc_xor_in%}\n"
-    out += "ReflectOut   = {%crc_reflect_out%}\n"
-    out += "XorOut       = {%crc_xor_out%}\n"
-    out += "Algorithm    = {%crc_algorithm%}\n"
+    out += "Width        = $crc_width\n"
+    out += "Poly         = $crc_poly\n"
+    out += "ReflectIn    = $crc_reflect_in\n"
+    out += "XorIn        = $crc_xor_in\n"
+    out += "ReflectOut   = $crc_reflect_out\n"
+    out += "XorOut       = $crc_xor_out\n"
+    out += "Algorithm    = $crc_algorithm\n"
 
     mp = MacroParser(opt)
     if not mp.parse(out):
@@ -71,7 +71,7 @@ def print_parameters(opt):
 ###############################################################################
 def check_string(opt):
     """
-    Returns the calculated CRC sum of a string
+    Return the calculated CRC sum of a string.
     """
     error = False
     if opt.UndefinedCrcParameters:
@@ -118,7 +118,7 @@ def check_string(opt):
 ###############################################################################
 def check_hexstring(opt):
     """
-    Returns the calculated CRC sum of a string
+    Return the calculated CRC sum of a hex string.
     """
     if opt.UndefinedCrcParameters:
         sys.stderr.write("%s: error: undefined parameters\n" % sys.argv[0])
@@ -164,7 +164,7 @@ def check_file(opt):
     This algorithm uses the table_driven CRC algorithm.
     """
     if opt.UndefinedCrcParameters:
-        sys.stderr.write("%s: error: undefined parameters\n", sys.argv[0])
+        sys.stderr.write("%s: error: undefined parameters\n" % sys.argv[0])
         sys.exit(1)
     alg = Crc(width = opt.Width, poly = opt.Poly,
         reflect_in = opt.ReflectIn, xor_in = opt.XorIn,
@@ -205,7 +205,7 @@ def check_file(opt):
 ###############################################################################
 def main():
     """
-    Main function
+    Main function.
     """
     opt = Options()
     opt.parse(sys.argv[1:])
@@ -223,19 +223,17 @@ def main():
     if opt.Action == opt.Action_Generate_H or opt.Action == opt.Action_Generate_C or opt.Action == opt.Action_Generate_C_Main or opt.Action == opt.Action_Generate_Table:
         mp = MacroParser(opt)
         if opt.Action == opt.Action_Generate_H:
-            in_str = "{%h_template%}"
+            in_str = "$h_template"
         elif opt.Action == opt.Action_Generate_C:
-            in_str = "{%c_template%}"
+            in_str = "$c_template"
         elif opt.Action == opt.Action_Generate_C_Main:
-            in_str = "{%c_template%}\n\n{%main_template%}"
+            in_str = "$c_template\n\n$main_template"
         elif opt.Action == opt.Action_Generate_Table:
-            in_str = "{%crc_table_init%}"
+            in_str = "$crc_table_init"
         else:
             sys.stderr.write("%s: error: unknown action. Please file a bug report!\n" % sys.argv[0])
             sys.exit(1)
-        if not mp.parse(in_str):
-            sys.stderr.write("%s: error: Failure parsing internal macro language. Please file a bug report!\n", sys.argv[0])
-            sys.exit(1)
+        mp.parse(in_str)
         if opt.OutputFile == None:
             print(mp.out_str)
         else:

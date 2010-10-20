@@ -3,7 +3,7 @@ set -e
 
 PYCRC=`dirname $0`/../pycrc.py
 
-function usage {
+usage() {
         echo >&2 "usage: $0 [OPTIONS]"
         echo >&2 ""
         echo >&2 "with OPTIONS in"
@@ -46,14 +46,14 @@ done
 shift `expr $OPTIND - 1`
 
 
-function cleanup {
+cleanup() {
     rm -f crc.c crc.h a.out crc-bb crc-bf crc-td2 crc-td4 crc-td8 file.txt
 }
 
 trap cleanup 0 1 2 3 15
 
 
-function testres {
+testres() {
     testres_lcmd="$1"
     testres_lres="$2"
     testres_lres=`echo $testres_lres | sed -e      's/.*0x0*\([0-9a-fA-F][0-9a-fA-F]*\).*/\1/'`
@@ -66,14 +66,14 @@ function testres {
 }
 
 
-function teststr {
+teststr() {
     teststr_lopt="$1 --check-string 123456789"
     teststr_lres="$2"
     testres "$teststr_lopt" "$teststr_lres"
 }
 
 
-function compile {
+compile() {
     compile_lalg="$1"
     compile_lopt="$2"
     compile_lout="$3"
@@ -90,7 +90,7 @@ function compile {
 }
 
 
-function testcmp {
+testcmp() {
     testcmp_lalg="$1"
     testcmp_lopt="$2"
     testcmp_larg="$3"
@@ -104,7 +104,7 @@ function testcmp {
 }
 
 
-function testbin {
+testbin() {
     testbin_lopt="$1"
     testbin_lres="$2"
 
@@ -126,7 +126,7 @@ function testbin {
 }
 
 
-function testfil {
+testfil() {
     testfil_lopt="$1 --check-file file.txt"
     testfil_lres="$2"
 

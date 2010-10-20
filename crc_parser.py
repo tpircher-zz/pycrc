@@ -27,13 +27,14 @@
 Macro Language parser for pycrc.
 use as follows:
 
+    import sys
     from crc_opt import Options
     from crc_parser import MacroParser
 
-    opt = Options("0.6")
-    opt.parse(sys.argv)
+    opt = Options()
+    opt.parse(sys.argv[1:])
     mp = MacroParser(opt)
-    if mp.parse(out):
+    if mp.parse("Test 1 2 3"):
         print(mp.out_str)
 
 
@@ -41,7 +42,8 @@ This file is part of pycrc.
 """
 
 from crc_symtable import SymbolTable
-from crc_lexer import LangLexer, ExpLexer
+from crc_lexer import Lexer
+import re
 import sys
 
 
@@ -49,7 +51,7 @@ import sys
 ###############################################################################
 class ParseError(Exception):
     """
-    The exception class for the parser
+    The exception class for the parser.
     """
 
     # Class constructor
@@ -67,16 +69,15 @@ class ParseError(Exception):
 ###############################################################################
 class MacroParser(object):
     """
-    The macro language parser and code generator class
+    The macro language parser and code generator class.
     """
+    re_is_int = re.compile("^[-+]?[0-9]+$")
+    #re_is_hex = re.compile("^(0[xX])?[0-9a-fA-F]+$")
+    re_is_hex = re.compile("^0[xX][0-9a-fA-F]+$")
+
     opt = None
     sym = None
-    lex = LangLexer()
-    explex = ExpLexer()
-
-    mPrintMask      = 1
-    mDoPrint        = 2
-    mEvalElse       = 4
+    lex = Lexer()
 
 
     # Class constructor
@@ -87,369 +88,337 @@ class MacroParser(object):
 
     # function parse
     #
-    # the used grammar (more or less correctly) in Wirth Syntax Notation:
-    #
-    # DATA = { LITERAL | CONTROL } .
-    # CONTROL = IF | "{%" LITERAL "%}" .
-    # IF = "{%" "if" EXPRESSION "%}" "{:" { DATA } ":}"
-    #       { "{%" "elif" EXPRESSION "%}" "{:" { DATA } ":}" }
-    #       [ "{%" "else" "%}" "{:" { DATA } ":}" ]
-    #       .
-    # STRING = """" LITERAL """" .
-    # ID = "{%" LITERAL "%}" .
-    # LITERAL = letter { letter } .
-    #
-    # EXPRESSION = TERM { "or" TERM } .
-    # TERM = FACTOR { "and" FACTOR } .
-    # FACTOR = ( EXPRESSION ) | TERMINAL OP TERMINAL .
-    # TERMINAL = ID | STRING | LITERAL .
-    # OP = "==" | ">" | "<" | "<=" | "=>" | "!=" .
+    # The used grammar is:
+    # term:           LITERAL
+    #               | IDENTIFIER
+    #               | '(' or_exp ')'
+    #               ;
+    # 
+    # comp_exp:       term OP_COMPARISON term
+    #               ;
+    # 
+    # and_exp:        term
+    #               | and_exp OP_AND comp_exp
+    #               ;
+    # 
+    # or_exp:         and_exp
+    #               | or_exp OP_OR and_exp
+    #               ;
+    # 
+    # else_block:     /* empty */
+    #               | ELSE '{:' data ':}'
+    #               ;
+    # 
+    # elif_blocks:    /* empty */
+    #               | elif_blocks ELIF '(' or_exp ')' '{:' data ':}'
+    #               ;
+    # 
+    # if_block:     IF '(' or_exp ')' '{:' data ':}' elif_blocks else_block
+    #               ;
+    # 
+    # data:           /* empty */
+    #               | data GIBBERISH
+    #               | data IDENTIFIER
+    #               | data '{:' data ':}'
+    #               | data if_block
+    #               ;
     #
     ###############################################################################
-    def parse(self, str):
+    def parse(self, in_str):
         """
-        parse a string
+        Parse a macro string.
         """
-        self.lex.set_str(str)
+        self.lex.set_str(in_str)
         self.out_str = ""
-        self.if_stack = [ self.mPrintMask | self.mDoPrint ]
-        return self.__parse_data()
+        self._parse_data(do_print = True)
+
+        tok = self.lex.peek()
+        if tok != self.lex.tok_EOF:
+            raise ParseError("%s: error: misaligned closing block '%s'" % (sys.argv[0], self.lex.text))
 
 
-    # function __parse_data
+    # function _parse_data
     ###############################################################################
-    def __parse_data(self):
+    def _parse_data(self, do_print):
         """
-        parse data
+        Private top-level parsing function.
         """
         tok = self.lex.peek()
         while tok != self.lex.tok_EOF:
-            if tok == self.lex.tok_text:
-                if (self.if_stack[0] & self.mDoPrint) == self.mDoPrint:
-                    self.out_str += self.lex.text
-                self.lex.advance(skip_nl = False)
-            elif tok == self.lex.tok_control:
-                if not self.__parse_control(self.lex.text):
-                    return False
-            elif tok == self.lex.tok_block_end:
-                return True
+            if tok == self.lex.tok_gibberish:
+                self._parse_gibberish(do_print)
+            elif tok == self.lex.tok_block_open:
+                self._parse_data_block(do_print)
+            elif tok == self.lex.tok_identifier and self.lex.text == "if":
+                self._parse_if_block(do_print)
+            elif tok == self.lex.tok_identifier:
+                self._parse_identifier(do_print)
+            elif tok == self.lex.tok_block_close:
+                return
             else:
-                sys.stderr.write("%s: error: wrong token %s\n" % (sys.argv[0], self.lex.text))
-                return False
+                raise ParseError("%s: error: wrong token '%s'" % (sys.argv[0], self.lex.text))
             tok = self.lex.peek()
-        return True
 
 
-    # function __parse_control
+    # function _parse_gibberish
     ###############################################################################
-    def __parse_control(self, str):
+    def _parse_gibberish(self, do_print):
         """
-        parse a control structure
+        Parse gibberish.
+        Actually, just print the characters in 'text' if do_print is True.
         """
+        if do_print:
+            self.out_str = self.out_str + self.lex.text
+        self.lex.advance()
+
+
+    # function _parse_identifier
+    ###############################################################################
+    def _parse_identifier(self, do_print):
+        """
+        Parse an identifier.
+        """
+        try:
+            sym_value = self.sym.getTerminal(self.lex.text)
+        except LookupError:
+            raise ParseError("%s: error: unknown terminal '%s'" % (sys.argv[0], self.lex.text))
+#        if sym_value == None:
+#            sym_value = 'Undefined'
+        self.lex.advance()
+        if do_print:
+            self.lex.prepend(sym_value)
+
+
+    # function _parse_if_block
+    ###############################################################################
+    def _parse_if_block(self, do_print):
+        """
+        Parse an if block.
+        """
+        # parse the expression following the 'if' and the associated block.
+        exp_res = self._parse_conditional_block(do_print)
+        do_print = do_print and not exp_res
+
+        # try $elif
         tok = self.lex.peek()
-        if tok == self.lex.tok_control:
-            if self.lex.text.startswith("if "):
-                if not self.__parse_if(self.lex.text) or \
-                    not self.__parse_block_start() or \
-                    not self.__parse_data() or \
-                    not self.__parse_block_end():
-                    return False
-                tok = self.lex.peek()
-                while self.lex.text.startswith("elif "):
-                    if not self.__parse_elif(self.lex.text) or \
-                        not self.__parse_block_start() or \
-                        not self.__parse_data() or \
-                        not self.__parse_block_end():
-                        return False
-                    tok = self.lex.peek()
-                if self.lex.text == "else":
-                    if not self.__parse_else(self.lex.text) or \
-                        not self.__parse_block_start() or \
-                        not self.__parse_data() or \
-                        not self.__parse_block_end():
-                        return False
-                self.if_stack.pop(0)
-                return True
-            elif self.lex.text == "else" or self.lex.text.startswith("elif "):
-                sys.stderr.write("%s: error: unmatched %s clause\n" % (sys.argv[0], self.lex.text[:4]))
-                return False
+        while tok == self.lex.tok_identifier and self.lex.text == "elif":
+            exp_res = self._parse_conditional_block(do_print)
+            do_print = do_print and not exp_res
+            tok = self.lex.peek()
+
+        # try $else
+        if tok == self.lex.tok_identifier and self.lex.text == "else":
+            # get rid of the tok_identifier, 'else' and following spaces
+            self.lex.advance()
+            self.lex.delete_spaces()
+
+            # expect a data block
+            self._parse_data_block(do_print)
+
+
+
+    # function _parse_conditional_block
+    ###############################################################################
+    def _parse_conditional_block(self, do_print):
+        """
+        Parse a conditional block (such as $if or $elif).
+        Return the truth value of the expression.
+        """
+        # get rid of the tok_identifier, 'if' or 'elif'
+        self.lex.advance()
+        self.lex.set_state(self.lex.state_expr)
+
+        # expect an open parenthesis
+        tok = self.lex.peek()
+        if tok != self.lex.tok_par_open:
+            raise ParseError("%s: error: open parenthesis expected: '%s'" % (sys.argv[0], self.lex.text))
+        self.lex.advance()
+
+        # parse the boolean expression
+        exp_res = self._parse_exp_or()
+
+        # expect a closed parenthesis
+        tok = self.lex.peek()
+        if tok != self.lex.tok_par_close:
+            raise ParseError("%s: error: closed parenthesis expected: '%s'" % (sys.argv[0], self.lex.text))
+        self.lex.advance()
+
+        # get rid of eventual spaces, and switch back to gibberish.
+        self.lex.delete_spaces()
+        self.lex.set_state(self.lex.state_gibberish)
+
+        # expect a data block
+        self._parse_data_block(do_print and exp_res)
+
+        # get rid of eventual spaces
+        # but only if followed by $if, $else or $elif
+        self.lex.delete_spaces(skip_unconditional = False)
+
+        return exp_res
+
+
+    # function _parse_data_block
+    ###############################################################################
+    def _parse_data_block(self, do_print):
+        """
+        Parse a data block.
+        """
+        # expect an open block
+        tok = self.lex.peek()
+        if tok != self.lex.tok_block_open:
+            raise ParseError("%s: error: open block expected: '%s'" % (sys.argv[0], self.lex.text))
+        self.lex.advance(skip_nl = True)
+
+        # more data follows...
+        self._parse_data(do_print)
+
+        # expect a closed block
+        tok = self.lex.peek()
+        if tok != self.lex.tok_block_close:
+            raise ParseError("%s: error: closed block expected: '%s'" % (sys.argv[0], self.lex.text))
+        self.lex.advance(skip_nl = True)
+
+
+    # function _parse_exp_or
+    ###############################################################################
+    def _parse_exp_or(self):
+        """
+        Parse a boolean 'or' expression.
+        """
+        ret = False
+        while True:
+            ret = self._parse_exp_and() or ret
+
+            # is the expression terminated?
+            tok = self.lex.peek()
+            if tok == self.lex.tok_par_close:
+                return ret
+            # expect an 'or' token.
+            elif tok == self.lex.tok_or:
+                self.lex.advance()
+            # everything else is the end of the expression.
+            # Let the caling function worry about error reporting.
             else:
-                if not self.__parse_literal(self.lex.text):
-                    return False
-                return True
-        sys.stderr.write("%s: %error: unknown token in control\n" % sys.argv[0])
+                return ret
         return False
 
 
-    # function __parse_if
+    # function _parse_exp_and
     ###############################################################################
-    def __parse_if(self, str):
+    def _parse_exp_and(self):
         """
-        parse a if operation
+        Parse a boolean 'and' expression.
         """
-        exp = str[3:].strip()
-        try:
-            condition = self.__parse_expression(exp)
-        except ParseError:
-            sys.stderr.write("%s: %error: parsing expression %s failed\n" % (sys.argv[0], str))
-            return False
+        ret = True
+        while True:
+            ret = self._parse_exp_comparison() and ret
 
-        stack_state = self.if_stack[0]
-        if (stack_state & self.mDoPrint) == self.mDoPrint:
-            if condition:
-                stack_state = self.mPrintMask | self.mDoPrint
+            # is the expression terminated?
+            tok = self.lex.peek()
+            if tok == self.lex.tok_par_close:
+                return ret
+            # expect an 'and' token.
+            elif tok == self.lex.tok_and:
+                self.lex.advance()
+            # everything else is a parse error.
             else:
-                stack_state = self.mPrintMask | self.mEvalElse
-        else:
-            stack_state = 0
-        self.if_stack.insert(0, stack_state)
-        self.lex.advance(skip_nl = True)
-        return True
+                return ret
+#                raise ParseError("Unexpected token '%s'" % self.lex.text)
+        return False
 
 
-    # function __parse_elif
+    # function _parse_exp_comparison
     ###############################################################################
-    def __parse_elif(self, str):
+    def _parse_exp_comparison(self):
         """
-        parse a elif operation
+        Parse a boolean comparison.
         """
-        stack_state = self.if_stack[0]
-        if (stack_state & (self.mPrintMask | self.mEvalElse)) == (self.mPrintMask | self.mEvalElse):
-            exp = str[5:].strip()
-            try:
-                condition = self.__parse_expression(exp)
-            except ParseError:
-                sys.stderr.write("%s: error: parsing of expression %s failed\n" % (sys.argv[0], str))
-                return False
+        # left hand side of the comparison
+        lhs = self._parse_exp_term()
 
-            if condition:
-                stack_state = self.mPrintMask | self.mDoPrint
-            else:
-                stack_state = self.mPrintMask | self.mEvalElse
-        else:
-            stack_state = 0
-
-        self.if_stack[0] = stack_state
-        self.lex.advance(skip_nl = True)
-        return True
-
-
-    # function __parse_else
-    ###############################################################################
-    def __parse_else(self, str):
-        """
-        parse a if operation
-        """
-        stack_state = self.if_stack[0]
-        if (stack_state & (self.mPrintMask | self.mEvalElse)) == (self.mPrintMask | self.mEvalElse):
-            stack_state = self.mPrintMask | self.mDoPrint
-        else:
-            stack_state = 0
-        self.if_stack[0] = stack_state
-        self.lex.advance(skip_nl = True)
-        return True
-
-
-    # function __parse_block_start
-    ###############################################################################
-    def __parse_block_start(self):
-        """
-        parse a begin of a control block
-        """
+        # expect a comparison
         tok = self.lex.peek()
-        if tok != self.lex.tok_block_start:
-            sys.stderr.write("%s: error: begin block expected, at %s\n" % (sys.argv[0], self.lex.text))
-            return False
-        self.lex.advance(skip_nl = True)
-        return True
+        if tok != self.lex.tok_op:
+            raise ParseError("%s: error: operator expected: '%s'" % (sys.argv[0], self.lex.text))
+        operator = self.lex.text
+        self.lex.advance()
 
+        # right hand side of the comparison
+        rhs = self._parse_exp_term()
 
-    # function __parse_block_end
-    ###############################################################################
-    def __parse_block_end(self):
-        """
-        parse a end of a control block
-        """
-        tok = self.lex.peek()
-        if tok != self.lex.tok_block_end:
-            sys.stderr.write("%s: error: end block expected, at %s\n" % (sys.argv[0], self.lex.text))
-            return False
-        self.lex.advance(skip_nl = True)
-        return True
+        # if both operands ar numbers, convert them
+        num_l = self._get_num(lhs)
+        num_r = self._get_num(rhs)
+        if num_l != None and num_r != None:
+            lhs = num_l
+            rhs = num_r
 
-
-    # function __parse_literal
-    ###############################################################################
-    def __parse_literal(self, str):
-        """
-        parse a literal
-        """
-        try:
-            data = self.sym.getTerminal(str)
-        except LookupError:
-            sys.stderr.write("%s: error: unknown terminal %s\n" % (sys.argv[0], self.lex.text))
-            return False
-        self.lex.advance(skip_nl = False)
-        if (self.if_stack[0] & self.mDoPrint) == self.mDoPrint:
-            self.lex.prepend(data)
-        return True
-
-
-    # function __parse_expression
-    ###############################################################################
-    def __parse_expression(self, str):
-        """
-        parse an expression
-        """
-        self.explex.set_str(str)
-        try:
-            ret = self.__parse_exp_exp()
-        except ParseError:
-            raise ParseError("Exp parsing failed")
-        if self.explex.peek() != self.explex.tok_EOF:
-            raise ParseError("extra characters after expression");
+        # now calculate the result of the comparison, whatever that means
+        if operator == "<=":
+            ret = lhs <= rhs
+        elif operator == "<":
+            ret = lhs < rhs
+        elif operator == "==":
+            ret = lhs == rhs
+        elif operator == "!=":
+            ret = lhs != rhs
+        elif operator == ">=":
+            ret = lhs >= rhs
+        elif operator == ">":
+            ret = lhs > rhs
+        else:
+            raise ParseError("%s: error: unknow operator: '%s'" % (sys.argv[0], self.lex.text))
         return ret
 
 
-    # function __parse_exp_exp
+    # function _parse_exp_term
     ###############################################################################
-    def __parse_exp_exp(self):
+    def _parse_exp_term(self):
         """
-        parse an expression
+        Parse a terminal.
         """
-        ret = False
+        tok = self.lex.peek()
 
-        while True:
-            ret = self.__parse_exp_term() or ret
-
-            tok = self.explex.peek()
-            if tok == self.explex.tok_EOF:
-                return ret
-            if tok != self.explex.tok_or:
-                print("expecting 'or' and not '%s'" % self.explex.text)
-                raise ParseError("Unexpected token")
-            self.explex.advance(skip_nl = False)
-
-        return False
-
-
-    # function __parse_exp_term
-    ###############################################################################
-    def __parse_exp_term(self):
-        """
-        parse a term
-        """
-        ret = True
-
-        while True:
-            ret = self.__parse_exp_factor() and ret
-            tok = self.explex.peek()
-
-            if tok != self.explex.tok_and:
-                return ret
-            self.explex.advance(skip_nl = False)
-
-        return False
-
-
-    # function __parse_exp_factor
-    ###############################################################################
-    def __parse_exp_factor(self):
-        """
-        parse a term
-        """
-        ret = True
-
-        tok = self.explex.peek()
-
-        if tok == self.explex.tok_par_open:
-            self.explex.advance(skip_nl = False)
-            ret = self.__parse_exp_exp()
-            tok = self.explex.peek()
-            if tok != self.explex.tok_par_close:
-                print("missing ')' before '%s'" % self.explex.text)
-                raise ParseError("missing ')' before '%s'" % self.explex.text)
-            self.explex.advance(skip_nl = False)
-            self.explex.peek()
-            return ret
-
-        val1_str = self.explex.text
-        val1 = self.__parse_exp_terminal()
-        tok = self.explex.peek()
-        if tok != self.explex.tok_op:
-            print("operator expected and not '%s' before '%s'" % (self.explex.text, self.explex.str))
-            raise ParseError("operator expected and not '%s'" % self.explex.text)
-        op_text = self.explex.text
-        self.explex.advance(skip_nl = False)
-        self.explex.peek()
-        val2_str = self.explex.text
-        val2 = self.__parse_exp_terminal()
-        if val1 == None or val2 == None:
-            if op_text == "==":
-                if (val1 == None and val2 == "Undefined") or (val1 == "Undefined" and val2 == None):
-                    return True
-            elif op_text == "!=":
-                if (val1 == None and val2 == "Undefined") or (val1 == "Undefined" and val2 == None):
-                    return False
-            if val1 == None:
-                text = val1_str
-            else:
-                text = val2_str
-            print("undefined parameter '%s'" % text)
-            raise ParseError("undefined parameter")
-
-        val1_num = val2_num = None
-        if val1 != None:
-            if self.explex.is_int(val1):
-                val1_num = int(val1)
-            if self.explex.is_hex(val1):
-                val1_num = int(val1, 16)
-        if val2 != None:
-            if self.explex.is_int(val2):
-                val2_num = int(val2)
-            if self.explex.is_hex(val2):
-                val2_num = int(val2, 16)
-
-        if val1_num != None and val2_num != None:
-            val1 = val1_num
-            val2 = val2_num
-
-        if op_text == "<":
-            return val1 < val2
-        if op_text == "<=":
-            return val1 <= val2
-        if op_text == "==":
-            return val1 == val2
-        if op_text == "!=":
-            return val1 != val2
-        if op_text == ">=":
-            return val1 >= val2
-        if op_text == ">":
-            return val1 > val2
-        else:
-            print("unknown operator '%s'" % op_text)
-            raise ParseError("unknown operator")
-
-
-    # function __parse_exp_terminal
-    ###############################################################################
-    def __parse_exp_terminal(self):
-        """
-        parse a terminal
-        """
-        tok = self.explex.peek()
-        if tok == self.explex.tok_id:
-            if self.explex.text == "Undefined":
+        # identifier
+        if tok == self.lex.tok_identifier:
+            try:
+                ret = self.sym.getTerminal(self.lex.text)
+            except LookupError:
+                raise ParseError("%s: error: unknown terminal '%s'" % (sys.argv[0], self.lex.text))
+            if ret == None:
                 ret = "Undefined"
-            else:
-                try:
-                    ret = self.sym.getTerminal(self.explex.text)
-                except LookupError:
-                    ret = None
-        elif tok == self.explex.tok_str:
-            ret = self.explex.text
-        else:
-            print("unexpected terminal '%s' before '%s'" % (self.explex.text, self.explex.str))
-            raise ParseError("unexpected terminal '%s'" % self.explex.text)
-        self.explex.advance(skip_nl = False)
+        # string
+        elif tok == self.lex.tok_str:
+            ret = self.lex.text
+        # number
+        elif tok == self.lex.tok_num:
+            ret = self.lex.text
+        # parenthesised expression
+        elif tok == self.lex.tok_par_open:
+            self.lex.advance()
+            ret = self._parse_exp_or()
+            tok = self.lex.peek()
+            if tok != self.lex.tok_par_close:
+                raise ParseError("%s: error: closed parenthesis expected: '%s'" % (sys.argv[0], self.lex.text))
+        self.lex.advance()
+        return ret
+
+
+    # function _get_num
+    ###############################################################################
+    def _get_num(self, in_str):
+        """
+        Check if in_str is a number and return the numeric value.
+        """
+        ret = None
+
+        if in_str != None:
+            m = self.re_is_int.match(in_str)
+            if m != None:
+                ret = int(in_str)
+
+            m = self.re_is_hex.match(in_str)
+            if m != None:
+                ret = int(in_str, 16)
+
         return ret

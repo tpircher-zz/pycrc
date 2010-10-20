@@ -27,17 +27,19 @@
 Lexical analyzer for pycrc.
 use as follows:
 
-    from crc_opt import Options
-    from crc_symtable import SymbolTable
-    from crc_lexer import LangLexer
+    from crc_lexer import Lexer
 
-    lex = LangLexer()
-    lex.set_str(str)
+    input_str = "the input string to parse"
+    lex = Lexer()
+    lex.set_str(input_str)
+    while True:
+        tok = lex.peek()
+        if tok == lex.tok_EOF:
+            break
+        else:
+            print("%4d: %s\n" % (tok, lex.text))
+            lex.advance()
 
-    tok = self.lex.peek()
-    print(tok)
-    print(self.lex.text)
-    self.lex.advance()
 
 This file is part of pycrc.
 """
@@ -51,197 +53,249 @@ import re
 ###############################################################################
 class Lexer(object):
     """
-    A lexical analyser
+    A lexical analyser base class.
     """
 
-    tok_unknown = 0
-    tok_EOF     = 1
+    tok_unknown     = 0
+    tok_EOF         = 1
+    tok_gibberish   = 10
+    tok_identifier  = 11
+    tok_block_open  = 12
+    tok_block_close = 13
+    tok_num         = 20
+    tok_str         = 21
+    tok_par_open    = 22
+    tok_par_close   = 23
+    tok_op          = 24
+    tok_and         = 25
+    tok_or          = 26
+
+    state_gibberish = 0
+    state_expr      = 1
+
 
     # Class constructor
     ###############################################################################
-    def __init__(self, str = ""):
-        self.set_str(str)
+    def __init__(self, input_str = ""):
+        """
+        The class constructor.
+        """
+        self.re_id = re.compile("^\\$[a-zA-Z][a-zA-Z0-9_-]*")
+        self.re_num = re.compile("^(0[xX][0-9a-fA-F]+|[0-9]+)")
+        self.re_op = re.compile("<=|<|==|!=|>=|>")
+        self.re_str = re.compile("\"?([a-zA-Z0-9_-]+)\"?")
+        self.set_str(input_str)
+        self.state = self.state_gibberish
+
 
     # function set_str
     ###############################################################################
-    def set_str(self, str):
-        self.str = str
+    def set_str(self, input_str):
+        """
+        Set the parse input string.
+        """
+        self.input_str = input_str
         self.text = ""
-        self.text_len = 0
-        self.tok = self.tok_unknown
+        self.next_token = None
+
 
     # function peek
     ###############################################################################
     def peek(self):
-        return self.tok_unknown
+        """
+        Return the next token, without taking it away from the input_str.
+        """
+        if self.next_token == None:
+            self.next_token = self._parse_next()
+        return self.next_token
+
 
     # function advance
     ###############################################################################
     def advance(self, skip_nl = False):
-        skip_len = self.text_len
-        if skip_nl and (len(self.str) > skip_len) and (self.str[skip_len] == "\n"):
-            skip_len = skip_len + 1     # FIXME: check on Windoze if I can do simply a +1 to skip the line ending...
-        self.str = self.str[skip_len:]
+        """
+        Discard the current symbol from the input stream and advance to the following characters.
+        If skip_nl is True, then skip also a following newline character.
+        """
+        self.next_token = None
+        if skip_nl and  len(self.input_str) > 1 and self.input_str[0] == "\n":
+            self.input_str = self.input_str[1:]
+
+
+    # function delete_spaces
+    ###############################################################################
+    def delete_spaces(self, skip_unconditional = True):
+        """
+        Delete spaces in the input string.
+        If skip_unconditional is False, then skip the spaces only if followed by
+        $if() $else() or $elif().
+        """
+        new_input = self.input_str.lstrip(" \t")
+
+        # check for an identifier
+        m = self.re_id.match(new_input)
+        if m != None:
+            text = m.group(0)[1:]
+            # if the identifier is a reserved keyword, skip the spaces.
+            if (text == "if" or text == "elif" or text == "else"):
+                skip_unconditional = True
+        if skip_unconditional:
+            self.next_token = None
+            self.input_str = new_input
+
 
     # function prepend
     ###############################################################################
-    def prepend(self, str):
-        self.text = ""
-        self.text_len = 0
-        self.str = str + self.str
+    def prepend(self, in_str):
+        """
+        prepend in_str to to the input string.
+        """
+        self.input_str = in_str + self.input_str
 
 
-# Class LangLexer
-###############################################################################
-class LangLexer(Lexer):
-    """
-    A lexical analyser
-    """
-
-    tok_text        = 12
-    tok_control     = 13
-    tok_block_start = 14
-    tok_block_end   = 15
-
-
-    # Class constructor
+    # function set_state
     ###############################################################################
-    def __init__(self, str = ""):
-        super(LangLexer, self).__init__(str)
-        self.re_control = re.compile("\{%([^%}]*)%\}")
+    def set_state(self, new_state):
+        """
+        Set the new state for the lexer.
+        """
+        self.state = new_state
+        self.next_token = None
 
 
-    # function peek
+    # function _parse_next
     ###############################################################################
-    def peek(self):
-        if len(self.str) == 0:
-            self.text = ""
-            return self.tok_EOF
-        m = self.re_control.search(self.str)
-        if m != None and  m.start() == 0:
-            self.text = m.group(1)
-            self.text_len = m.end()
-            return self.tok_control
-
-        if m == None:
-            text_end = len(self.str)
-        else:
-            text_end = m.start()
-
-        i = self.str.find("{:")
-        if i >= 0:
-            if i == 0:
-                self.text = self.str[:2]
-                self.text_len = 2
-                return self.tok_block_start
-            if i < text_end:
-                text_end = i
-        i = self.str.find(":}")
-        if i >= 0:
-            if i == 0:
-                self.text = self.str[:2]
-                self.text_len = 2
-                return self.tok_block_end
-            if i < text_end:
-                text_end = i
-
-        self.text = self.str[:text_end]
-        self.text_len = text_end
-        return self.tok_text
-
-
-
-# Class ExpLexer
-###############################################################################
-class ExpLexer(Lexer):
-    """
-    A lexical analyser
-    """
-
-    tok_id          = 12
-    tok_op          = 13
-    tok_str         = 14
-    tok_and         = 15
-    tok_or          = 16
-    tok_par_open    = 17
-    tok_par_close   = 18
-
-
-    # Class constructor
-    ###############################################################################
-    def __init__(self, str = ""):
-        super(ExpLexer, self).__init__(str)
-#        self.re_id = re.compile("\{%([^%}]+)%\}")
-        self.re_id = re.compile("\\$([a-zA-Z][a-zA-Z0-9_-]*)")
-        self.re_op = re.compile("<=|<|==|!=|>=|>")
-#        self.re_str = re.compile("\"([^\"]+)\"")
-#        self.re_str = re.compile("([a-zA-Z0-9_-]+)|\"([a-zA-Z0-9_-]+)\"")
-        self.re_str = re.compile("\"?([a-zA-Z0-9_-]+)\"?")
-        self.re_is_int = re.compile("^[-+]?[0-9]+$")
-        self.re_is_hex = re.compile("^(0[xX])?[0-9a-fA-F]+$")
-
-
-    # function peek
-    ###############################################################################
-    def peek(self):
-        self.str = self.str.strip()
-        if len(self.str) == 0:
-            self.text = ""
+    def _parse_next(self):
+        """
+        Parse the next token, update the state variables and take the consumed
+        text from the imput stream.
+        """
+        if len(self.input_str) == 0:
             return self.tok_EOF
 
-        m = self.re_id.match(self.str)
-        if m != None:
-            self.text = m.group(1)
-            self.text_len = m.end()
-            return self.tok_id
-
-        m = self.re_op.match(self.str)
-        if m != None:
-            self.text = m.string[:m.end()]
-            self.text_len = m.end()
-            return self.tok_op
-
-        if self.str[:4] == "and ":
-            self.text = "and"
-            self.text_len = len(self.text)
-            return self.tok_and
-
-        if self.str[:3] == "or ":
-            self.text = "or"
-            self.text_len = len(self.text)
-            return self.tok_or
-
-        m = self.re_str.match(self.str)
-        if m != None:
-            self.text = m.group(1)
-            self.text_len = m.end()
-            return self.tok_str
-
-        if self.str[0] == "(" or self.str[0] == ")":
-            self.text = self.str[0]
-            self.text_len = len(self.text)
-            if self.str[0] == "(":
-                return self.tok_par_open
-            else:
-                return self.tok_par_close
-
-        self.text = ""
+        if self.state == self.state_gibberish:
+            return self._parse_gibberish()
+        if self.state == self.state_expr:
+            return self._parse_expr()
         return self.tok_unknown
 
 
-    # function is_int
+    # function _parse_gibberish
     ###############################################################################
-    def is_int(self, str):
-        try:
-            return self.re_is_int.search(str)
-        except TypeError:
-            return False
+    def _parse_gibberish(self):
+        """
+        Parse the next token, update the state variables and take the consumed
+        text from the imput stream.
+        """
+        # check for an identifier
+        m = self.re_id.match(self.input_str)
+        if m != None:
+            self.text = m.group(0)[1:]
+            self.input_str = self.input_str[m.end():]
+            return self.tok_identifier
+
+        if len(self.input_str) > 1:
+            # check for "{:"
+            if self.input_str[0:2] == "{:":
+                self.text = self.input_str[0:2]
+                self.input_str = self.input_str[2:]
+                return self.tok_block_open
+            # check for ":}"
+            if self.input_str[0:2] == ":}":
+                self.text = self.input_str[0:2]
+                self.input_str = self.input_str[2:]
+                return self.tok_block_close
+            # check for "$$"
+            if self.input_str[0:2] == "$$":
+                self.text = self.input_str[0:1]
+                self.input_str = self.input_str[2:]
+                return self.tok_gibberish
+            # check for malformed "$"
+            if self.input_str[0] == "$":
+                self.text = self.input_str[0:1]
+                # self.input_str = self.input_str[1:]
+                return self.tok_unknown
+
+        # the character is gibberish.
+        # find the position of the next special character.
+        pos = self.input_str.find("$")
+        tmp = self.input_str.find("{:")
+        if pos < 0 or (tmp >= 0 and tmp < pos):
+            pos = tmp
+        tmp = self.input_str.find(":}")
+        if pos < 0 or (tmp >= 0 and tmp < pos):
+            pos = tmp
+
+        if pos < 0 or len(self.input_str) == 1:
+            # neither id nor block start nor block end found:
+            # the whole text is just gibberish.
+            self.text = self.input_str
+            self.input_str = ""
+        else:
+            self.text = self.input_str[:pos]
+            self.input_str = self.input_str[pos:]
+        return self.tok_gibberish
 
 
-    # function is_hex
+    # function _parse_expr
     ###############################################################################
-    def is_hex(self, str):
-        try:
-            return self.re_is_hex.match(str)
-        except TypeError:
-            return False
+    def _parse_expr(self):
+        """
+        Parse the next token, update the state variables and take the consumed
+        text from the imput stream.
+        """
+        # skip whitespaces
+        pos = 0
+        while pos < len(self.input_str) and self.input_str[pos] == ' ':
+            pos = pos + 1
+        if pos > 0:
+            self.input_str = self.input_str[pos:]
+
+        if len(self.input_str) == 0:
+            return self.tok_EOF
+
+        m = self.re_id.match(self.input_str)
+        if m != None:
+            self.text = m.group(0)[1:]
+            self.input_str = self.input_str[m.end():]
+            return self.tok_identifier
+
+        m = self.re_num.match(self.input_str)
+        if m != None:
+            self.text = m.group(0)
+            self.input_str = self.input_str[m.end():]
+            return self.tok_num
+
+        m = self.re_op.match(self.input_str)
+        if m != None:
+            self.text = m.string[:m.end()]
+            self.input_str = self.input_str[m.end():]
+            return self.tok_op
+
+        if self.input_str[:4] == "and ":
+            self.text = "and"
+            self.input_str = self.input_str[len(self.text) + 1:]
+            return self.tok_and
+
+        if self.input_str[:3] == "or ":
+            self.text = "or"
+            self.input_str = self.input_str[len(self.text) + 1:]
+            return self.tok_or
+
+        m = self.re_str.match(self.input_str)
+        if m != None:
+            self.text = m.group(1)
+            self.input_str = self.input_str[m.end():]
+            return self.tok_str
+
+        if self.input_str[0] == "(":
+            self.text = self.input_str[0]
+            self.input_str = self.input_str[len(self.text):]
+            return self.tok_par_open
+
+        if self.input_str[0] == ")":
+            self.text = self.input_str[0]
+            self.input_str = self.input_str[len(self.text):]
+            return self.tok_par_close
+
+        return self.tok_unknown

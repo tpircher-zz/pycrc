@@ -31,7 +31,7 @@ static crc_t xtoi(const char *str);
 static int get_config(int argc, char *argv[], crc_cfg_t *cfg);
 #if CRC_ALGO_BIT_BY_BIT
 static crc_t crc_verify(const crc_cfg_t *cfg, crc_t crc_pre_final, crc_t crc);
-static unsigned long crc_reflect(unsigned long data, size_t data_len);
+static crc_t crc_reflect(crc_t data, size_t data_len);
 #endif
 
 
@@ -200,10 +200,10 @@ crc_t crc_verify(const crc_cfg_t *cfg, crc_t crc_pre_final, crc_t crc)
     return result;
 }
 
-unsigned long crc_reflect(unsigned long data, size_t data_len)
+crc_t crc_reflect(crc_t data, size_t data_len)
 {
     unsigned int i;
-    unsigned long ret;
+    crc_t ret;
 
     ret = 0;
     for (i = 0; i < data_len; i++)

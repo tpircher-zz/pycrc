@@ -48,7 +48,7 @@ import os
 ###############################################################################
 class SymbolTable:
     """
-    The symbol table class
+    The symbol table class.
     """
     opt = None
     table = {}
@@ -58,9 +58,10 @@ class SymbolTable:
     ###############################################################################
     def __init__(self, opt):
         """
-        The class constructor
+        The class constructor.
         """
         self.opt = opt
+        self.table["nop"] = ""
         self.table["datetime"] = time.asctime()
         self.table["program_version"] = self.opt.VersionStr
         self.table["program_url"] = self.opt.WebAddress
@@ -97,27 +98,27 @@ class SymbolTable:
             self.table["crc_do_shift"] = self.__pretty_bool(False)
             self.table["crc_shift"] = self.__pretty_str(0)
 
-        self.table["cfg_width"] = "{%if $crc_width != Undefined%}{:{%crc_width%}:}{%else%}{:cfg->width:}"
-        self.table["cfg_poly"] = "{%if $crc_poly != Undefined%}{:{%crc_poly%}:}{%else%}{:cfg->poly:}"
-        self.table["cfg_poly_shifted"] = "{%if $crc_do_shift == True%}{:({%cfg_poly%} << {%cfg_shift%}):}{%else%}{:{%cfg_poly%}:}"
-        self.table["cfg_reflect_in"] = "{%if $crc_reflect_in != Undefined%}{:{%crc_reflect_in%}:}{%else%}{:cfg->reflect_in:}"
-        self.table["cfg_xor_in"] = "{%if $crc_xor_in != Undefined%}{:{%crc_xor_in%}:}{%else%}{:cfg->xor_in:}"
-        self.table["cfg_reflect_out"] = "{%if $crc_reflect_out != Undefined%}{:{%crc_reflect_out%}:}{%else%}{:cfg->reflect_out:}"
-        self.table["cfg_xor_out"] = "{%if $crc_xor_out != Undefined%}{:{%crc_xor_out%}:}{%else%}{:cfg->xor_out:}"
-        self.table["cfg_table_idx_width"] = "{%if $crc_table_idx_width != Undefined%}{:{%crc_table_idx_width%}:}{%else%}{:cfg->table_idx_width:}"
-        self.table["cfg_table_width"] = "{%if $crc_table_width != Undefined%}{:{%crc_table_width%}:}{%else%}{:cfg->table_width:}"
-        self.table["cfg_mask"] = "{%if $crc_mask != Undefined%}{:{%crc_mask%}:}{%else%}{:cfg->crc_mask:}"
-        self.table["cfg_mask_shifted"] = "{%if $crc_do_shift == True%}{:({%cfg_mask%} << {%cfg_shift%}):}{%else%}{:{%cfg_mask%}:}"
-        self.table["cfg_msb_mask"] = "{%if $crc_msb_mask != Undefined%}{:{%crc_msb_mask%}:}{%else%}{:cfg->msb_mask:}"
-        self.table["cfg_msb_mask_shifted"] = "{%if $crc_do_shift == True%}{:({%cfg_msb_mask%} << {%cfg_shift%}):}{%else%}{:{%cfg_msb_mask%}:}"
-        self.table["cfg_shift"] = "{%if $crc_shift != Undefined%}{:{%crc_shift%}:}{%else%}{:cfg->crc_shift:}"
+        self.table["cfg_width"] = "$if ($crc_width != Undefined) {:$crc_width:} $else {:cfg->width:}"
+        self.table["cfg_poly"] = "$if ($crc_poly != Undefined) {:$crc_poly:} $else {:cfg->poly:}"
+        self.table["cfg_poly_shifted"] = "$if ($crc_do_shift == True) {:($cfg_poly << $cfg_shift):} $else {:$cfg_poly:}"
+        self.table["cfg_reflect_in"] = "$if ($crc_reflect_in != Undefined) {:$crc_reflect_in:} $else {:cfg->reflect_in:}"
+        self.table["cfg_xor_in"] = "$if ($crc_xor_in != Undefined) {:$crc_xor_in:} $else {:cfg->xor_in:}"
+        self.table["cfg_reflect_out"] = "$if ($crc_reflect_out != Undefined) {:$crc_reflect_out:} $else {:cfg->reflect_out:}"
+        self.table["cfg_xor_out"] = "$if ($crc_xor_out != Undefined) {:$crc_xor_out:} $else {:cfg->xor_out:}"
+        self.table["cfg_table_idx_width"] = "$if ($crc_table_idx_width != Undefined) {:$crc_table_idx_width:} $else {:cfg->table_idx_width:}"
+        self.table["cfg_table_width"] = "$if ($crc_table_width != Undefined) {:$crc_table_width:} $else {:cfg->table_width:}"
+        self.table["cfg_mask"] = "$if ($crc_mask != Undefined) {:$crc_mask:} $else {:cfg->crc_mask:}"
+        self.table["cfg_mask_shifted"] = "$if ($crc_do_shift == True) {:($cfg_mask << $cfg_shift):} $else {:$cfg_mask:}"
+        self.table["cfg_msb_mask"] = "$if ($crc_msb_mask != Undefined) {:$crc_msb_mask:} $else {:cfg->msb_mask:}"
+        self.table["cfg_msb_mask_shifted"] = "$if ($crc_do_shift == True) {:($cfg_msb_mask << $cfg_shift):} $else {:$cfg_msb_mask:}"
+        self.table["cfg_shift"] = "$if ($crc_shift != Undefined) {:$crc_shift:} $else {:cfg->crc_shift:}"
 
         self.table["undefined_parameters"] = self.__pretty_bool(self.opt.UndefinedCrcParameters)
         self.table["use_cfg_t"] = self.__pretty_bool(self.opt.UndefinedCrcParameters)
         self.table["c_std"] = self.opt.CStd
-        self.table["c_bool"] = "{%if $c_std == C89%}{:int:}{%else%}{:bool:}"
-        self.table["c_true"] = "{%if $c_std == C89%}{:1:}{%else%}{:true:}"
-        self.table["c_false"] = "{%if $c_std == C89%}{:0:}{%else%}{:false:}"
+        self.table["c_bool"] = "$if ($c_std == C89) {:int:} $else {:bool:}"
+        self.table["c_true"] = "$if ($c_std == C89) {:1:} $else {:true:}"
+        self.table["c_false"] = "$if ($c_std == C89) {:0:} $else {:false:}"
 
         self.table["underlying_crc_t"] = self.__get_underlying_crc_t()
         self.table["include_file"] = self.__get_include_file()
@@ -136,7 +137,7 @@ class SymbolTable:
     ###############################################################################
     def getTerminal(self, id):
         """
-        return the expanded terminal, if it exists or None otherwise
+        Return the expanded terminal, if it exists or None otherwise.
         """
 
         if id != None:
@@ -155,7 +156,7 @@ class SymbolTable:
     ###############################################################################
     def __getTerminal(self, id):
         """
-        return the expanded terminal, if it exists or None otherwise
+        Return the expanded terminal, if it exists or None otherwise.
         """
         if id == "constant_crc_init":
             if self.__get_init_value() == None:
@@ -240,29 +241,29 @@ class SymbolTable:
 
         elif id == "crc_final_value":
             return  """\
-{%if $crc_algorithm == "table-driven"%}{:
-{%if $crc_reflect_in == $crc_reflect_out%}{:
-{%if $crc_do_shift == True%}{:(crc >> {%cfg_shift%}):}{%else%}{:crc:} ^ {%crc_xor_out%}\
-:}{%else%}{:
-{%crc_reflect_function%}({%if $crc_do_shift == True%}{:(crc >> {%cfg_shift%}):}{%else%}{:crc:}, {%crc_width%}) ^ {%crc_xor_out%}\
-:}:}{%elif $crc_reflect_out == True%}{:
-{%crc_reflect_function%}(crc, {%crc_width%}) ^ {%crc_xor_out%}\
-:}{%else%}{:
-crc ^ {%crc_xor_out%}\
+$if ($crc_algorithm == "table-driven") {:
+$if ($crc_reflect_in == $crc_reflect_out) {:
+$if ($crc_do_shift == True) {:(crc >> $cfg_shift):} $else {:crc:} ^ $crc_xor_out\
+:} $else {:
+$crc_reflect_function($if ($crc_do_shift == True) {:(crc >> $cfg_shift):} $else {:crc:}, $crc_width) ^ $crc_xor_out\
+:}:} $elif ($crc_reflect_out == True) {:
+$crc_reflect_function(crc, $crc_width) ^ $crc_xor_out\
+:} $else {:
+crc ^ $crc_xor_out\
 :}\
 """
         elif id == "h_template":
             return  """\
-{%source_header%}
-#ifndef {%header_protection%}
-#define {%header_protection%}
+$source_header
+#ifndef $header_protection
+#define $header_protection
 
-{%if $include_file != Undefined%}{:
-#include {%include_file%}
+$if ($include_file != Undefined) {:
+#include $include_file
 :}
 #include <stdint.h>
 #include <stdlib.h>
-{%if $undefined_parameters == True and $c_std != C89%}{:
+$if ($undefined_parameters == True and $c_std != C89) {:
 #include <stdbool.h>
 :}
 
@@ -270,97 +271,105 @@ crc ^ {%crc_xor_out%}\
 extern "C" {
 #endif
 
+
 /**
  * The definition of the used algorithm.
  *****************************************************************************/
-{%if $crc_algorithm == "bit-by-bit"%}{:
+$if ($crc_algorithm == "bit-by-bit") {:
 #define CRC_ALGO_BIT_BY_BIT 1
-:}{%elif $crc_algorithm == "bit-by-bit-fast"%}{:
+:} $elif ($crc_algorithm == "bit-by-bit-fast") {:
 #define CRC_ALGO_BIT_BY_BIT_FAST 1
-:}{%elif $crc_algorithm == "table-driven"%}{:
+:} $elif ($crc_algorithm == "table-driven") {:
 #define CRC_ALGO_TABLE_DRIVEN 1
 :}
+
 
 /**
  * The type of the CRC values.
  *
- * This type must be big enough to contain at least {%cfg_width%} bits.
+ * This type must be big enough to contain at least $cfg_width bits.
  *****************************************************************************/
-typedef {%underlying_crc_t%} {%crc_t%};
+typedef $underlying_crc_t $crc_t;
 
-{%if $undefined_parameters == True%}{:
+
+$if ($undefined_parameters == True) {:
 /**
  * The configuration type of the CRC algorithm.
  *****************************************************************************/
 typedef struct {
-{%if $crc_width == Undefined%}{:
+$if ($crc_width == Undefined) {:
     unsigned int width;     /*!< The width of the polynomial */
 :}
-{%if $crc_poly == Undefined%}{:
-    {%crc_t%} poly;             /*!< The CRC polynomial */
+$if ($crc_poly == Undefined) {:
+    $crc_t poly;             /*!< The CRC polynomial */
 :}
-{%if $crc_reflect_in == Undefined%}{:
-    {%c_bool%} reflect_in;         /*!< Whether the input shall be reflected or not */
+$if ($crc_reflect_in == Undefined) {:
+    $c_bool reflect_in;         /*!< Whether the input shall be reflected or not */
 :}
-{%if $crc_xor_in == Undefined%}{:
-    {%crc_t%} xor_in;           /*!< The initial value of the algorithm */
+$if ($crc_xor_in == Undefined) {:
+    $crc_t xor_in;           /*!< The initial value of the algorithm */
 :}
-{%if $crc_reflect_out == Undefined%}{:
-    {%c_bool%} reflect_out;        /*!< Wether the output shall be reflected or not */
+$if ($crc_reflect_out == Undefined) {:
+    $c_bool reflect_out;        /*!< Wether the output shall be reflected or not */
 :}
-{%if $crc_xor_out == Undefined%}{:
-    {%crc_t%} xor_out;          /*!< The value which shall be XOR-ed to the final CRC value */
+$if ($crc_xor_out == Undefined) {:
+    $crc_t xor_out;          /*!< The value which shall be XOR-ed to the final CRC value */
 :}
-{%if $crc_width == Undefined%}{:
+$if ($crc_width == Undefined) {:
 
     /* internal parameters */
-    {%crc_t%} msb_mask;             /*!< a bitmask with the Most Significant Bit set to 1
+    $crc_t msb_mask;             /*!< a bitmask with the Most Significant Bit set to 1
                                      initialise as 1UL << (width - 1) */
-    {%crc_t%} crc_mask;             /*!< a bitmask with all width bits set to 1
+    $crc_t crc_mask;             /*!< a bitmask with all width bits set to 1
                                      initialise as (cfg->msb_mask - 1) | cfg->msb_mask */
     unsigned int crc_shift;     /*!< a shift count that is used when width < 8
                                      initialise as cfg->width < 8 ? 8 - cfg->width : 0 */
 :}
-} {%cfg_t%};
+} $cfg_t;
+
 
 :}
-{%if $use_reflect_func == True and $static_reflect_func != True%}{:
-{%crc_reflect_doc%}
-{%crc_reflect_function_def%};
+$if ($use_reflect_func == True and $static_reflect_func != True) {:
+$crc_reflect_doc
+$crc_reflect_function_def;
+
 
 :}
-{%if $crc_algorithm == "table-driven" and $constant_crc_table != True%}{:
-{%crc_table_gen_doc%}
-{%crc_table_gen_function_def%};
+$if ($crc_algorithm == "table-driven" and $constant_crc_table != True) {:
+$crc_table_gen_doc
+$crc_table_gen_function_def;
+
 
 :}
-{%crc_init_doc%}
-{%if $constant_crc_init == False%}{:
-{%crc_init_function_def%};
-:}{%elif $c_std == C89%}{:
-#define {%crc_init_function%}()      ({%crc_init_value%}{%if $crc_do_shift == True%}{: << {%cfg_shift%}:})
-:}{%else%}{:
-static inline {%crc_init_function_def%}{%%}
+$crc_init_doc
+$if ($constant_crc_init == False) {:
+$crc_init_function_def;
+:} $elif ($c_std == C89) {:
+#define $crc_init_function()      ($crc_init_value$if ($crc_do_shift == True) {: << $cfg_shift:})
+:} $else {:
+static inline $crc_init_function_def$nop
 {
-    return {%crc_init_value%}{%if $crc_do_shift == True%}{: << {%cfg_shift%}:};
+    return $crc_init_value$if ($crc_do_shift == True) {: << $cfg_shift:};
 }
 :}
 
-{%crc_update_doc%}
-{%crc_update_function_def%};
 
-{%crc_finalize_doc%}
-{%if $inline_crc_finalize == True%}{:
-{%if $c_std == C89%}{:
-#define {%crc_finalize_function%}(crc)      ({%crc_final_value%})
-:}{%else%}{:
-static inline {%crc_finalize_function_def%}{%%}
+$crc_update_doc
+$crc_update_function_def;
+
+
+$crc_finalize_doc
+$if ($inline_crc_finalize == True) {:
+$if ($c_std == C89) {:
+#define $crc_finalize_function(crc)      ($crc_final_value)
+:} $else {:
+static inline $crc_finalize_function_def$nop
 {
-    return {%crc_final_value%};
+    return $crc_final_value;
 }
 :}
-:}{%else%}{:
-{%crc_finalize_function_def%};
+:} $else {:
+$crc_finalize_function_def;
 :}
 
 
@@ -368,25 +377,25 @@ static inline {%crc_finalize_function_def%}{%%}
 }           /* closing brace for extern "C" */
 #endif
 
-#endif      /* {%header_protection%} */
+#endif      /* $header_protection */
 """
 
         elif id == "source_header":
             return  """\
 /**
- * \\file {%filename%}
+ * \\file $filename
  * Functions and types for CRC checks.
  *
- * Generated on {%datetime%},
- * by {%program_version%}, {%program_url%}
+ * Generated on $datetime,
+ * by $program_version, $program_url
  * using the configuration:
- *    Width        = {%crc_width%}
- *    Poly         = {%crc_poly%}
- *    XorIn        = {%crc_xor_in%}
- *    ReflectIn    = {%crc_reflect_in%}
- *    XorOut       = {%crc_xor_out%}
- *    ReflectOut   = {%crc_reflect_out%}
- *    Algorithm    = {%crc_algorithm%}
+ *    Width        = $crc_width
+ *    Poly         = $crc_poly
+ *    XorIn        = $crc_xor_in
+ *    ReflectIn    = $crc_reflect_in
+ *    XorOut       = $crc_xor_out
+ *    ReflectOut   = $crc_reflect_out
+ *    Algorithm    = $crc_algorithm
  *****************************************************************************/\
 """
 
@@ -403,21 +412,20 @@ static inline {%crc_finalize_function_def%}{%%}
 
         elif id == "crc_reflect_function_def":
             return  """\
-unsigned long {%crc_reflect_function%}(unsigned long data, size_t data_len)\
+$crc_t $crc_reflect_function($crc_t data, size_t data_len)\
 """
 
         elif id == "crc_reflect_function_body":
             return  """\
-{%if $crc_reflect_in == Undefined or $crc_reflect_in == True or $crc_reflect_out == Undefined or $crc_reflect_out == True%}{:
-{%crc_reflect_doc%}
-{%crc_reflect_function_def%}{%%}
+$if ($crc_reflect_in == Undefined or $crc_reflect_in == True or $crc_reflect_out == Undefined or $crc_reflect_out == True) {:
+$crc_reflect_doc
+$crc_reflect_function_def$nop
 {
     unsigned int i;
-    unsigned long ret;
+    $crc_t ret;
 
     ret = data & 0x01;
-    for (i = 1; i < data_len; i++)
-    {
+    for (i = 1; i < data_len; i++) {
         data >>= 1;
         ret = (ret << 1) | (data & 0x01);
     }
@@ -431,14 +439,14 @@ unsigned long {%crc_reflect_function%}(unsigned long data, size_t data_len)\
 /**
  * Populate the private static crc table.
  *
- * \\param cfg  A pointer to a initialised {%cfg_t%} structure.
+ * \\param cfg  A pointer to a initialised $cfg_t structure.
  * \\return     void
  *****************************************************************************/\
 """
 
         elif id == "crc_table_gen_function_def":
             return  """\
-void {%crc_table_gen_function%}(const {%cfg_t%} *cfg)\
+void $crc_table_gen_function(const $cfg_t *cfg)\
 """
 
         elif id == "crc_init_doc":
@@ -446,8 +454,8 @@ void {%crc_table_gen_function%}(const {%cfg_t%} *cfg)\
 /**
  * Calculate the initial crc value.
  *
-{%if $use_cfg_t == True%}{:
- * \\param cfg  A pointer to a initialised {%cfg_t%} structure.
+$if ($use_cfg_t == True) {:
+ * \\param cfg  A pointer to a initialised $cfg_t structure.
 :}
  * \\return     The initial crc value.
  *****************************************************************************/\
@@ -455,10 +463,10 @@ void {%crc_table_gen_function%}(const {%cfg_t%} *cfg)\
 
         elif id == "crc_init_function_def":
             return  """\
-{%if $constant_crc_init == False%}{:
-{%crc_t%} {%crc_init_function%}(const {%cfg_t%} *cfg)\
-:}{%else%}{:
-{%crc_t%} {%crc_init_function%}(void)\
+$if ($constant_crc_init == False) {:
+$crc_t $crc_init_function(const $cfg_t *cfg)\
+:} $else {:
+$crc_t $crc_init_function(void)\
 :}\
 """
 
@@ -468,8 +476,8 @@ void {%crc_table_gen_function%}(const {%cfg_t%} *cfg)\
  * Update the crc value with new data.
  *
  * \\param crc      The current crc value.
-{%if $simple_crc_update_def != True%}{:
- * \\param cfg      A pointer to a initialised {%cfg_t%} structure.
+$if ($simple_crc_update_def != True) {:
+ * \\param cfg      A pointer to a initialised $cfg_t structure.
 :}
  * \\param data     Pointer to a buffer of \\a data_len bytes.
  * \\param data_len Number of bytes in the \\a data buffer.
@@ -479,10 +487,10 @@ void {%crc_table_gen_function%}(const {%cfg_t%} *cfg)\
 
         elif id == "crc_update_function_def":
             return  """\
-{%if $simple_crc_update_def != True%}{:
-{%crc_t%} {%crc_update_function%}(const {%cfg_t%} *cfg, {%crc_t%} crc, const unsigned char *data, size_t data_len)\
-:}{%else%}{:
-{%crc_t%} {%crc_update_function%}({%crc_t%} crc, const unsigned char *data, size_t data_len)\
+$if ($simple_crc_update_def != True) {:
+$crc_t $crc_update_function(const $cfg_t *cfg, $crc_t crc, const unsigned char *data, size_t data_len)\
+:} $else {:
+$crc_t $crc_update_function($crc_t crc, const unsigned char *data, size_t data_len)\
 :}\
 """
 
@@ -491,8 +499,8 @@ void {%crc_table_gen_function%}(const {%cfg_t%} *cfg)\
 /**
  * Calculate the final crc value.
  *
-{%if $simple_crc_finalize_def != True%}{:
- * \\param cfg  A pointer to a initialised {%cfg_t%} structure.
+$if ($simple_crc_finalize_def != True) {:
+ * \\param cfg  A pointer to a initialised $cfg_t structure.
 :}
  * \\param crc  The current crc value.
  * \\return     The final crc value.
@@ -501,38 +509,38 @@ void {%crc_table_gen_function%}(const {%cfg_t%} *cfg)\
 
         elif id == "crc_finalize_function_def":
             return  """\
-{%if $simple_crc_finalize_def != True%}{:
-{%crc_t%} {%crc_finalize_function%}(const {%cfg_t%} *cfg, {%crc_t%} crc)\
-:}{%else%}{:
-{%crc_t%} {%crc_finalize_function%}({%crc_t%} crc)\
+$if ($simple_crc_finalize_def != True) {:
+$crc_t $crc_finalize_function(const $cfg_t *cfg, $crc_t crc)\
+:} $else {:
+$crc_t $crc_finalize_function($crc_t crc)\
 :}\
 """
 
         elif id == "c_template":
             return  """\
-{%source_header%}
-{%if $include_file != Undefined%}{:
-#include {%include_file%}
+$source_header
+$if ($include_file != Undefined) {:
+#include $include_file
 :}
-#include "{%header_filename%}"
+#include "$header_filename"
 #include <stdint.h>
 #include <stdlib.h>
-{%if $undefined_parameters == True or $crc_algorithm == "bit-by-bit" or $crc_algorithm == "bit-by-bit-fast"%}{:
-{%if $c_std != C89%}{:
+$if ($undefined_parameters == True or $crc_algorithm == "bit-by-bit" or $crc_algorithm == "bit-by-bit-fast") {:
+$if ($c_std != C89) {:
 #include <stdbool.h>
 :}
 :}
 
-{%if $use_reflect_func == True and $static_reflect_func == True%}{:
-static {%crc_reflect_function_def%};
+$if ($use_reflect_func == True and $static_reflect_func == True) {:
+static $crc_reflect_function_def;
 
 :}
-{%if $crc_algorithm == "bit-by-bit"%}{:
-{%c_bit_by_bit%}
-:}{%elif $crc_algorithm == "bit-by-bit-fast"%}{:
-{%c_bit_by_bit_fast%}
-:}{%elif $crc_algorithm == "table-driven"%}{:
-{%c_table_driven%}
+$if ($crc_algorithm == "bit-by-bit") {:
+$c_bit_by_bit
+:} $elif ($crc_algorithm == "bit-by-bit-fast") {:
+$c_bit_by_bit_fast
+:} $elif ($crc_algorithm == "table-driven") {:
+$c_table_driven
 :}
 """
 
@@ -540,162 +548,162 @@ static {%crc_reflect_function_def%};
             return  """\
 /**
  * Static table used for the table_driven implementation.
-{%if $undefined_parameters == True%}{:
- * Must be initialised with the {%crc_init_function%} function.
+$if ($undefined_parameters == True) {:
+ * Must be initialised with the $crc_init_function function.
 :}
  *****************************************************************************/
-{%if $constant_crc_table != True%}{:
-static {%crc_t%} crc_table[{%crc_table_width%}];
-:}{%else%}{:
-static const {%crc_t%} crc_table[{%crc_table_width%}] = {
-{%crc_table_init%}
+$if ($constant_crc_table != True) {:
+static $crc_t crc_table[$crc_table_width];
+:} $else {:
+static const $crc_t crc_table[$crc_table_width] = {
+$crc_table_init
 };
 :}
 """
 
         elif id == "c_bit_by_bit":
             return  """\
-{%if $use_reflect_func == True%}{:
-{%crc_reflect_function_body%}
+$if ($use_reflect_func == True) {:
+$crc_reflect_function_body
 
 :}
-{%if $constant_crc_init == False%}{:
-{%crc_init_doc%}
-{%crc_init_function_def%}{%%}
+$if ($constant_crc_init == False) {:
+$crc_init_doc
+$crc_init_function_def$nop
 {
     unsigned int i;
-    {%c_bool%} bit;
-    {%crc_t%} crc = {%cfg_xor_in%};
-    for (i = 0; i < {%cfg_width%}; i++) {
+    $c_bool bit;
+    $crc_t crc = $cfg_xor_in;
+    for (i = 0; i < $cfg_width; i++) {
         bit = crc & 0x01;
         if (bit) {
-            crc = ((crc ^ {%cfg_poly%}) >> 1) | {%cfg_msb_mask%};
+            crc = ((crc ^ $cfg_poly) >> 1) | $cfg_msb_mask;
         } else {
             crc >>= 1;
         }
     }
-    return crc & {%cfg_mask%};
+    return crc & $cfg_mask;
 }
 :}
 
-{%crc_update_doc%}
-{%crc_update_function_def%}{%%}
+$crc_update_doc
+$crc_update_function_def$nop
 {
     unsigned int i;
-    {%c_bool%} bit;
+    $c_bool bit;
     unsigned char c;
 
     while (data_len--) {
-{%if $crc_reflect_in == Undefined%}{:
-        if ({%cfg_reflect_in%}) {
-            c = {%crc_reflect_function%}(*data++, 8);
+$if ($crc_reflect_in == Undefined) {:
+        if ($cfg_reflect_in) {
+            c = $crc_reflect_function(*data++, 8);
         } else {
             c = *data++;
         }
-:}{%elif $crc_reflect_in == True%}{:
-        c = {%crc_reflect_function%}(*data++, 8);
-:}{%else%}{:
+:} $elif ($crc_reflect_in == True) {:
+        c = $crc_reflect_function(*data++, 8);
+:} $else {:
         c = *data++;
 :}
         for (i = 0; i < 8; i++) {
-            bit = crc & {%cfg_msb_mask%};
+            bit = crc & $cfg_msb_mask;
             crc = (crc << 1) | ((c >> (7 - i)) & 0x01);
             if (bit) {
-                crc ^= {%cfg_poly%};
+                crc ^= $cfg_poly;
             }
         }
-        crc &= {%cfg_mask%};
+        crc &= $cfg_mask;
     }
-    return crc & {%cfg_mask%};
+    return crc & $cfg_mask;
 }
 
 
-{%crc_finalize_doc%}
-{%crc_finalize_function_def%}{%%}
+$crc_finalize_doc
+$crc_finalize_function_def$nop
 {
     unsigned int i;
-    {%c_bool%} bit;
+    $c_bool bit;
 
-    for (i = 0; i < {%cfg_width%}; i++) {
-        bit = crc & {%cfg_msb_mask%};
+    for (i = 0; i < $cfg_width; i++) {
+        bit = crc & $cfg_msb_mask;
         crc = (crc << 1) | 0x00;
         if (bit) {
-            crc ^= {%cfg_poly%};
+            crc ^= $cfg_poly;
         }
     }
-{%if $crc_reflect_out == Undefined%}{:
-    if ({%cfg_reflect_out%}) {
-        crc = {%crc_reflect_function%}(crc, {%cfg_width%});
+$if ($crc_reflect_out == Undefined) {:
+    if ($cfg_reflect_out) {
+        crc = $crc_reflect_function(crc, $cfg_width);
     }
-:}{%elif $crc_reflect_out == True%}{:
-    crc = {%crc_reflect_function%}(crc, {%cfg_width%});
+:} $elif ($crc_reflect_out == True) {:
+    crc = $crc_reflect_function(crc, $cfg_width);
 :}
-    return (crc ^ {%cfg_xor_out%}) & {%cfg_mask%};
+    return (crc ^ $cfg_xor_out) & $cfg_mask;
 }
 """
 
         elif id == "c_bit_by_bit_fast":
             return  """\
-{%if $use_reflect_func == True%}{:
-{%crc_reflect_function_body%}
+$if ($use_reflect_func == True) {:
+$crc_reflect_function_body
 
 :}
-{%if $constant_crc_init == False%}{:
-{%crc_init_doc%}
-{%crc_init_function_def%}{%%}
+$if ($constant_crc_init == False) {:
+$crc_init_doc
+$crc_init_function_def$nop
 {
-    return {%cfg_xor_in%} & {%cfg_mask%};
+    return $cfg_xor_in & $cfg_mask;
 }
 :}
 
-{%crc_update_doc%}
-{%crc_update_function_def%}{%%}
+$crc_update_doc
+$crc_update_function_def$nop
 {
     unsigned int i;
-    {%c_bool%} bit;
+    $c_bool bit;
     unsigned char c;
 
     while (data_len--) {
-{%if $crc_reflect_in == Undefined%}{:
-        if ({%cfg_reflect_in%}) {
-            c = {%crc_reflect_function%}(*data++, 8);
+$if ($crc_reflect_in == Undefined) {:
+        if ($cfg_reflect_in) {
+            c = $crc_reflect_function(*data++, 8);
         } else {
             c = *data++;
         }
-:}{%else%}{:
+:} $else {:
         c = *data++;
 :}
-{%if $crc_reflect_in == True%}{:
+$if ($crc_reflect_in == True) {:
         for (i = 0x01; i & 0xff; i <<= 1) {
-:}{%else%}{:
+:} $else {:
         for (i = 0x80; i > 0; i >>= 1) {
 :}
-            bit = crc & {%cfg_msb_mask%};
+            bit = crc & $cfg_msb_mask;
             if (c & i) {
                 bit = !bit;
             }
             crc <<= 1;
             if (bit) {
-                crc ^= {%cfg_poly%};
+                crc ^= $cfg_poly;
             }
         }
-        crc &= {%cfg_mask%};
+        crc &= $cfg_mask;
     }
-    return crc & {%cfg_mask%};
+    return crc & $cfg_mask;
 }
 
-{%if $inline_crc_finalize != True%}{:
-{%crc_finalize_doc%}
-{%crc_finalize_function_def%}{%%}
+$if ($inline_crc_finalize != True) {:
+$crc_finalize_doc
+$crc_finalize_function_def$nop
 {
-{%if $crc_reflect_out == Undefined%}{:
+$if ($crc_reflect_out == Undefined) {:
     if (cfg->reflect_out) {
-        crc = {%crc_reflect_function%}(crc, {%cfg_width%});
+        crc = $crc_reflect_function(crc, $cfg_width);
     }
-:}{%elif $crc_reflect_out == True%}{:
-    crc = {%crc_reflect_function%}(crc, {%cfg_width%});
+:} $elif ($crc_reflect_out == True) {:
+    crc = $crc_reflect_function(crc, $cfg_width);
 :}
-    return (crc ^ {%cfg_xor_out%}) & {%cfg_mask%};
+    return (crc ^ $cfg_xor_out) & $cfg_mask;
 }
 
 :}
@@ -703,170 +711,170 @@ static const {%crc_t%} crc_table[{%crc_table_width%}] = {
 
         elif id == "c_table_driven":
             return  """\
-{%c_table%}
-{%if $use_reflect_func == True%}{:
-{%crc_reflect_function_body%}
+$c_table
+$if ($use_reflect_func == True) {:
+$crc_reflect_function_body
 :}
 
-{%if $constant_crc_init == False%}{:
-{%crc_init_doc%}
-{%crc_init_function_def%}{%%}
+$if ($constant_crc_init == False) {:
+$crc_init_doc
+$crc_init_function_def$nop
 {
-{%if $crc_reflect_in == Undefined%}{:
-    if ({%cfg_reflect_in%}) {
-        return {%crc_reflect_function%}({%cfg_xor_in%} & {%cfg_mask%}, {%cfg_width%}){%if $crc_do_shift == True%}{: << {%cfg_shift%}:};
+$if ($crc_reflect_in == Undefined) {:
+    if ($cfg_reflect_in) {
+        return $crc_reflect_function($cfg_xor_in & $cfg_mask, $cfg_width)$if ($crc_do_shift == True) {: << $cfg_shift:};
     } else {
-        return {%cfg_xor_in%} & {%cfg_mask%}{%if $crc_do_shift == True%}{: << {%cfg_shift%}:};
+        return $cfg_xor_in & $cfg_mask$if ($crc_do_shift == True) {: << $cfg_shift:};
     }
-:}{%elif $crc_reflect_in == True%}{:
-    return {%crc_reflect_function%}({%cfg_xor_in%} & {%cfg_mask%}, {%cfg_width%}){%if $crc_do_shift == True%}{: << {%cfg_shift%}:};
-:}{%else%}{:
-    return {%cfg_xor_in%} & {%cfg_mask%}{%if $crc_do_shift == True%}{: << {%cfg_shift%}:};
+:} $elif ($crc_reflect_in == True) {:
+    return $crc_reflect_function($cfg_xor_in & $cfg_mask, $cfg_width)$if ($crc_do_shift == True) {: << $cfg_shift:};
+:} $else {:
+    return $cfg_xor_in & $cfg_mask$if ($crc_do_shift == True) {: << $cfg_shift:};
 :}
 }
 :}
 
-{%if $constant_crc_table != True%}{:
-{%crc_table_gen_doc%}
-{%crc_table_gen_function_def%}
+$if ($constant_crc_table != True) {:
+$crc_table_gen_doc
+$crc_table_gen_function_def
 {
-    {%crc_t%} crc;
+    $crc_t crc;
     unsigned int i, j;
 
-    for (i = 0; i < {%cfg_table_width%}; i++) {
-{%if $crc_reflect_in == Undefined%}{:
+    for (i = 0; i < $cfg_table_width; i++) {
+$if ($crc_reflect_in == Undefined) {:
         if (cfg->reflect_in) {
-            crc = {%crc_reflect_function%}(i, {%cfg_table_idx_width%});
+            crc = $crc_reflect_function(i, $cfg_table_idx_width);
         } else {
             crc = i;
         }
-:}{%elif $crc_reflect_in == True%}{:
-        crc = {%crc_reflect_function%}(i, {%cfg_table_idx_width%});
-:}{%else%}{:
+:} $elif ($crc_reflect_in == True) {:
+        crc = $crc_reflect_function(i, $cfg_table_idx_width);
+:} $else {:
         crc = i;
 :}
-{%if $crc_do_shift == True%}{:
-        crc <<= ({%cfg_width%} - {%cfg_table_idx_width%} + {%cfg_shift%});
-:}{%else%}{:
-        crc <<= ({%cfg_width%} - {%cfg_table_idx_width%});
+$if ($crc_do_shift == True) {:
+        crc <<= ($cfg_width - $cfg_table_idx_width + $cfg_shift);
+:} $else {:
+        crc <<= ($cfg_width - $cfg_table_idx_width);
 :}
-        for (j = 0; j < {%cfg_table_idx_width%}; j++) {
-            if (crc & {%cfg_msb_mask_shifted%}) {
-                crc = (crc << 1) ^ {%cfg_poly_shifted%};
+        for (j = 0; j < $cfg_table_idx_width; j++) {
+            if (crc & $cfg_msb_mask_shifted) {
+                crc = (crc << 1) ^ $cfg_poly_shifted;
             } else {
                 crc = crc << 1;
             }
         }
-{%if $crc_reflect_in == Undefined%}{:
+$if ($crc_reflect_in == Undefined) {:
         if (cfg->reflect_in) {
-{%if $crc_do_shift == True%}{:
-            crc = {%crc_reflect_function%}(crc >> {%cfg_shift%}, {%cfg_width%}) << {%cfg_shift%};
-:}{%else%}{:
-            crc = {%crc_reflect_function%}(crc, {%cfg_width%});
+$if ($crc_do_shift == True) {:
+            crc = $crc_reflect_function(crc >> $cfg_shift, $cfg_width) << $cfg_shift;
+:} $else {:
+            crc = $crc_reflect_function(crc, $cfg_width);
 :}
         }
-:}{%elif $crc_reflect_in == True%}{:
-{%if $crc_do_shift == True%}{:
-        crc = {%crc_reflect_function%}(crc >> {%cfg_shift%}, {%cfg_width%}) << {%cfg_shift%};
-:}{%else%}{:
-        crc = {%crc_reflect_function%}(crc, {%cfg_width%});
+:} $elif ($crc_reflect_in == True) {:
+$if ($crc_do_shift == True) {:
+        crc = $crc_reflect_function(crc >> $cfg_shift, $cfg_width) << $cfg_shift;
+:} $else {:
+        crc = $crc_reflect_function(crc, $cfg_width);
 :}
 :}
-        crc_table[i] = crc & {%cfg_mask_shifted%};
+        crc_table[i] = crc & $cfg_mask_shifted;
     }
 }
 
 :}
-{%crc_update_doc%}
-{%crc_update_function_def%}{%%}
+$crc_update_doc
+$crc_update_function_def$nop
 {
     unsigned int tbl_idx;
 
-{%if $crc_reflect_in == Undefined%}{:
+$if ($crc_reflect_in == Undefined) {:
     if (cfg->reflect_in) {
         while (data_len--) {
-{%crc_table_core_algorithm_ri%}
+$crc_table_core_algorithm_ri
             data++;
         }
     } else {
         while (data_len--) {
-{%crc_table_core_algorithm_ni%}
+$crc_table_core_algorithm_ni
             data++;
         }
     }
-:}{%else%}{:
+:} $else {:
     while (data_len--) {
-{%if $crc_reflect_in == True%}{:
-{%crc_table_core_algorithm_ri%}
-:}{%elif $crc_reflect_in == False%}{:
-{%crc_table_core_algorithm_ni%}
+$if ($crc_reflect_in == True) {:
+$crc_table_core_algorithm_ri
+:} $elif ($crc_reflect_in == False) {:
+$crc_table_core_algorithm_ni
 :}
         data++;
     }
 :}
-    return crc & {%cfg_mask_shifted%};
+    return crc & $cfg_mask_shifted;
 }
 
-{%if $inline_crc_finalize == False%}{:
-{%crc_finalize_doc%}
-{%crc_finalize_function_def%}{%%}
+$if ($inline_crc_finalize == False) {:
+$crc_finalize_doc
+$crc_finalize_function_def$nop
 {
-{%if $crc_do_shift == True%}{:
-    crc >>= {%cfg_shift%};
+$if ($crc_do_shift == True) {:
+    crc >>= $cfg_shift;
 :}
-{%if $crc_reflect_in == Undefined or $crc_reflect_out == Undefined%}{:
-{%if $crc_reflect_in == Undefined and $crc_reflect_out == Undefined%}{:
+$if ($crc_reflect_in == Undefined or $crc_reflect_out == Undefined) {:
+$if ($crc_reflect_in == Undefined and $crc_reflect_out == Undefined) {:
     if (cfg->reflect_in == !cfg->reflect_out):}
-{%elif $crc_reflect_out == Undefined%}{:
-    if ({%if $crc_reflect_in == True%}{:!:}cfg->reflect_out):}
-{%elif $crc_reflect_in == Undefined%}{:
-    if ({%if $crc_reflect_out == True%}{:!:}cfg->reflect_in):} {
-        crc = {%crc_reflect_function%}(crc, {%cfg_width%});
+ $elif ($crc_reflect_out == Undefined) {:
+    if ($if ($crc_reflect_in == True) {:!:}cfg->reflect_out):}
+ $elif ($crc_reflect_in == Undefined) {:
+    if ($if ($crc_reflect_out == True) {:!:}cfg->reflect_in):} {
+        crc = $crc_reflect_function(crc, $cfg_width);
     }
-:}{%elif $crc_reflect_in != $crc_reflect_out%}{:
-    crc = {%crc_reflect_function%}(crc, {%cfg_width%});
+:} $elif ($crc_reflect_in != $crc_reflect_out) {:
+    crc = $crc_reflect_function(crc, $cfg_width);
 :}
-    return (crc ^ {%cfg_xor_out%}) & {%cfg_mask%};
+    return (crc ^ $cfg_xor_out) & $cfg_mask;
 }
 :}
 """
 
         elif id == "main_template":
             return  """\
-{%if $include_file != Undefined%}{:
-#include {%include_file%}
+$if ($include_file != Undefined) {:
+#include $include_file
 :}
 #include <stdio.h>
 #include <getopt.h>
-{%if $undefined_parameters == True%}{:
+$if ($undefined_parameters == True) {:
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
 :}
-{%if $c_std != C89%}{:
+$if ($c_std != C89) {:
 #include <stdbool.h>
 :}
 #include <string.h>
 
 static char str[256] = "123456789";
-static {%c_bool%} verbose = {%c_false%};
+static $c_bool verbose = $c_false;
 
-void print_params({%if $undefined_parameters == True%}{:const {%cfg_t%} *cfg:}{%else%}{:void:});
-{%getopt_template%}
+void print_params($if ($undefined_parameters == True) {:const $cfg_t *cfg:} $else {:void:});
+$getopt_template
 
-void print_params({%if $undefined_parameters == True%}{:const {%cfg_t%} *cfg:}{%else%}{:void:})
+void print_params($if ($undefined_parameters == True) {:const $cfg_t *cfg:} $else {:void:})
 {
     char format[20];
 
-    snprintf(format, sizeof(format), "%%-16s = 0x%%0%dx\\n", (unsigned int)({%cfg_width%} + 3) / 4);
-    printf("%-16s = %d\\n", "width", (unsigned int){%cfg_width%});
-    printf(format, "poly", (unsigned int){%cfg_poly%});
-    printf("%-16s = %s\\n", "reflect_in", {%if $crc_reflect_in == Undefined%}{:{%cfg_reflect_in%} ? "true": "false":}{%else%}{:{%if $crc_reflect_in == True%}{:"true":}{%else%}{:"false":}:});
-    printf(format, "xor_in", {%cfg_xor_in%});
-    printf("%-16s = %s\\n", "reflect_out", {%if $crc_reflect_out == Undefined%}{:{%cfg_reflect_out%} ? "true": "false":}{%else%}{:{%if $crc_reflect_out == True%}{:"true":}{%else%}{:"false":}:});
-    printf(format, "xor_out", (unsigned int){%cfg_xor_out%});
-    printf(format, "crc_mask", (unsigned int){%cfg_mask%});
-    printf(format, "msb_mask", (unsigned int){%cfg_msb_mask%});
+    snprintf(format, sizeof(format), "%%-16s = 0x%%0%dx\\n", (unsigned int)($cfg_width + 3) / 4);
+    printf("%-16s = %d\\n", "width", (unsigned int)$cfg_width);
+    printf(format, "poly", (unsigned int)$cfg_poly);
+    printf("%-16s = %s\\n", "reflect_in", $if ($crc_reflect_in == Undefined) {:$cfg_reflect_in ? "true": "false":} $else {:$if ($crc_reflect_in == True) {:"true":} $else {:"false":}:});
+    printf(format, "xor_in", $cfg_xor_in);
+    printf("%-16s = %s\\n", "reflect_out", $if ($crc_reflect_out == Undefined) {:$cfg_reflect_out ? "true": "false":} $else {:$if ($crc_reflect_out == True) {:"true":} $else {:"false":}:});
+    printf(format, "xor_out", (unsigned int)$cfg_xor_out);
+    printf(format, "crc_mask", (unsigned int)$cfg_mask);
+    printf(format, "msb_mask", (unsigned int)$cfg_msb_mask);
 }
 
 /**
@@ -876,27 +884,27 @@ void print_params({%if $undefined_parameters == True%}{:const {%cfg_t%} *cfg:}{%
  *****************************************************************************/
 int main(int argc, char *argv[])
 {
-{%if $undefined_parameters == True%}{:
-    {%cfg_t%} cfg = {
-{%if $crc_width == Undefined%}{:
+$if ($undefined_parameters == True) {:
+    $cfg_t cfg = {
+$if ($crc_width == Undefined) {:
             0,      /* width */
 :}
-{%if $crc_poly == Undefined%}{:
+$if ($crc_poly == Undefined) {:
             0,      /* poly */
 :}
-{%if $crc_xor_in == Undefined%}{:
+$if ($crc_xor_in == Undefined) {:
             0,      /* xor_in */
 :}
-{%if $crc_reflect_in == Undefined%}{:
+$if ($crc_reflect_in == Undefined) {:
             0,      /* reflect_in */
 :}
-{%if $crc_xor_out == Undefined%}{:
+$if ($crc_xor_out == Undefined) {:
             0,      /* xor_out */
 :}
-{%if $crc_reflect_out == Undefined%}{:
+$if ($crc_reflect_out == Undefined) {:
             0,      /* reflect_out */
 :}
-{%if $crc_width == Undefined%}{:
+$if ($crc_width == Undefined) {:
 
             0,      /* crc_mask */
             0,      /* msb_mask */
@@ -904,22 +912,22 @@ int main(int argc, char *argv[])
 :}
     };
 :}
-    {%crc_t%} crc;
+    $crc_t crc;
 
-{%if $undefined_parameters == True%}{:
+$if ($undefined_parameters == True) {:
     get_config(argc, argv, &cfg);
-:}{%else%}{:
+:} $else {:
     get_config(argc, argv);
 :}
-{%if $crc_algorithm == "table-driven" and $constant_crc_table != True%}{:
-    {%crc_table_gen_function%}(&cfg);
+$if ($crc_algorithm == "table-driven" and $constant_crc_table != True) {:
+    $crc_table_gen_function(&cfg);
 :}
-    crc = {%crc_init_function%}({%if $constant_crc_init != True%}{:&cfg:});
-    crc = {%crc_update_function%}({%if $simple_crc_update_def != True%}{:&cfg, :}crc, (unsigned char *)str, strlen(str));
-    crc = {%crc_finalize_function%}({%if $simple_crc_finalize_def != True%}{:&cfg, :}crc);
+    crc = $crc_init_function($if ($constant_crc_init != True) {:&cfg:});
+    crc = $crc_update_function($if ($simple_crc_update_def != True) {:&cfg, :}crc, (unsigned char *)str, strlen(str));
+    crc = $crc_finalize_function($if ($simple_crc_finalize_def != True) {:&cfg, :}crc);
 
     if (verbose) {
-        print_params({%if $undefined_parameters == True%}{:&cfg:});
+        print_params($if ($undefined_parameters == True) {:&cfg:});
     }
     printf("0x%lx\\n", (unsigned long)crc);
     return 0;
@@ -928,32 +936,32 @@ int main(int argc, char *argv[])
 
         elif id == "getopt_template":
             return  """\
-{%if $crc_reflect_in == Undefined or $crc_reflect_out == Undefined%}{:
-static {%c_bool%} atob(const char *str);
+$if ($crc_reflect_in == Undefined or $crc_reflect_out == Undefined) {:
+static $c_bool atob(const char *str);
 :}
-{%if $crc_poly == Undefined or $crc_xor_in == Undefined or $crc_xor_out == Undefined%}{:
+$if ($crc_poly == Undefined or $crc_xor_in == Undefined or $crc_xor_out == Undefined) {:
 static crc_t xtoi(const char *str);
 :}
-static int get_config(int argc, char *argv[]{%if $undefined_parameters == True%}{:, {%cfg_t%} *cfg:});
+static int get_config(int argc, char *argv[]$if ($undefined_parameters == True) {:, $cfg_t *cfg:});
 
 
-{%if $crc_reflect_in == Undefined or $crc_reflect_out == Undefined%}{:
-{%c_bool%} atob(const char *str)
+$if ($crc_reflect_in == Undefined or $crc_reflect_out == Undefined) {:
+$c_bool atob(const char *str)
 {
     if (!str) {
         return 0;
     }
     if (isdigit(str[0])) {
-        return ({%c_bool%})atoi(str);
+        return ($c_bool)atoi(str);
     }
     if (tolower(str[0]) == 't') {
-        return {%c_true%};
+        return $c_true;
     }
-    return {%c_false%};
+    return $c_false;
 }
 
 :}
-{%if $crc_poly == Undefined or $crc_xor_in == Undefined or $crc_xor_out == Undefined%}{:
+$if ($crc_poly == Undefined or $crc_xor_in == Undefined or $crc_xor_out == Undefined) {:
 crc_t xtoi(const char *str)
 {
     crc_t ret = 0;
@@ -986,33 +994,33 @@ crc_t xtoi(const char *str)
 
 
 :}
-static int get_config(int argc, char *argv[]{%if $undefined_parameters == True%}{:, {%cfg_t%} *cfg:})
+static int get_config(int argc, char *argv[]$if ($undefined_parameters == True) {:, $cfg_t *cfg:})
 {
     int c;
     int this_option_optind;
     int option_index;
     static struct option long_options[] = {
-{%if $crc_width == Undefined%}{:
+$if ($crc_width == Undefined) {:
         {"width",           1, 0, 'w'},
 :}
-{%if $crc_poly == Undefined%}{:
+$if ($crc_poly == Undefined) {:
         {"poly",            1, 0, 'p'},
 :}
-{%if $crc_reflect_in == Undefined%}{:
+$if ($crc_reflect_in == Undefined) {:
         {"reflect-in",      1, 0, 'n'},
 :}
-{%if $crc_xor_in == Undefined%}{:
+$if ($crc_xor_in == Undefined) {:
         {"xor-in",          1, 0, 'i'},
 :}
-{%if $crc_reflect_out == Undefined%}{:
+$if ($crc_reflect_out == Undefined) {:
         {"reflect-out",     1, 0, 'u'},
 :}
-{%if $crc_xor_out == Undefined%}{:
+$if ($crc_xor_out == Undefined) {:
         {"xor-out",         1, 0, 'o'},
 :}
         {"verbose",         0, 0, 'v'},
         {"check-string",    1, 0, 's'},
-{%if $crc_width == Undefined%}{:
+$if ($crc_width == Undefined) {:
         {"table-idx-with",  1, 0, 't'},
 :}
         {0, 0, 0, 0}
@@ -1022,7 +1030,7 @@ static int get_config(int argc, char *argv[]{%if $undefined_parameters == True%}
         this_option_optind = optind ? optind : 1;
         option_index = 0;
 
-        c = getopt_long (argc, argv, "w:p:ni:uo:s:v", long_options, &option_index);
+        c = getopt_long (argc, argv, "w:p:n:i:u:o:s:vt", long_options, &option_index);
         if (c == -1)
             break;
 
@@ -1032,32 +1040,32 @@ static int get_config(int argc, char *argv[]{%if $undefined_parameters == True%}
                 if (optarg)
                     printf (" with arg %s", optarg);
                 printf ("\\n");
-{%if $crc_width == Undefined%}{:
+$if ($crc_width == Undefined) {:
             case 'w':
                 cfg->width = atoi(optarg);
                 break;
 :}
-{%if $crc_poly == Undefined%}{:
+$if ($crc_poly == Undefined) {:
             case 'p':
                 cfg->poly = xtoi(optarg);
                 break;
 :}
-{%if $crc_reflect_in == Undefined%}{:
+$if ($crc_reflect_in == Undefined) {:
             case 'n':
                 cfg->reflect_in = atob(optarg);
                 break;
 :}
-{%if $crc_xor_in == Undefined%}{:
+$if ($crc_xor_in == Undefined) {:
             case 'i':
                 cfg->xor_in = xtoi(optarg);
                 break;
 :}
-{%if $crc_reflect_out == Undefined%}{:
+$if ($crc_reflect_out == Undefined) {:
             case 'u':
                 cfg->reflect_out = atob(optarg);
                 break;
 :}
-{%if $crc_xor_out == Undefined%}{:
+$if ($crc_xor_out == Undefined) {:
             case 'o':
                 cfg->xor_out = xtoi(optarg);
                 break;
@@ -1067,9 +1075,9 @@ static int get_config(int argc, char *argv[]{%if $undefined_parameters == True%}
                 str[sizeof(str) - 1] = '\\0';
                 break;
             case 'v':
-                verbose = {%c_true%};
+                verbose = $c_true;
                 break;
-{%if $crc_width == Undefined%}{:
+$if ($crc_width == Undefined) {:
             case 't':
                 /* ignore --table_idx_width option */
                 break;
@@ -1084,20 +1092,20 @@ static int get_config(int argc, char *argv[]{%if $undefined_parameters == True%}
                 return -1;
         }
     }
-{%if $crc_width == Undefined%}{:
+$if ($crc_width == Undefined) {:
     cfg->msb_mask = 1UL << (cfg->width - 1);
     cfg->crc_mask = (cfg->msb_mask - 1) | cfg->msb_mask;
     cfg->crc_shift = cfg->width < 8 ? 8 - cfg->width : 0;
 :}
 
-{%if $crc_poly == Undefined%}{:
-    cfg->poly &= {%cfg_mask%};
+$if ($crc_poly == Undefined) {:
+    cfg->poly &= $cfg_mask;
 :}
-{%if $crc_xor_in == Undefined%}{:
-    cfg->xor_in &= {%cfg_mask%};
+$if ($crc_xor_in == Undefined) {:
+    cfg->xor_in &= $cfg_mask;
 :}
-{%if $crc_xor_out == Undefined%}{:
-    cfg->xor_out &= {%cfg_mask%};
+$if ($crc_xor_out == Undefined) {:
+    cfg->xor_out &= $cfg_mask;
 :}
     return 0;
 }\
@@ -1125,7 +1133,7 @@ static int get_config(int argc, char *argv[]{%if $undefined_parameters == True%}
             return "Undefined"
         if width == None:
             return "0x%x" % value
-        width = (width + 3) / 4
+        width = (width + 3) // 4
         str = "0x%%0%dx" % width
         return str % value
 
@@ -1148,7 +1156,7 @@ static int get_config(int argc, char *argv[]{%if $undefined_parameters == True%}
     ###############################################################################
     def __pretty_hdrprotection(self):
         """
-        Return the name of a C header protection (e.g. __CRC_IMPLEMENTATION_H__)
+        Return the name of a C header protection (e.g. __CRC_IMPLEMENTATION_H__).
         """
         tr_str = ""
         for i in range(256):
@@ -1170,7 +1178,7 @@ static int get_config(int argc, char *argv[]{%if $undefined_parameters == True%}
     ###############################################################################
     def __get_underlying_crc_t(self):
         """
-        Return the C type of the crc_t typedef
+        Return the C type of the crc_t typedef.
         """
         if self.opt.CrcType != None:
             return self.opt.CrcType
@@ -1199,7 +1207,7 @@ static int get_config(int argc, char *argv[]{%if $undefined_parameters == True%}
     ###############################################################################
     def __get_include_file(self):
         """
-        Return an addittional include instruction if specified
+        Return an addittional include instruction if specified.
         """
         if self.opt.IncludeFile == None:
             return None
@@ -1213,7 +1221,7 @@ static int get_config(int argc, char *argv[]{%if $undefined_parameters == True%}
     def __get_init_value(self):
         """
         Return the init value of a C implementation, according to the selected algorithm and
-        to the given options
+        to the given options.
         If no default option is given for a given parameter, value in the cfg_t structure must be used.
         """
         if self.opt.Algorithm == self.opt.Algo_Bit_by_Bit:
@@ -1252,7 +1260,7 @@ static int get_config(int argc, char *argv[]{%if $undefined_parameters == True%}
     ###############################################################################
     def __get_table_init(self):
         """
-        Return the precalculated CRC table for the table_driven implementation
+        Return the precalculated CRC table for the table_driven implementation.
         """
         if self.opt.Algorithm != self.opt.Algo_Table_Driven:
             return "0"
@@ -1287,7 +1295,7 @@ static int get_config(int argc, char *argv[]{%if $undefined_parameters == True%}
     ###############################################################################
     def __get_table_core_algorithm_ni(self):
         """
-        Return the core loop of the table-driven algorithm
+        Return the core loop of the table-driven algorithm.
         """
         if self.opt.Algorithm != self.opt.Algo_Table_Driven:
             return ""
@@ -1300,22 +1308,22 @@ static int get_config(int argc, char *argv[]{%if $undefined_parameters == True%}
             loop_indent = "        "
 
         if self.opt.Width == None:
-            shr = "({%cfg_width%} - {%cfg_table_idx_width%} + {%cfg_shift%})"
+            shr = "($cfg_width - $cfg_table_idx_width + $cfg_shift)"
         elif self.opt.Width < 8:
             shr = "%d" % (self.opt.Width - self.opt.TableIdxWidth + 8 - self.opt.Width)
         else:
             shr = "%d" % (self.opt.Width - self.opt.TableIdxWidth)
 
-        reg_shift = "{%if $crc_do_shift == True%}{:({%cfg_table_idx_width%} - {%cfg_shift%}):}{%else%}{:{%cfg_table_idx_width%}:}"
+        reg_shift = "$if ($crc_do_shift == True) {:($cfg_table_idx_width - $cfg_shift):} $else {:$cfg_table_idx_width:}"
 
         if self.opt.TableIdxWidth == 8:
-            loop_core_ni += loop_indent + "tbl_idx = ((crc >> " + shr + ") ^ *data) & {%crc_table_mask%};" + '\n' + \
-                            loop_indent + "crc = (crc_table[tbl_idx] ^ (crc << " + reg_shift + ")) & {%cfg_mask_shifted%};" + '\n'
+            loop_core_ni += loop_indent + "tbl_idx = ((crc >> " + shr + ") ^ *data) & $crc_table_mask;" + '\n' + \
+                            loop_indent + "crc = (crc_table[tbl_idx] ^ (crc << " + reg_shift + ")) & $cfg_mask_shifted;" + '\n'
         else:
             for i in range (8 / self.opt.TableIdxWidth):
                 str_idx = "%s" % (8 - (i + 1) * self.opt.TableIdxWidth)
                 loop_core_ni += loop_indent + "tbl_idx = (crc >> " + shr + ") ^ (*data >> " + str_idx + ");" + '\n' + \
-                                loop_indent + "crc = crc_table[tbl_idx & {%crc_table_mask%}] ^ (crc << " + reg_shift + ");" + '\n'
+                                loop_indent + "crc = crc_table[tbl_idx & $crc_table_mask] ^ (crc << " + reg_shift + ");" + '\n'
         return loop_core_ni
 
 
@@ -1323,7 +1331,7 @@ static int get_config(int argc, char *argv[]{%if $undefined_parameters == True%}
     ###############################################################################
     def __get_table_core_algorithm_ri(self):
         """
-        Return the core loop of the table-driven algorithm
+        Return the core loop of the table-driven algorithm.
         """
         if self.opt.Algorithm != self.opt.Algo_Table_Driven:
             return ""
@@ -1334,15 +1342,15 @@ static int get_config(int argc, char *argv[]{%if $undefined_parameters == True%}
             loop_indent = "            "
         else:
             loop_indent = "        "
-        crc_shifted = "{%if $crc_do_shift == True%}{:(crc >> {%cfg_shift%}):}{%else%}{:crc:}"
+        crc_shifted = "$if ($crc_do_shift == True) {:(crc >> $cfg_shift):} $else {:crc:}"
 
         if self.opt.TableIdxWidth == 8:
-            loop_core_ri += loop_indent + "tbl_idx = (" + crc_shifted + " ^ *data) & {%crc_table_mask%};" + '\n' + \
-                            loop_indent + "crc = (crc_table[tbl_idx] ^ (crc >> {%cfg_table_idx_width%})) & {%cfg_mask_shifted%};" + '\n'
+            loop_core_ri += loop_indent + "tbl_idx = (" + crc_shifted + " ^ *data) & $crc_table_mask;" + '\n' + \
+                            loop_indent + "crc = (crc_table[tbl_idx] ^ (crc >> $cfg_table_idx_width)) & $cfg_mask_shifted;" + '\n'
         else:
             for i in range (8 / self.opt.TableIdxWidth):
                 str_idx = "%d" % i
-                loop_core_ri += loop_indent + "tbl_idx = " + crc_shifted + " ^ (*data >> (" + str_idx + " * {%cfg_table_idx_width%}));" + '\n' + \
-                                loop_indent + "crc = crc_table[tbl_idx & {%crc_table_mask%}] ^ (crc >> {%cfg_table_idx_width%});" + '\n'
+                loop_core_ri += loop_indent + "tbl_idx = " + crc_shifted + " ^ (*data >> (" + str_idx + " * $cfg_table_idx_width));" + '\n' + \
+                                loop_indent + "crc = crc_table[tbl_idx & $crc_table_mask] ^ (crc >> $cfg_table_idx_width);" + '\n'
 
         return loop_core_ri

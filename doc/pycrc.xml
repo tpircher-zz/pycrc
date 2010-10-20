@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
-<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
-                    "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+                    "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
 <!ENTITY program_name       "pycrc">
 <!ENTITY program_version    "0.7.5">
 <!ENTITY date               "2010-03-28">
@@ -22,6 +22,19 @@
 
 <refentry id="&program_name;">
 
+    <refentryinfo>
+        <title>&program_name;</title>
+        <productname>&program_name;</productname>
+        <productnumber>&program_version;</productnumber>
+        <author>
+            <firstname>&author_firstname;</firstname>
+            <surname>&author_surname;</surname>
+            <contrib>Author of &program_name; and this manual page.</contrib>
+            <email>&author_email;</email>
+        </author>
+        <date>&date;</date>
+    </refentryinfo>
+
     <refmeta>
         <refentrytitle>&program_name;</refentrytitle>
         <manvolnum>1</manvolnum>
@@ -31,19 +44,6 @@
         <refname>&program_name;</refname>
         <refpurpose>&program_name; is a free, easy to use Cyclic Redundancy Check (CRC) calculator and source code generator.</refpurpose>
     </refnamediv>
-
-    <refentryinfo>
-        <title>&program_name;</title>
-        <productname>&program_name;</productname>
-        <productnumber>&program_version;</productnumber>
-        <author>
-            <firstname>&author_firstname;</firstname>
-            <surname>&author_surname;</surname>
-            <email>&author_email;</email>
-            <contrib>Author of &program_name; and this manual page.</contrib>
-        </author>
-        <date>&date;</date>
-    </refentryinfo>
 
     <refsynopsisdiv>
         <cmdsynopsis>
@@ -392,7 +392,7 @@
                     <glossdef>
                         <para>
                         This value is not exactly a parameter of a model but it is sometimes given together with the Rocksoft Model parameters.
-                        It is the CRC value of the parametrised model over the standard string <replaceable>123456789</replaceable> and
+                        It is the CRC value of the parametrised model over the string "<replaceable>123456789</replaceable>" and
                         may be used to validate an implementation.
                         </para>
                     </glossdef>
@@ -440,11 +440,10 @@ typedef XXXX crc_t;             // this type is defined in the generated header 
                     <paramdef>crc_t <parameter>crc</parameter></paramdef>
                 </funcprototype>
             </funcsynopsis>
-        </refsect2>
 
-        <para>
-        The following code snippet shows how to use the generated functions.
-        <programlisting>
+            <para>
+            The following code snippet shows how to use the generated functions.
+            <programlisting>
 #include "my_generated_crc.h"
 #include &lt;stdio.h&gt;
 
@@ -463,8 +462,9 @@ int main(void)
     printf("0x%lx\n", (long)crc);
     return 0;
 }
-        </programlisting>
-        </para>
+            </programlisting>
+            </para>
+        </refsect2>
 
         <refsect2><title>Models with runtime-configurable parameters</title>
             <para>
@@ -486,7 +486,7 @@ typedef struct {
     // internal parameters
     crc_t msb_mask;             // initialise as 1UL &lt;&lt; (cfg-&gt;width - 1)
     crc_t crc_mask;             // initialise as (cfg-&gt;msb_mask - 1) | cfg-&gt;msb_mask
-    unsigned int crc_shift;     // initialise as initialise as cfg-&gt;width &lt; 8 ? 8 - cfg-&gt;width : 0
+    unsigned int crc_shift;     // initialise as cfg-&gt;width &lt; 8 ? 8 - cfg-&gt;width : 0
 } crc_cfg_t;
             </programlisting>
             </para>
@@ -497,6 +497,14 @@ typedef struct {
             wide data type set to 1.
             <parameter>crc_shift</parameter> is a shift counter that is used when <replaceable>&width;</replaceable> is less than 8.
             It is the number of bits to shift the CRC register to align its top bit at a byte boundary.
+            </para>
+
+            <para>
+            The file <filename>test/main.c</filename> in the source package of &program_name; contains a fully featured example
+            of how to use the generated source code.
+            A shorter, more compact <code>main()</code> function can be generated with the <replaceable>--generate c-main</replaceable>
+            option.
+            This second variant is the better option when some of the CRC parameters are known and some are unknown during code generation.
             </para>
         </refsect2>
     </refsect1>
@@ -522,8 +530,8 @@ typedef struct {
                         <userinput>pycrc.py --model crc-16 --algorithm table-driven --table-idx-width 4 --generate c -o crc.c</userinput>
                         </para>
                         <para>
-                         The table index width of 4 bits ensures a moderate memory consumption.
-                         In fact, the size of the resulting table is <code>16 * sizeof(crc_t)</code> bytes.
+                        The table index width of 4 bits ensures a moderate memory consumption.
+                        In fact, the size of the resulting table is <code>16 * sizeof(crc_t)</code> bytes.
                         A variant of the last generated output is the <replaceable>c-main</replaceable> target:
                         a simple <replaceable>main()</replaceable> function is generated in addition to the CRC routines:
                         </para>
@@ -550,11 +558,13 @@ typedef struct {
         </para>
     </refsect1>
 
+    <!--
     <refsect1><title>Author</title>
         <para>
             Written by &author; <email>&author_email;</email>.
         </para>
     </refsect1>
+    -->
 
     <refsect1><title>Copyright</title>
         <para>
