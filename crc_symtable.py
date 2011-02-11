@@ -2,7 +2,7 @@
 
 #  pycrc -- parametrisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2010  Thomas Pircher  <tehpeh@gmx.net>
+#  Copyright (c) 2006-2011  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal
@@ -1134,8 +1134,8 @@ $if ($crc_xor_out == Undefined) {:
         if width == None:
             return "0x%x" % value
         width = (width + 3) // 4
-        str = "0x%%0%dx" % width
-        return str % value
+        hex_str = "0x%%0%dx" % width
+        return hex_str % value
 
 
     # function __pretty_bool
@@ -1165,13 +1165,13 @@ $if ($crc_xor_out == Undefined) {:
             else:
                 tr_str += '_'
         if self.opt.OutputFile == None:
-            str = "stdout"
+            out_str = "stdout"
         else:
-            str = self.opt.OutputFile
-        str = os.path.basename(str)
-        str = str.upper()
-        str = str.translate(tr_str)
-        return "__" + str + "__"
+            out_str = self.opt.OutputFile
+        out_str = os.path.basename(out_str)
+        out_str = out_str.upper()
+        out_str = out_str.translate(tr_str)
+        return "__" + out_str + "__"
 
 
     # function __get_underlying_crc_t

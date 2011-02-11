@@ -516,7 +516,7 @@ typedef struct {
                     <glossterm>Calculate the CRC-32 checksum of the string 123456789:</glossterm>
                     <glossdef>
                         <para>
-                        <userinput>pycrc.py --model crc-32 --check-string 123456789</userinput>
+                        <userinput>python pycrc.py --model crc-32 --check-string 123456789</userinput>
                         </para>
                     </glossdef>
                 </glossentry>
@@ -524,10 +524,10 @@ typedef struct {
                     <glossterm>Generate the source code of the table-driven algorithm for an embedded application.</glossterm>
                     <glossdef>
                         <para>
-                        <userinput>pycrc.py --model crc-16 --algorithm table-driven --table-idx-width 4 --generate h -o crc.h</userinput>
+                        <userinput>python pycrc.py --model crc-16 --algorithm table-driven --table-idx-width 4 --generate h -o crc.h</userinput>
                         </para>
                         <para>
-                        <userinput>pycrc.py --model crc-16 --algorithm table-driven --table-idx-width 4 --generate c -o crc.c</userinput>
+                        <userinput>python pycrc.py --model crc-16 --algorithm table-driven --table-idx-width 4 --generate c -o crc.c</userinput>
                         </para>
                         <para>
                         The table index width of 4 bits ensures a moderate memory consumption.
@@ -536,7 +536,7 @@ typedef struct {
                         a simple <replaceable>main()</replaceable> function is generated in addition to the CRC routines:
                         </para>
                         <para>
-                        <userinput>pycrc.py --model crc-16 --algorithm table-driven --table-idx-width 4 --generate c-main -o crc.c</userinput>
+                        <userinput>python pycrc.py --model crc-16 --algorithm table-driven --table-idx-width 4 --generate c-main -o crc.c</userinput>
                         </para>
                     </glossdef>
                 </glossentry>
@@ -544,7 +544,7 @@ typedef struct {
                     <glossterm>Generate the CRC table only:</glossterm>
                     <glossdef>
                         <para>
-                        <userinput>pycrc.py --model kermit --generate table -o crc-table.txt</userinput>
+                        <userinput>python pycrc.py --model kermit --generate table -o crc-table.txt</userinput>
                         </para>
                     </glossdef>
                 </glossentry>

@@ -1,4 +1,23 @@
 #
+# Version 0.7.7, 2011-02-11
+#
+
+2011-02-11  Thomas Pircher   <tehpeh@gmx.net>
+
+    * all files:
+    Updated the copyright year.
+    Fixed some coding style issues found by pylint and pychecker.
+
+2010-12-13  Thomas Pircher   <tehpeh@gmx.net>
+
+    * crc_opt.py:
+    Substituted the deprecated function atoi() with int(). Closes issue 3136566.
+    Thanks to Tony Smith.
+
+    * doc/pycrc.xml:
+    Updated the documentation using Windows-style calls to the Python interpreter.
+
+#
 # Version 0.7.6, 2010-10-21
 #
 

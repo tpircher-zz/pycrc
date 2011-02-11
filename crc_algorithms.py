@@ -2,7 +2,7 @@
 
 #  pycrc -- parametrisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2010  Thomas Pircher  <tehpeh@gmx.net>
+#  Copyright (c) 2006-2011  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal
@@ -77,7 +77,6 @@ class Crc(object):
         self.MSB_Mask = 0x1 << (self.Width - 1)
         self.Mask = ((self.MSB_Mask - 1) << 1) | 1
         if self.TableIdxWidth != None:
-            self.TableIdxWidth = self.TableIdxWidth
             self.TableWidth = 1 << self.TableIdxWidth
         else:
             self.TableIdxWidth = 8
@@ -104,7 +103,7 @@ class Crc(object):
                 crc^= self.Poly
             crc >>= 1
             if bit:
-                crc |= self.MSB_Mask;
+                crc |= self.MSB_Mask
         return crc & self.Mask
 
 
@@ -123,13 +122,13 @@ class Crc(object):
 
     # function bit_by_bit
     ###############################################################################
-    def bit_by_bit(self, str):
+    def bit_by_bit(self, in_str):
         """
         Classic simple and slow CRC implementation.
         This function iterates bit by bit over the augmented input message and returns the calculated CRC value at the end
         """
         register = self.NonDirectInit
-        for c in str:
+        for c in in_str:
             octet = ord(c)
             if self.ReflectIn:
                 octet = self.reflect(octet, 8)
@@ -152,13 +151,13 @@ class Crc(object):
 
     # function bit_by_bit_fast
     ###############################################################################
-    def bit_by_bit_fast(self, str):
+    def bit_by_bit_fast(self, in_str):
         """
         This is a slightly modified version of the bit-by-bit algorithm: it does not need to loop over the augmented bits,
         i.e. the Width 0-bits wich are appended to the input message in the bit-by-bit algorithm.
         """
         register = self.DirectInit
-        for c in str:
+        for c in in_str:
             octet = ord(c)
             if self.ReflectIn:
                 octet = self.reflect(octet, 8)
@@ -203,7 +202,7 @@ class Crc(object):
 
     # function table_driven
     ###############################################################################
-    def table_driven(self, str):
+    def table_driven(self, in_str):
         """
         The Standard table_driven CRC algorithm.
         """
@@ -211,13 +210,13 @@ class Crc(object):
 
         register = self.DirectInit << self.CrcShift
         if not self.ReflectIn:
-            for c in str:
+            for c in in_str:
                 tblidx = ((register >> (self.Width - self.TableIdxWidth + self.CrcShift)) ^ ord(c)) & 0xff
                 register = ((register << (self.TableIdxWidth - self.CrcShift)) ^ tbl[tblidx]) & (self.Mask << self.CrcShift)
             register = register >> self.CrcShift
         else:
             register = self.reflect(register, self.Width + self.CrcShift) << self.CrcShift
-            for c in str:
+            for c in in_str:
                 tblidx = ((register >> self.CrcShift) ^ ord(c)) & 0xff
                 register = ((register >> self.TableIdxWidth) ^ tbl[tblidx]) & (self.Mask << self.CrcShift)
             register = self.reflect(register, self.Width + self.CrcShift) & self.Mask

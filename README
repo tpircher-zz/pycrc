@@ -7,9 +7,9 @@ Installation
 
 pycrc requires Python 2.4 or later. Python 3.x is supported.
 
-This program doesn't need any particular installation. You may execute the
-script from any directory.
-Simply call the python interpreter with the script:
+This program doesn't need any particular installation. The script can be
+called from any directory.
+Simply call the python interpreter with the script as parameter:
 
 python pycrc.py [options]
 
@@ -17,20 +17,24 @@ On UNIX-like systems, you might want to make the script executable:
 
 chmod +x pycrc.py
 
+Then the script can be called like an application.
+./pycrc.py [options]
+
 
 Getting help
 ============
 
+If you are new to pycrc and want to generate C code, start with the tutorial
+http://www.tty1.net/pycrc/tutorial_en.html
+
 The manual page (http://www.tty1.net/pycrc/pycrc.html) explains the command
 line options and gives some examples how to use pycrc.
-
-If you want to generate C code and are new to pycrc, start with the tutorial
-http://www.tty1.net/pycrc/tutorial_en.html
 
 If you have questions about using pycrc which is not answered in a satisfactory
 way by the documentation, please send a mail to the pycrc user mailing list
 <pycrc-users@lists.sourceforge.net>. The list info page is available at
 https://lists.sourceforge.net/lists/listinfo/pycrc-users
+Due to excessive spamming a subscription is required to post on the list.
 
 If you have found a bug in pycrc, please take the time and file it to the issue
 tracker at https://sourceforge.net/tracker/?group_id=186891

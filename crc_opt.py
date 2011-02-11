@@ -2,7 +2,7 @@
 
 #  pycrc -- parametrisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2010  Thomas Pircher  <tehpeh@gmx.net>
+#  Copyright (c) 2006-2011  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +37,6 @@ This file is part of pycrc.
 
 from optparse import OptionParser, Option, OptionValueError
 from copy import copy
-import string
 import sys
 from crc_models import CrcModels
 
@@ -49,17 +48,13 @@ class Options(object):
     The options parsing and validationg class
     """
 
-    """
-    Program details
-    """
+    # Program details
     ProgramName    = "pycrc"
-    Version        = "0.7.6"
+    Version        = "0.7.7"
     VersionStr     = "%s v%s" % (ProgramName, Version)
     WebAddress     = "http://www.tty1.net/pycrc/"
 
-    """
-    Bitmap of the algorithms
-    """
+    # Bitmap of the algorithms
     Algo_None               = 0x00
     Algo_Bit_by_Bit         = 0x01
     Algo_Bit_by_Bit_Fast    = 0x02
@@ -87,6 +82,8 @@ class Options(object):
         self.TableWidth     = 1 << self.TableIdxWidth
         self.Verbose        = False
         self.CheckString    = "123456789"
+        self.MSB_Mask       = None
+        self.Mask           = None
 
         self.Algorithm      = self.Algo_None
         self.SymbolPrefix   = "crc_"
@@ -94,7 +91,9 @@ class Options(object):
         self.IncludeFile    = None
         self.OutputFile     = None
         self.Action         = self.Action_Check_String
+        self.CheckFile      = None
         self.CStd           = None
+        self.UndefinedCrcParameters = False
 
 
     # function parse
@@ -106,8 +105,9 @@ class Options(object):
         usage = """\
 %prog [OPTIONS]
 
-To generate the checksum of a string:
+To generate the checksum of a string or hexadecimal data:
     %prog [model] --check-string "123456789"
+    %prog [model] --check-hexstring "313233343536373839"
 
 To generate the checksum of a file:
     %prog [model] --check-file filename
@@ -219,7 +219,7 @@ following parameters:
                 sys.exit(1)
 
         if self.Poly != None and self.Poly % 2 == 0:
-                sys.stderr.write("%s: warning: the polynomial 0x%x is even. A valid CRC polynomial must be odd.\n" % (sys.argv[0], self.Poly))
+            sys.stderr.write("%s: warning: the polynomial 0x%x is even. A valid CRC polynomial must be odd.\n" % (sys.argv[0], self.Poly))
 
         if self.Width != None:
             if self.Width <= 0:
@@ -330,7 +330,7 @@ following parameters:
         if self.UndefinedCrcParameters and self.Action in set((self.Action_Check_String, self.Action_Check_Hex_String, self.Action_Check_File, self.Action_Generate_Table)):
             sys.stderr.write("%s: error: undefined parameters: Add %s or use --model\n" % (sys.argv[0], ", ".join(undefined_params)))
             sys.exit(1)
-        self.Verbose            = options.verbose
+        self.Verbose = options.verbose
 
 
     # function model_cb
@@ -340,9 +340,9 @@ following parameters:
         This function sets up the single parameters if the 'model' option has been selected
         by the user.
         """
-        str = value.lower();
-        models = CrcModels();
-        model = models.getParams(str)
+        model_name = value.lower()
+        models = CrcModels()
+        model = models.getParams(model_name)
         if model != None:
             setattr(parser.values, 'width',         model['width'])
             setattr(parser.values, 'poly',          model['poly'])
@@ -352,7 +352,6 @@ following parameters:
             setattr(parser.values, 'xor_out',       model['xor_out'])
         else:
             raise OptionValueError("Error: unsupported model %s" % (value))
-            sys.exit(1)
 
 
 # function check_hex
@@ -364,9 +363,9 @@ def check_hex(option, opt, value):
     """
     try:
         if value.lower().startswith("0x"):
-            return string.atoi(value, 16)
+            return int(value, 16)
         else:
-            return string.atoi(value)
+            return int(value)
     except ValueError:
         raise OptionValueError("option %s: invalid integer or hexadecimal value: %r" % (opt, value))
 
@@ -379,7 +378,7 @@ def check_bool(option, opt, value):
     Returns the converted value or rises an exception on error.
     """
     if value.isdigit():
-        return string.atoi(value, 10) != 0
+        return int(value, 10) != 0
     elif value.lower() == "false":
         return False
     elif value.lower() == "true":

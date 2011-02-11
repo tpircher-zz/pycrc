@@ -3,7 +3,7 @@
 
 #  pycrc -- parametrisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2010  Thomas Pircher  <tehpeh@gmx.net>
+#  Copyright (c) 2006-2011  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +34,8 @@ It can:
     -  generate the C header file and source of any of the algorithms below
 
 It supports the following CRC algorithms:
-    -  bit-by-bit       the basic algorithm which operates bit by bit on the augmented message
+    -  bit-by-bit       the basic algorithm which operates bit by bit on the
+                        augmented message
     -  bit-by-bit-fast  a variation of the simple bit-by-bit algorithm
     -  table-driven     the standard table driven algorithm
 """
@@ -126,23 +127,23 @@ def check_hexstring(opt):
     if len(opt.CheckString) % 2 != 0:
         opt.CheckString = "0" + opt.CheckString
     try:
-        str = binascii.unhexlify(opt.CheckString)
+        check_str = binascii.unhexlify(opt.CheckString)
     except TypeError:
         sys.stderr.write("%s: error: invalid hex string %s\n" % (sys.argv[0], opt.CheckString))
         sys.exit(1)
 
-    opt.CheckString = str
+    opt.CheckString = check_str
     return check_string(opt)
 
 
 # function crc_file_update
 ###############################################################################
-def crc_file_update(opt, alg, register, str):
+def crc_file_update(alg, register, check_str):
     """
     Update the CRC using the bit-by-bit-fast CRC algorithm.
     """
-    for i in range(len(str)):
-        octet = ord(str[i])
+    for i in range(len(check_str)):
+        octet = ord(check_str[i])
         if alg.ReflectIn:
             octet = alg.reflect(octet, 8)
         for j in range(8):
@@ -172,7 +173,7 @@ def check_file(opt):
         table_idx_width = opt.TableIdxWidth)
 
     try:
-        file = open(opt.CheckFile, 'rb')
+        in_file = open(opt.CheckFile, 'rb')
     except IOError:
         sys.stderr.write("%s: error: can't open file %s\n" % (sys.argv[0], opt.CheckFile))
         sys.exit(1)
@@ -182,18 +183,18 @@ def check_file(opt):
     else:
         register = alg.reflect(opt.XorIn, opt.Width)
     try:
-        str = file.read()
+        check_str = in_file.read()
     except IOError:
         sys.stderr.write("%s: error: can't open read %s\n" % (sys.argv[0], opt.CheckFile))
         sys.exit(1)
-    while len(str):
-        register = crc_file_update(opt, alg, register, str)
+    while len(check_str):
+        register = crc_file_update(alg, register, check_str)
         try:
-            str = file.read()
+            check_str = in_file.read()
         except IOError:
             sys.stderr.write("%s: error: can't open read %s\n" % (sys.argv[0], opt.CheckFile))
             sys.exit(1)
-    file.close()
+    in_file.close()
 
     if opt.ReflectOut:
         register = alg.reflect(register, opt.Width)
@@ -238,9 +239,9 @@ def main():
             print(mp.out_str)
         else:
             try:
-                file = open(opt.OutputFile, "w")
-                file.write(mp.out_str)
-                file.close()
+                out_file = open(opt.OutputFile, "w")
+                out_file.write(mp.out_str)
+                out_file.close()
             except IOError:
                 sys.stderr.write("%s: error: cannot write to file %s\n" % (sys.argv[0], opt.OutputFile))
                 sys.exit(1)
