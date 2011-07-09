@@ -1,4 +1,23 @@
 #
+# Version 0.7.8, 2011-07-10
+#
+
+2011-07-10  Thomas Pircher   <tehpeh@gmx.net>
+
+    * crc_symtable.py:
+    When generating C code for the C89 or ANSI standard, don't include <stdint.h>.
+    This closes issue 3338930
+
+    * crc_symtable.py:
+    If no output file name is given while generating a C file, then pycrc will
+    #include a hypothetical pycrc.h file instead of a stdout.h file.
+    Also, added a comment on that line to make debugging easier.
+    Closes issue 3325109.
+
+    * crc_symtable.py:
+    Removed unused variable "this_option_optind" in the generated option parser.
+
+#
 # Version 0.7.7, 2011-02-11
 #
 

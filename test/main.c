@@ -87,7 +87,6 @@ crc_t xtoi(const char *str)
 int get_config(int argc, char *argv[], crc_cfg_t *cfg)
 {
     int c;
-    int this_option_optind;
     int option_index;
     static struct option long_options[] = {
         {"width",           1, 0, 'w'},
@@ -103,7 +102,6 @@ int get_config(int argc, char *argv[], crc_cfg_t *cfg)
     };
 
     while (1) {
-        this_option_optind = optind ? optind : 1;
         option_index = 0;
 
         c = getopt_long (argc, argv, "w:p:ni:uo:v", long_options, &option_index);

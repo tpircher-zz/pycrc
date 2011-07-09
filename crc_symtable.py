@@ -66,12 +66,12 @@ class SymbolTable:
         self.table["program_version"] = self.opt.VersionStr
         self.table["program_url"] = self.opt.WebAddress
         if self.opt.OutputFile == None:
-            self.table["filename"] = "stdout"
+            self.table["filename"] = "pycrc_stdout"
         else:
             self.table["filename"] = self.opt.OutputFile
 
         if self.opt.OutputFile == None:
-            self.table["header_filename"] = "stdout.h"
+            self.table["header_filename"] = "pycrc_stdout.h"
         elif self.opt.OutputFile[-2:] == ".c":
             self.table["header_filename"] = self.opt.OutputFile[0:-1] + "h"
         else:
@@ -261,8 +261,10 @@ $source_header
 $if ($include_file != Undefined) {:
 #include $include_file
 :}
-#include <stdint.h>
 #include <stdlib.h>
+$if ($c_std != C89) {:
+#include <stdint.h>
+:}
 $if ($undefined_parameters == True and $c_std != C89) {:
 #include <stdbool.h>
 :}
@@ -522,7 +524,7 @@ $source_header
 $if ($include_file != Undefined) {:
 #include $include_file
 :}
-#include "$header_filename"
+#include "$header_filename"     /* include the header file generated with pycrc */
 #include <stdint.h>
 #include <stdlib.h>
 $if ($undefined_parameters == True or $crc_algorithm == "bit-by-bit" or $crc_algorithm == "bit-by-bit-fast") {:
@@ -997,7 +999,6 @@ crc_t xtoi(const char *str)
 static int get_config(int argc, char *argv[]$if ($undefined_parameters == True) {:, $cfg_t *cfg:})
 {
     int c;
-    int this_option_optind;
     int option_index;
     static struct option long_options[] = {
 $if ($crc_width == Undefined) {:
@@ -1027,7 +1028,6 @@ $if ($crc_width == Undefined) {:
     };
 
     while (1) {
-        this_option_optind = optind ? optind : 1;
         option_index = 0;
 
         c = getopt_long (argc, argv, "w:p:n:i:u:o:s:vt", long_options, &option_index);
@@ -1165,7 +1165,7 @@ $if ($crc_xor_out == Undefined) {:
             else:
                 tr_str += '_'
         if self.opt.OutputFile == None:
-            out_str = "stdout"
+            out_str = "pycrc_stdout"
         else:
             out_str = self.opt.OutputFile
         out_str = os.path.basename(out_str)
