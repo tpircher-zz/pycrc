@@ -577,7 +577,7 @@ $crc_init_function_def$nop
     $c_bool bit;
     $crc_t crc = $cfg_xor_in;
     for (i = 0; i < $cfg_width; i++) {
-        bit = crc & 0x01;
+        bit = $if ($c_std == C89) {:!!(crc & 0x01);:} $else {:crc & 0x01;:}
         if (bit) {
             crc = ((crc ^ $cfg_poly) >> 1) | $cfg_msb_mask;
         } else {
@@ -608,7 +608,7 @@ $if ($crc_reflect_in == Undefined) {:
         c = *data++;
 :}
         for (i = 0; i < 8; i++) {
-            bit = crc & $cfg_msb_mask;
+            bit = $if ($c_std == C89) {:!!(crc & $cfg_msb_mask);:} $else {:crc & $cfg_msb_mask;:}
             crc = (crc << 1) | ((c >> (7 - i)) & 0x01);
             if (bit) {
                 crc ^= $cfg_poly;
@@ -627,7 +627,7 @@ $crc_finalize_function_def$nop
     $c_bool bit;
 
     for (i = 0; i < $cfg_width; i++) {
-        bit = crc & $cfg_msb_mask;
+        bit = $if ($c_std == C89) {:!!(crc & $cfg_msb_mask);:} $else {:crc & $cfg_msb_mask;:}
         crc = (crc << 1) | 0x00;
         if (bit) {
             crc ^= $cfg_poly;
@@ -680,7 +680,7 @@ $if ($crc_reflect_in == True) {:
 :} $else {:
         for (i = 0x80; i > 0; i >>= 1) {
 :}
-            bit = crc & $cfg_msb_mask;
+            bit = $if ($c_std == C89) {:!!(crc & $cfg_msb_mask);:} $else {:crc & $cfg_msb_mask;:}
             if (c & i) {
                 bit = !bit;
             }
