@@ -53,18 +53,17 @@ def print_parameters(opt):
     """
     Generate a string with the options pretty-printed (used in the --verbose mode).
     """
-    out  = ""
-    out += "Width        = $crc_width\n"
-    out += "Poly         = $crc_poly\n"
-    out += "ReflectIn    = $crc_reflect_in\n"
-    out += "XorIn        = $crc_xor_in\n"
-    out += "ReflectOut   = $crc_reflect_out\n"
-    out += "XorOut       = $crc_xor_out\n"
-    out += "Algorithm    = $crc_algorithm\n"
+    in_str  = ""
+    in_str += "Width        = $crc_width\n"
+    in_str += "Poly         = $crc_poly\n"
+    in_str += "ReflectIn    = $crc_reflect_in\n"
+    in_str += "XorIn        = $crc_xor_in\n"
+    in_str += "ReflectOut   = $crc_reflect_out\n"
+    in_str += "XorOut       = $crc_xor_out\n"
+    in_str += "Algorithm    = $crc_algorithm\n"
 
     mp = MacroParser(opt)
-    if not mp.parse(out):
-        sys.exit(1)
+    mp.parse(in_str)
     return mp.out_str
 
 
@@ -247,5 +246,8 @@ def main():
                 sys.exit(1)
     return 0
 
+
+# program entry point
+###############################################################################
 if __name__ == "__main__":
     sys.exit(main())

@@ -1,1 +1,4 @@
 .svn
+*.pyc
+doc/pycrc.1
+doc/pycrc.html

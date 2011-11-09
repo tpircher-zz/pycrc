@@ -156,7 +156,7 @@ opt="--width 5 --poly 0x05 --reflect-in 1 --xor-in 0x1f --reflect-out 1 --xor-ou
 teststr "$cmd" "$res"
 teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
-#testbin "$opt" "$res"      # don't test binaries with Width < 8 (table driven algorithm does not work)
+testbin "$opt" "$res"
 
 #CRC-8
 res="0xf4"
@@ -183,7 +183,7 @@ opt="--width 15 --poly 0x4599 --reflect-in 0 --xor-in 0x0 --reflect-out 0 --xor-
 teststr "$cmd" "$res"
 teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
-#testbin "$opt" "$res"      # don't test binaries with width not a multiple of 8 (table driven algorithm does not work)
+testbin "$opt" "$res"
 
 #CRC-16/ARC
 res="0xbb3d"
@@ -273,7 +273,7 @@ opt="--width 24 --poly 0x1864cfb --reflect-in 0 --xor-in 0xb704ce --reflect-out 
 teststr "$cmd" "$res"
 teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
-#testbin "$opt" "$res"      # don't test binaries with width not a multiple of 8 (table driven algorithm does not work)
+testbin "$opt" "$res"
 
 #CRC-32
 res="0xcbf43926"
@@ -336,7 +336,7 @@ opt="--width 64 --poly 0x000000000000001b --reflect-in 1 --xor-in 0x0 --reflect-
 teststr "$cmd" "$res"
 teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
-#testbin "$opt" "$res"      # don't test binaries with width 64 bits (variables not wide enough...)
+testbin "$opt" "$res"      # don't test binaries with width 64 bits (variables not wide enough...)
 
 #CRC-64-jones
 res="0xcaa717168609f281"
@@ -345,7 +345,7 @@ opt="--width 64 --poly 0xad93d23594c935a9 --reflect-in 1 --xor-in 0xffffffffffff
 teststr "$cmd" "$res"
 teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
-#testbin "$opt" "$res"      # don't test binaries with width 64 bits (variables not wide enough...)
+testbin "$opt" "$res"      # don't test binaries with width 64 bits (variables not wide enough...)
 fi
 
 
