@@ -50,7 +50,7 @@ class Options(object):
 
     # Program details
     ProgramName    = "pycrc"
-    Version        = "0.7.8"
+    Version        = "0.7.9"
     VersionStr     = "%s v%s" % (ProgramName, Version)
     WebAddress     = "http://www.tty1.net/pycrc/"
 
