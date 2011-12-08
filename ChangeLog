@@ -1,3 +1,10 @@
+2011-12-08  Thomas Pircher   <tehpeh@gmx.net>
+
+    * crc_symtable.py:
+    Fixed a bug in the generated C89 code that included stdint.h.
+    Thanks to Frank (ftheile).
+    Closes issue 3454356.
+
 2011-11-08  Thomas Pircher   <tehpeh@gmx.net>
 
     * crc_symtable.py:

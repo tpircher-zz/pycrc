@@ -525,10 +525,10 @@ $if ($include_file != Undefined) {:
 #include $include_file
 :}
 #include "$header_filename"     /* include the header file generated with pycrc */
-#include <stdint.h>
 #include <stdlib.h>
-$if ($undefined_parameters == True or $crc_algorithm == "bit-by-bit" or $crc_algorithm == "bit-by-bit-fast") {:
 $if ($c_std != C89) {:
+#include <stdint.h>
+$if ($undefined_parameters == True or $crc_algorithm == "bit-by-bit" or $crc_algorithm == "bit-by-bit-fast") {:
 #include <stdbool.h>
 :}
 :}
@@ -577,7 +577,7 @@ $crc_init_function_def$nop
     $c_bool bit;
     $crc_t crc = $cfg_xor_in;
     for (i = 0; i < $cfg_width; i++) {
-        bit = $if ($c_std == C89) {:!!(crc & 0x01);:} $else {:crc & 0x01;:}
+        bit = crc & 0x01;
         if (bit) {
             crc = ((crc ^ $cfg_poly) >> 1) | $cfg_msb_mask;
         } else {

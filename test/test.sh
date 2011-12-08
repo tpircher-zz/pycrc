@@ -336,7 +336,7 @@ opt="--width 64 --poly 0x000000000000001b --reflect-in 1 --xor-in 0x0 --reflect-
 teststr "$cmd" "$res"
 teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
-testbin "$opt" "$res"      # don't test binaries with width 64 bits (variables not wide enough...)
+testbin "$opt" "$res"
 
 #CRC-64-jones
 res="0xcaa717168609f281"
@@ -345,7 +345,7 @@ opt="--width 64 --poly 0xad93d23594c935a9 --reflect-in 1 --xor-in 0xffffffffffff
 teststr "$cmd" "$res"
 teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
-testbin "$opt" "$res"      # don't test binaries with width 64 bits (variables not wide enough...)
+testbin "$opt" "$res"
 fi
 
 
