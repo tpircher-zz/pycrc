@@ -1,3 +1,9 @@
+2011-12-14  Thomas Pircher   <tehpeh@gmx.net>
+
+    * doc/pycrc.xml:
+    Fixed a mistake in the man page that still used the old model name
+    crc-32mpeg instead of crc-32-mpeg.  Thanks to Marek Erban.
+
 #
 # Version 0.7.9, 2011-12-08
 #
