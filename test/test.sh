@@ -176,6 +176,15 @@ teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
 testbin "$opt" "$res"
 
+#3gpp
+res="0xdaf"
+cmd="$PYCRC --model crc-12-3gpp"
+opt="--width 12 --poly 0x80f --reflect-in 0 --xor-in 0x0 --reflect-out 1 --xor-out 0x0"
+teststr "$cmd" "$res"
+teststr "$PYCRC $opt" "$res"
+testfil "$cmd" "$res"
+testbin "$opt" "$res"
+
 #CRC-15
 res="0x59e"
 cmd="$PYCRC --model crc-15"
@@ -207,6 +216,15 @@ testbin "$opt" "$res"
 res="0x4b37"
 cmd="$PYCRC --model crc-16-modbus"
 opt="--width 16 --poly 0x8005 --reflect-in 1 --xor-in 0xffff --reflect-out 1 --xor-out 0x0"
+teststr "$cmd" "$res"
+teststr "$PYCRC $opt" "$res"
+testfil "$cmd" "$res"
+testbin "$opt" "$res"
+
+#CRC-16-GENIBUS
+res="0xd64e"
+cmd="$PYCRC --model crc-16-genibus"
+opt="--width 16 --poly 0x1021 --reflect-in 0 --xor-in 0xffff --reflect-out 0 --xor-out 0xffff"
 teststr "$cmd" "$res"
 teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
@@ -320,6 +338,15 @@ teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"
 testbin "$opt" "$res"
 
+#CRC-32-BZIP2
+res="0xfc891918"
+cmd="$PYCRC --model crc-32-bzip2"
+opt="--width 32 --poly 0x04c11db7 --reflect-in 0 --xor-in 0xffffffff --reflect-out 0 --xor-out 0xffffffff"
+teststr "$cmd" "$res"
+teststr "$PYCRC $opt" "$res"
+testfil "$cmd" "$res"
+testbin "$opt" "$res"
+
 #XFER
 res="0xbd0be338"
 cmd="$PYCRC --model xfer"
@@ -342,6 +369,15 @@ testbin "$opt" "$res"
 res="0xcaa717168609f281"
 cmd="$PYCRC --model crc-64-jones"
 opt="--width 64 --poly 0xad93d23594c935a9 --reflect-in 1 --xor-in 0xffffffffffffffff --reflect-out 1 --xor-out 0x0"
+teststr "$cmd" "$res"
+teststr "$PYCRC $opt" "$res"
+testfil "$cmd" "$res"
+testbin "$opt" "$res"
+
+#CRC-64-zx
+res="0x995dc9bbdf1939fa"
+cmd="$PYCRC --model crc-64-xz"
+opt="--width 64 --poly 0x42f0e1eba9ea3693 --reflect-in 1 --xor-in 0xffffffffffffffff --reflect-out 1 --xor-out 0xffffffffffffffff"
 teststr "$cmd" "$res"
 teststr "$PYCRC $opt" "$res"
 testfil "$cmd" "$res"

@@ -90,6 +90,17 @@ class CrcModels(object):
         'check':         0xa1,
     })
     models.append({
+        'name':         'crc-12-3gpp',
+        'width':         12,
+        'poly':          0x80f,
+        'reflect_in':    False,
+        'xor_in':        0x0,
+        'reflect_out':   True,
+        'xor_out':       0x0,
+        'direct':        True,
+        'check':         0xdaf,
+    })
+    models.append({
         'name':         'crc-15',
         'width':         15,
         'poly':          0x4599,
@@ -132,6 +143,17 @@ class CrcModels(object):
         'xor_out':       0x0,
         'direct':        True,
         'check':         0x4b37,
+    })
+    models.append({
+        'name':         'crc-16-genibus',
+        'width':         16,
+        'poly':          0x1021,
+        'reflect_in':    False,
+        'xor_in':        0xffff,
+        'reflect_out':   False,
+        'xor_out':       0xffff,
+        'direct':        True,
+        'check':         0xd64e,
     })
     models.append({
         'name':         'ccitt',
@@ -244,6 +266,17 @@ class CrcModels(object):
         'check':         0x0376e6e7,
     })
     models.append({
+        'name':         'crc-32-bzip2',
+        'width':         32,
+        'poly':          0x04c11db7,
+        'reflect_in':    False,
+        'xor_in':        0xffffffff,
+        'reflect_out':   False,
+        'xor_out':       0xffffffff,
+        'direct':        True,
+        'check':         0xfc891918,
+    })
+    models.append({
         'name':         'posix',
         'width':         32,
         'poly':          0x4c11db7,
@@ -297,6 +330,17 @@ class CrcModels(object):
         'xor_out':       0x0,
         'direct':        True,
         'check':         0xe9c6d914c4b8d9ca,
+    })
+    models.append({
+        'name':         'crc-64-xz',
+        'width':         64,
+        'poly':          0x42f0e1eba9ea3693,
+        'reflect_in':    True,
+        'xor_in':        0xffffffffffffffff,
+        'reflect_out':   True,
+        'xor_out':       0xffffffffffffffff,
+        'direct':        True,
+        'check':         0x995dc9bbdf1939fa,
     })
 
 

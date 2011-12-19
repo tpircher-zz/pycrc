@@ -2,8 +2,8 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
                     "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
 <!ENTITY program_name       "pycrc">
-<!ENTITY program_version    "0.7.5">
-<!ENTITY date               "2010-03-28">
+<!ENTITY program_version    "0.7.9">
+<!ENTITY date               "2011-11-19">
 <!ENTITY author_firstname   "Thomas">
 <!ENTITY author_surname     "Pircher">
 <!ENTITY author_email       "tehpeh@gmx.net">
@@ -196,10 +196,12 @@
                    {<replaceable>crc-5</replaceable>, 
                     <replaceable>crc-8</replaceable>, 
                     <replaceable>dallas-1-wire</replaceable>, 
+                    <replaceable>crc-12-3gpp</replaceable>,
                     <replaceable>crc-15</replaceable>,
                     <replaceable>crc-16</replaceable>, 
                     <replaceable>crc-16-usb</replaceable>,
                     <replaceable>crc-16-modbus</replaceable>,
+                    <replaceable>crc-16-genibus</replaceable>,
                     <replaceable>ccitt</replaceable>, 
                     <replaceable>r-crc-16</replaceable>, 
                     <replaceable>kermit</replaceable>, 
@@ -210,11 +212,13 @@
                     <replaceable>crc-32</replaceable>,
                     <replaceable>crc-32c</replaceable>,
                     <replaceable>crc-32-mpeg</replaceable>,
+                    <replaceable>crc-32-bzip2</replaceable>,
                     <replaceable>posix</replaceable>,
                     <replaceable>jam</replaceable>,
                     <replaceable>xfer</replaceable>,
                     <replaceable>crc-64</replaceable>,
-                    <replaceable>crc-64-jones</replaceable>}</para>
+                    <replaceable>crc-64-jones</replaceable>,
+                    <replaceable>crc-64-xz</replaceable>}</para>
             </listitem>
         </varlistentry>
         <varlistentry>

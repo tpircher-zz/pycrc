@@ -1,3 +1,11 @@
+2011-12-19  Thomas Pircher   <tehpeh@gmx.net>
+
+    * crc_models.py:
+    * doc/pycrc.xml:
+    Added the models crc-12-3gpp, crc-16-genibus, crc-32-bzip2 and crc-64-xz.
+    Taken from Greg Cook's Catalogue of parametrised CRC algorithms:
+    http://regregex.bbcmicro.net/crc-catalogue.htm
+
 2011-12-14  Thomas Pircher   <tehpeh@gmx.net>
 
     * doc/pycrc.xml:
