@@ -2,13 +2,13 @@
 
 #  pycrc -- parametrisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2011  Thomas Pircher  <tehpeh@gmx.net>
+#  Copyright (c) 2006-2012  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
-#  of this software and associated documentation files (the "Software"), to deal
-#  in the Software without restriction, including without limitation the rights
-#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#  copies of the Software, and to permit persons to whom the Software is
+#  of this software and associated documentation files (the "Software"), to
+#  deal in the Software without restriction, including without limitation the
+#  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+#  sell copies of the Software, and to permit persons to whom the Software is
 #  furnished to do so, subject to the following conditions:
 #
 #  The above copyright notice and this permission notice shall be included in
@@ -18,9 +18,9 @@
 #  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 #  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 #  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-#  THE SOFTWARE.
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+#  IN THE SOFTWARE.
 
 
 """
@@ -36,9 +36,6 @@ use as follows:
     mp = MacroParser(opt)
     if mp.parse("Test 1 2 3"):
         print(mp.out_str)
-
-
-This file is part of pycrc.
 """
 
 from crc_symtable import SymbolTable
@@ -123,7 +120,6 @@ class MacroParser(object):
     #               | data '{:' data ':}'
     #               | data if_block
     #               ;
-    #
     ###############################################################################
     def parse(self, in_str):
         """
@@ -183,8 +179,6 @@ class MacroParser(object):
             sym_value = self.sym.getTerminal(self.lex.text)
         except LookupError:
             raise ParseError("%s: error: unknown terminal '%s'" % (sys.argv[0], self.lex.text))
-#        if sym_value == None:
-#            sym_value = 'Undefined'
         self.lex.advance()
         if do_print:
             self.lex.prepend(sym_value)
@@ -324,7 +318,6 @@ class MacroParser(object):
             # everything else is a parse error.
             else:
                 return ret
-#                raise ParseError("Unexpected token '%s'" % self.lex.text)
         return False
 
 

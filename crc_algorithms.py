@@ -2,13 +2,13 @@
 
 #  pycrc -- parametrisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2011  Thomas Pircher  <tehpeh@gmx.net>
+#  Copyright (c) 2006-2012  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
-#  of this software and associated documentation files (the "Software"), to deal
-#  in the Software without restriction, including without limitation the rights
-#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#  copies of the Software, and to permit persons to whom the Software is
+#  of this software and associated documentation files (the "Software"), to
+#  deal in the Software without restriction, including without limitation the
+#  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+#  sell copies of the Software, and to permit persons to whom the Software is
 #  furnished to do so, subject to the following conditions:
 #
 #  The above copyright notice and this permission notice shall be included in
@@ -18,16 +18,19 @@
 #  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 #  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 #  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-#  THE SOFTWARE.
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+#  IN THE SOFTWARE.
 
 
 """
-CRC routines for pycrc.
-If you want to study the Python implementation of the CRC routines, then you are
-looking at the right place.
+CRC algorithms implemented in Python.
+If you want to study the Python implementation of the CRC routines, then this
+is a good place to start from.
 
+The algorithms Bit by Bit, Bit by Bit Fast and Table-Driven are implemented.
+
+This module can also be used as a library from within Python.
 
 Examples
 ========
@@ -42,8 +45,6 @@ This is an example use of the different algorithms:
 >>> print("0x%x" % crc.bit_by_bit("123456789"))
 >>> print("0x%x" % crc.bit_by_bit_fast("123456789"))
 >>> print("0x%x" % crc.table_driven("123456789"))
-
-This file is part of pycrc.
 """
 
 # Class Crc
@@ -124,8 +125,9 @@ class Crc(object):
     ###############################################################################
     def bit_by_bit(self, in_str):
         """
-        Classic simple and slow CRC implementation.
-        This function iterates bit by bit over the augmented input message and returns the calculated CRC value at the end
+        Classic simple and slow CRC implementation.  This function iterates bit
+        by bit over the augmented input message and returns the calculated CRC
+        value at the end.
         """
         register = self.NonDirectInit
         for c in in_str:
@@ -153,8 +155,9 @@ class Crc(object):
     ###############################################################################
     def bit_by_bit_fast(self, in_str):
         """
-        This is a slightly modified version of the bit-by-bit algorithm: it does not need to loop over the augmented bits,
-        i.e. the Width 0-bits wich are appended to the input message in the bit-by-bit algorithm.
+        This is a slightly modified version of the bit-by-bit algorithm: it
+        does not need to loop over the augmented bits, i.e. the Width 0-bits
+        wich are appended to the input message in the bit-by-bit algorithm.
         """
         register = self.DirectInit
         for c in in_str:
@@ -178,9 +181,10 @@ class Crc(object):
     ###############################################################################
     def gen_table(self):
         """
-        This function generates the CRC table used for the table_driven CRC algorithm.
-        The Python version cannot handle tables of an index width other than 8.
-        See the generated C code for tables with different sizes instead.
+        This function generates the CRC table used for the table_driven CRC
+        algorithm.  The Python version cannot handle tables of an index width
+        other than 8.  See the generated C code for tables with different sizes
+        instead.
         """
         table_length = 1 << self.TableIdxWidth
         tbl = [0] * table_length

@@ -2,13 +2,13 @@
 
 #  pycrc -- parametrisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2011  Thomas Pircher  <tehpeh@gmx.net>
+#  Copyright (c) 2006-2012  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
-#  of this software and associated documentation files (the "Software"), to deal
-#  in the Software without restriction, including without limitation the rights
-#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#  copies of the Software, and to permit persons to whom the Software is
+#  of this software and associated documentation files (the "Software"), to
+#  deal in the Software without restriction, including without limitation the
+#  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+#  sell copies of the Software, and to permit persons to whom the Software is
 #  furnished to do so, subject to the following conditions:
 #
 #  The above copyright notice and this permission notice shall be included in
@@ -18,14 +18,16 @@
 #  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 #  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 #  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-#  THE SOFTWARE.
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+#  IN THE SOFTWARE.
 
 
 """
-Lexical analyzer for pycrc.
-use as follows:
+Lexical analyzer for pycrc. This module is used internally by pycrc for the
+macro processing and code generation.
+
+A basic example of how the lexer is used:
 
     from crc_lexer import Lexer
 
@@ -39,9 +41,6 @@ use as follows:
         else:
             print("%4d: %s\n" % (tok, lex.text))
             lex.advance()
-
-
-This file is part of pycrc.
 """
 
 import re
@@ -112,8 +111,9 @@ class Lexer(object):
     ###############################################################################
     def advance(self, skip_nl = False):
         """
-        Discard the current symbol from the input stream and advance to the following characters.
-        If skip_nl is True, then skip also a following newline character.
+        Discard the current symbol from the input stream and advance to the
+        following characters.  If skip_nl is True, then skip also a following
+        newline character.
         """
         self.next_token = None
         if skip_nl and  len(self.input_str) > 1 and self.input_str[0] == "\n":
@@ -125,8 +125,8 @@ class Lexer(object):
     def delete_spaces(self, skip_unconditional = True):
         """
         Delete spaces in the input string.
-        If skip_unconditional is False, then skip the spaces only if followed by
-        $if() $else() or $elif().
+        If skip_unconditional is False, then skip the spaces only if followed
+        by $if() $else() or $elif().
         """
         new_input = self.input_str.lstrip(" \t")
 
@@ -146,7 +146,7 @@ class Lexer(object):
     ###############################################################################
     def prepend(self, in_str):
         """
-        prepend in_str to to the input string.
+        Prepend the parameter to to the input string.
         """
         self.input_str = in_str + self.input_str
 
@@ -156,6 +156,8 @@ class Lexer(object):
     def set_state(self, new_state):
         """
         Set the new state for the lexer.
+        This changes the behaviour of the lexical scanner from normal operation
+        to expression scanning (within $if () expressions) and back.
         """
         self.state = new_state
         self.next_token = None

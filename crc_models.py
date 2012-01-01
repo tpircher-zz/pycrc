@@ -2,30 +2,31 @@
 
 #  pycrc -- parametrisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2011  Thomas Pircher  <tehpeh@gmx.net>
+#  Copyright (c) 2006-2012  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
-#  of this software and associated documentation files (the "Software",, to deal
-#  in the Software without restriction, including without limitation the rights
-#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#  copies of the Software, and to permit persons to whom the Software is
+#  of this software and associated documentation files (the "Software"), to
+#  deal in the Software without restriction, including without limitation the
+#  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+#  sell copies of the Software, and to permit persons to whom the Software is
 #  furnished to do so, subject to the following conditions:
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 #
-#  THE SOFTWARE IS PROVIDED "AS IS': WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 #  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 #  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 #  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-#  THE SOFTWARE.
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+#  IN THE SOFTWARE.
 
 
 """
-Collection of CRC models[]
-use as follows:
+Collection of CRC models. This module contains the CRC models known to pycrc.
+
+To print the parameters of a particular model:
 
    from crc_models import CrcModels
 
@@ -33,16 +34,15 @@ use as follows:
    print(models.getList())
    m = models.getParams("crc-32")
    if m != None:
-       print(m['width'])
-       print(m['poly'])
-       print(m['reflect_in'])
-       print(m['xor_in'])
-       print(m['reflect_out'])
-       print(m['xor_out'])
-       print(m['direct'])
-       print(m['check'])
-
-This file is part of pycrc.
+       print("Width:        %(width)s" % m)
+       print("Poly:         %(poly)s" % m)
+       print("ReflectIn:    %(reflect_in)s" % m)
+       print("XorIn:        %(xor_in)s" % m)
+       print("ReflectOut:   %(reflect_out)s" % m)
+       print("XorOut:       %(xor_out)s" % m)
+       print("Check:        %(check)s" % m)
+   else:
+       print("model not found.")
 """
 
 
@@ -51,7 +51,8 @@ This file is part of pycrc.
 ###############################################################################
 class CrcModels(object):
     """
-    CRC Models
+    CRC Models.
+    All models are generated in the constructor.
     """
 
     models = []
@@ -348,7 +349,7 @@ class CrcModels(object):
     ###############################################################################
     def getList(self):
         """
-        This function returns the list of supported CRC models
+        This function returns the list of supported CRC models.
         """
         l = []
         for i in self.models:
@@ -360,7 +361,7 @@ class CrcModels(object):
     ###############################################################################
     def getParams(self, model):
         """
-        This function returns the paremeters of a given model
+        This function returns the paremeters of a given model.
         """
         model = model.lower();
         for i in self.models:
