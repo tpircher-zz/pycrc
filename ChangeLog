@@ -1,3 +1,12 @@
+2012-02-08  Thomas Pircher   <tehpeh@gmx.net>
+
+    * crc_symtable.py:
+    Bad-looking C code generated; make sure the bit-by-bit(fast) code does not
+    contain two instructions on one line. Thanks to "intgr" for the fix.
+
+    * crc_symtable.py:
+    Some small code clean-up: use set() instead of repeated tests of equality.
+
 2011-12-19  Thomas Pircher   <tehpeh@gmx.net>
 
     * crc_models.py:

@@ -169,7 +169,7 @@ class SymbolTable:
                 return   self.__pretty_bool(False)
 
         elif id == "simple_crc_update_def":
-            if self.opt.Algorithm == self.opt.Algo_Bit_by_Bit or self.opt.Algorithm == self.opt.Algo_Bit_by_Bit_Fast:
+            if self.opt.Algorithm in set([self.opt.Algo_Bit_by_Bit, self.opt.Algo_Bit_by_Bit_Fast]):
                 if self.opt.Width != None and self.opt.Poly != None and self.opt.ReflectIn != None:
                     return  self.__pretty_bool(True)
             elif self.opt.Algorithm == self.opt.Algo_Table_Driven:
@@ -178,7 +178,7 @@ class SymbolTable:
             return  self.__pretty_bool(False)
 
         elif id == "inline_crc_finalize":
-            if (self.opt.Algorithm == self.opt.Algo_Bit_by_Bit_Fast or self.opt.Algorithm == self.opt.Algo_Table_Driven) and \
+            if self.opt.Algorithm in set([self.opt.Algo_Bit_by_Bit_Fast, self.opt.Algo_Table_Driven]) and \
                     (self.opt.Width != None and self.opt.ReflectIn != None and self.opt.ReflectOut != None and self.opt.XorOut != None):
                 return  self.__pretty_bool(True)
             else:
