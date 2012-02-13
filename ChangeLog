@@ -1,3 +1,7 @@
+#
+# Version 0.7.10, 2012-02-13
+#
+
 2012-02-08  Thomas Pircher   <tehpeh@gmx.net>
 
     * crc_symtable.py:
@@ -5,7 +9,7 @@
     contain two instructions on one line. Thanks to "intgr" for the fix.
 
     * crc_symtable.py:
-    Some small code clean-up: use set() instead of repeated tests of equality.
+    Some small code clean-up: use set() when appropriate.
 
 2011-12-19  Thomas Pircher   <tehpeh@gmx.net>
 
