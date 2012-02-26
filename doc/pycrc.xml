@@ -567,7 +567,8 @@ typedef struct {
             The homepage of &program_name; is <ulink url="http://www.tty1.net/pycrc/">http://www.tty1.net/pycrc/</ulink>.
         </para>
         <para>
-            For a long list of known CRC models, see Greg Cook's <ulink url="http://regregex.bbcmicro.net/crc-catalogue.htm">Catalogue of Parameterised CRC Algorithms</ulink>.
+            A list of named CRC models is at <ulink url="http://www.tty1.net/pycrc/">http://www.tty1.net/pycrc/crc-models_en.html</ulink>.
+            For a long list of common CRC models, see Greg Cook's <ulink url="http://regregex.bbcmicro.net/crc-catalogue.htm">Catalogue of Parameterised CRC Algorithms</ulink>.
         </para>
     </refsect1>
 

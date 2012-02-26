@@ -866,7 +866,11 @@ void print_params($if ($undefined_parameters == True) {:const $cfg_t *cfg:} $els
 {
     char format[20];
 
+$if ($c_std == C89) {:
+    sprintf(format, "%%-16s = 0x%%0%dx\\n", (unsigned int)($cfg_width + 3) / 4);
+:} $else {:
     snprintf(format, sizeof(format), "%%-16s = 0x%%0%dx\\n", (unsigned int)($cfg_width + 3) / 4);
+:}
     printf("%-16s = %d\\n", "width", (unsigned int)$cfg_width);
     printf(format, "poly", (unsigned int)$cfg_poly);
     printf("%-16s = %s\\n", "reflect_in", $if ($crc_reflect_in == Undefined) {:$cfg_reflect_in ? "true": "false":} $else {:$if ($crc_reflect_in == True) {:"true":} $else {:"false":}:});
@@ -1158,7 +1162,7 @@ $if ($crc_xor_out == Undefined) {:
         """
         tr_str = ""
         for i in range(256):
-            if chr(i).isalpha():
+            if chr(i).isalnum():
                 tr_str += chr(i).upper()
             else:
                 tr_str += '_'

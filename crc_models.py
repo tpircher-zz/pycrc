@@ -330,7 +330,7 @@ class CrcModels(object):
         'reflect_out':   True,
         'xor_out':       0x0,
         'direct':        True,
-        'check':         0xe9c6d914c4b8d9ca,
+        'check':         0xcaa717168609f281,
     })
     models.append({
         'name':         'crc-64-xz',
