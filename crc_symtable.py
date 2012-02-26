@@ -66,14 +66,8 @@ class SymbolTable:
         if self.opt.OutputFile == None:
             self.table["filename"] = "pycrc_stdout"
         else:
-            self.table["filename"] = self.opt.OutputFile
-
-        if self.opt.OutputFile == None:
-            self.table["header_filename"] = "pycrc_stdout.h"
-        elif self.opt.OutputFile[-2:] == ".c":
-            self.table["header_filename"] = self.opt.OutputFile[0:-1] + "h"
-        else:
-            self.table["header_filename"] = self.opt.OutputFile + ".h"
+            self.table["filename"] = os.path.basename(self.opt.OutputFile)
+        self.table["header_filename"] = self.__pretty_header_filename(self.opt.OutputFile)
 
         self.table["crc_width"] = self.__pretty_str(self.opt.Width)
         self.table["crc_poly"] = self.__pretty_hex(self.opt.Poly, self.opt.Width)
@@ -1154,6 +1148,18 @@ $if ($crc_xor_out == Undefined) {:
             return "False"
 
 
+    # function __pretty_header_filename
+    ###############################################################################
+    def __pretty_header_filename(self, filename):
+        if filename == None:
+            return "pycrc_stdout.h"
+        filename = os.path.basename(filename)
+        if filename[-2:] == ".c":
+            return filename[0:-1] + "h"
+        else:
+            return filename + ".h"
+
+
     # function __pretty_hdrprotection
     ###############################################################################
     def __pretty_hdrprotection(self):
@@ -1209,7 +1215,7 @@ $if ($crc_xor_out == Undefined) {:
     ###############################################################################
     def __get_include_file(self):
         """
-        Return an addittional include instruction if specified.
+        Return an additional include instruction, if specified.
         """
         if self.opt.IncludeFile == None:
             return None

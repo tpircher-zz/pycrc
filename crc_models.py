@@ -168,7 +168,7 @@ class CrcModels(object):
         'check':         0x29b1,
     })
     models.append({
-        'name':          'r-crc-16',
+        'name':         'r-crc-16',
         'width':         16,
         'poly':          0x0589,
         'reflect_in':    False,
