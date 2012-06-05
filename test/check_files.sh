@@ -10,9 +10,9 @@ usage() {
         echo >&2 "usage: $0 [OPTIONS]"
         echo >&2 ""
         echo >&2 "with OPTIONS in"
-        echo >&2 "        -c    check the generated output (default)"
+        echo >&2 "        -c    check the generated output"
         echo >&2 "        -g    generate the database"
-        echo >&2 "        -n    do cleanup: don't delete the directories with the generated code"
+        echo >&2 "        -n    no cleanup: don't delete the directories with the generated code"
         echo >&2 "        -h    this help message"
 }
 

@@ -137,12 +137,14 @@ def check_hexstring(opt):
 
 # function crc_file_update
 ###############################################################################
-def crc_file_update(alg, register, check_str):
+def crc_file_update(alg, register, check_byte_str):
     """
     Update the CRC using the bit-by-bit-fast CRC algorithm.
     """
-    for i in range(len(check_str)):
-        octet = ord(check_str[i])
+    for octet in check_byte_str:
+        if not isinstance(octet, int):
+            # Python 2.x compatibility
+            octet = ord(octet)
         if alg.ReflectIn:
             octet = alg.reflect(octet, 8)
         for j in range(8):
@@ -181,18 +183,11 @@ def check_file(opt):
         register = opt.XorIn
     else:
         register = alg.reflect(opt.XorIn, opt.Width)
-    try:
-        check_str = in_file.read()
-    except IOError:
-        sys.stderr.write("%s: error: can't open read %s\n" % (sys.argv[0], opt.CheckFile))
-        sys.exit(1)
-    while len(check_str):
-        register = crc_file_update(alg, register, check_str)
-        try:
-            check_str = in_file.read()
-        except IOError:
-            sys.stderr.write("%s: error: can't open read %s\n" % (sys.argv[0], opt.CheckFile))
-            sys.exit(1)
+    # Read bytes from the file.
+    check_byte_str = in_file.read()
+    while check_byte_str:
+        register = crc_file_update(alg, register, check_byte_str)
+        check_byte_str = in_file.read()
     in_file.close()
 
     if opt.ReflectOut:

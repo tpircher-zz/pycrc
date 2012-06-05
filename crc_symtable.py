@@ -1328,7 +1328,7 @@ $if ($crc_xor_out == Undefined) {:
             loop_core_ni += loop_indent + "tbl_idx = ((crc >> " + shr + ") ^ *data) & $crc_table_mask;" + '\n' + \
                             loop_indent + "crc = (crc_table[tbl_idx] ^ (crc << " + reg_shift + ")) & $cfg_mask_shifted;" + '\n'
         else:
-            for i in range (8 / self.opt.TableIdxWidth):
+            for i in range (8 // self.opt.TableIdxWidth):
                 str_idx = "%s" % (8 - (i + 1) * self.opt.TableIdxWidth)
                 loop_core_ni += loop_indent + "tbl_idx = (crc >> " + shr + ") ^ (*data >> " + str_idx + ");" + '\n' + \
                                 loop_indent + "crc = crc_table[tbl_idx & $crc_table_mask] ^ (crc << " + reg_shift + ");" + '\n'
@@ -1356,7 +1356,7 @@ $if ($crc_xor_out == Undefined) {:
             loop_core_ri += loop_indent + "tbl_idx = (" + crc_shifted + " ^ *data) & $crc_table_mask;" + '\n' + \
                             loop_indent + "crc = (crc_table[tbl_idx] ^ (crc >> $cfg_table_idx_width)) & $cfg_mask_shifted;" + '\n'
         else:
-            for i in range (8 / self.opt.TableIdxWidth):
+            for i in range (8 // self.opt.TableIdxWidth):
                 str_idx = "%d" % i
                 loop_core_ri += loop_indent + "tbl_idx = " + crc_shifted + " ^ (*data >> (" + str_idx + " * $cfg_table_idx_width));" + '\n' + \
                                 loop_indent + "crc = crc_table[tbl_idx & $crc_table_mask] ^ (crc >> $cfg_table_idx_width);" + '\n'

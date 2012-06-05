@@ -18,7 +18,7 @@ source code generator.
 Installation
 ============
 
-pycrc requires Python 2.4 or later. Python 3.x is supported.
+pycrc requires Python 2.6 or later. Python 3.x is supported.
 
 This program doesn't need any particular installation. The script can be
 called from any directory.

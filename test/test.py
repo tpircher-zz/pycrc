@@ -29,6 +29,7 @@ class Options(object):
         self.CompileMixedArgs       = False
         self.VariableWidth          = False
         self.Verbose                = False
+        self.Python3                = False
         self.Algorithm = copy(self.AllAlgorithms)
 
     # function parse
@@ -44,8 +45,11 @@ class Options(object):
         model_list = ", ".join(models.getList())
         parser = OptionParser(usage=usage)
         parser.add_option("-v", "--verbose",
-                        action="store_true", dest="verbose", default=False,
+                        action="store_true", dest="verbose", default=self.Verbose,
                         help="print information about the model")
+        parser.add_option("-3", "--python3",
+                        action="store_true", dest="python3", default=self.Python3,
+                        help="use Python3.x")
         parser.add_option("-c", "--compile",
                         action="store_true", dest="compile", default=self.Compile,
                         help="test compiled version")
@@ -68,6 +72,7 @@ class Options(object):
         (options, args) = parser.parse_args(argv)
 
         self.Verbose = options.verbose
+        self.Python3 = options.python3
         self.Compile = options.all or options.compile or options.random_parameters
         self.RandomParameters = options.all or options.random_parameters
         self.CompileMixedArgs = options.all or options.compile_mixed_args
@@ -94,7 +99,7 @@ class CrcTests(object):
     # Class constructor
     ###############################################################################
     def __init__(self):
-        self.pycrc_bin = "python ../pycrc.py"
+        self.pycrc_bin = "/bin/false"
         self.use_algo_bit_by_bit = True
         self.use_algo_bit_by_bit_fast = True
         self.use_algo_table_driven = True
@@ -530,6 +535,11 @@ class CrcTests(object):
         self.use_algo_bit_by_bit_fast = "bit-by-bit-fast" in opt.Algorithm
         self.use_algo_table_driven = "table-driven" in opt.Algorithm
         self.verbose = opt.Verbose
+
+        if opt.Python3:
+            self.pycrc_bin = "python3 ../pycrc.py"
+        else:
+            self.pycrc_bin = "python ../pycrc.py"
 
         if not self.__setup_files(opt):
             return False
