@@ -6,7 +6,6 @@
                 | .__/ \__, |\___|_|  \___|
                 |_|    |___/
 
-
                 http://www.tty1.net/pycrc/
 
 
@@ -34,6 +33,7 @@ Then the script can be called like an application.
 ./pycrc.py [options]
 
 
+
 Getting help
 ============
 
@@ -54,6 +54,15 @@ tracker at https://sourceforge.net/tracker/?group_id=186891
 Thanks for your collaboration.
 
 Also see http://www.tty1.net/pycrc/faq.html for frequently asked questions.
+
+
+
+Donate
+======
+
+If you like pycrc and you would like to donate, please see my Amazon wishlist:
+http://www.amazon.co.uk/registry/wishlist/3LXEZGUTVJ3AW
+
 
 
 Copyright of the generated source code

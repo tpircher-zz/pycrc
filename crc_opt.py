@@ -182,27 +182,27 @@ following parameters:
 
         undefined_params = []
         if options.width != None:
-            self.Width          = options.width
+            self.Width = options.width
         else:
             undefined_params.append("--width")
         if options.poly != None:
-            self.Poly           = options.poly
+            self.Poly = options.poly
         else:
             undefined_params.append("--poly")
         if options.reflect_in != None:
-            self.ReflectIn      = options.reflect_in
+            self.ReflectIn = options.reflect_in
         else:
             undefined_params.append("--reflect-in")
         if options.xor_in != None:
-            self.XorIn          = options.xor_in
+            self.XorIn = options.xor_in
         else:
             undefined_params.append("--xor-in")
         if options.reflect_out != None:
-            self.ReflectOut     = options.reflect_out
+            self.ReflectOut = options.reflect_out
         else:
             undefined_params.append("--reflect-out")
         if options.xor_out != None:
-            self.XorOut         = options.xor_out
+            self.XorOut = options.xor_out
         else:
             undefined_params.append("--xor-out")
         if options.table_idx_width != None:

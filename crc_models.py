@@ -361,7 +361,7 @@ class CrcModels(object):
     ###############################################################################
     def getParams(self, model):
         """
-        This function returns the paremeters of a given model.
+        This function returns the parameters of a given model.
         """
         model = model.lower();
         for i in self.models:

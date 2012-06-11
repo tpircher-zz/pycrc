@@ -87,38 +87,38 @@ class MacroParser(object):
     # function parse
     #
     # The used grammar is:
-    # term:           LITERAL
-    #               | IDENTIFIER
-    #               | '(' or_exp ')'
+    # data:           /* empty */
+    #               | data GIBBERISH
+    #               | data IDENTIFIER
+    #               | data '{:' data ':}'
+    #               | data if_block
     #               ;
     # 
-    # comp_exp:       term OP_COMPARISON term
+    # if_block:     IF '(' exp_or ')' '{:' data ':}' elif_blocks else_block
     #               ;
     # 
-    # and_exp:        term
-    #               | and_exp OP_AND comp_exp
-    #               ;
-    # 
-    # or_exp:         and_exp
-    #               | or_exp OP_OR and_exp
+    # elif_blocks:    /* empty */
+    #               | elif_blocks ELIF '(' exp_or ')' '{:' data ':}'
     #               ;
     # 
     # else_block:     /* empty */
     #               | ELSE '{:' data ':}'
     #               ;
     # 
-    # elif_blocks:    /* empty */
-    #               | elif_blocks ELIF '(' or_exp ')' '{:' data ':}'
+    # exp_or:         exp_and
+    #               | exp_or TOK_OR exp_and
     #               ;
     # 
-    # if_block:     IF '(' or_exp ')' '{:' data ':}' elif_blocks else_block
+    # exp_and:        term
+    #               | exp_and TOK_AND exp_comparison
     #               ;
     # 
-    # data:           /* empty */
-    #               | data GIBBERISH
-    #               | data IDENTIFIER
-    #               | data '{:' data ':}'
-    #               | data if_block
+    # exp_comparison: term TOK_COMPARISON term
+    #               ;
+    # 
+    # term:           LITERAL
+    #               | IDENTIFIER
+    #               | '(' exp_or ')'
     #               ;
     ###############################################################################
     def parse(self, in_str):

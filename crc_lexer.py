@@ -213,7 +213,6 @@ class Lexer(object):
             # check for malformed "$"
             if self.input_str[0] == "$":
                 self.text = self.input_str[0:1]
-                # self.input_str = self.input_str[1:]
                 return self.tok_unknown
 
         # the character is gibberish.
