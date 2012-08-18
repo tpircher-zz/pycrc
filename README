@@ -10,7 +10,14 @@
 
 
 pycrc is a free, easy to use Cyclic Redundancy Check (CRC) calculator and
-source code generator.
+C source code generator.
+
+
+
+System Requirements
+===================
+
+pycrc requires Python 2.6 or later. Python 3.x is supported.
 
 
 
@@ -37,31 +44,35 @@ Then the script can be called like an application.
 Getting help
 ============
 
-If you are new to pycrc and want to generate C code, start with the tutorial
-http://www.tty1.net/pycrc/tutorial_en.html
+If you are new to pycrc and want to generate C code, start with
+[the tutorial](http://www.tty1.net/pycrc/tutorial_en.html).
 
-The manual page (http://www.tty1.net/pycrc/pycrc.html) explains the command
-line options and gives some examples how to use pycrc.
+The [pycrc manual page](http://www.tty1.net/pycrc/pycrc.html) explains the command
+line options in some detail and also gives some more examples how to use pycrc.
 
 If you have questions about using pycrc which is not answered in a satisfactory
 way by the documentation, please send a mail to the pycrc user mailing list
-<pycrc-users@lists.sourceforge.net>. The list info page is available at
-https://lists.sourceforge.net/lists/listinfo/pycrc-users
+<pycrc-users@lists.sourceforge.net>. Subscribe to the mailing list
+[pycrc users list](https://lists.sourceforge.net/lists/listinfo/pycrc-users).
 Due to excessive spamming a subscription is required to post on the list.
 
-If you have found a bug in pycrc, please take the time and file it to the issue
-tracker at https://sourceforge.net/tracker/?group_id=186891
+If you have found a bug in pycrc, please take the time and file it to the
+[bug tracker](http://sourceforge.net/p/pycrc/bugs/) or record a
+[feature request](http://sourceforge.net/p/pycrc/feature-requests/).
 Thanks for your collaboration.
 
-Also see http://www.tty1.net/pycrc/faq.html for frequently asked questions.
+Also see the [frequently asked questions](http://www.tty1.net/pycrc/faq.html).
 
 
 
-Donate
-======
+Feedback
+========
 
-If you like pycrc and you would like to donate, please see my Amazon wishlist:
-http://www.amazon.co.uk/registry/wishlist/3LXEZGUTVJ3AW
+If you like pycrc, let me know and drop me a note. If you don't like pycrc let
+me know what you don't like and why. In both cases, I would really appreciate
+some [feed back](http://sourceforge.net/projects/pycrc/reviews/).
+If you want some idea how to say thanks for this software, please have a look
+[here](http://www.tty1.net/say-thanks_en.html).
 
 
 

@@ -1,6 +1,6 @@
 # -*- coding: Latin-1 -*-
 
-#  pycrc -- parametrisable CRC calculation utility and C source code generator
+#  pycrc -- parameterisable CRC calculation utility and C source code generator
 #
 #  Copyright (c) 2006-2012  Thomas Pircher  <tehpeh@gmx.net>
 #

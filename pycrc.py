@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: Latin-1 -*-
 
-#  pycrc -- parametrisable CRC calculation utility and C source code generator
+#  pycrc -- parameterisable CRC calculation utility and C source code generator
 #
 #  Copyright (c) 2006-2012  Thomas Pircher  <tehpeh@gmx.net>
 #
@@ -25,7 +25,7 @@
 
 
 """
-pycrc is a fully parametrisable Cyclic Redundancy Check (CRC) calculation
+pycrc is a fully parameterisable Cyclic Redundancy Check (CRC) calculation
 utility and C source code generator written in Python.
 
 It can:
