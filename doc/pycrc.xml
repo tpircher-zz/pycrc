@@ -2,8 +2,8 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
                     "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
 <!ENTITY program_name       "pycrc">
-<!ENTITY program_version    "0.7.9">
-<!ENTITY date               "2011-11-19">
+<!ENTITY program_version    "0.7.11">
+<!ENTITY date               "2012-10-22">
 <!ENTITY author_firstname   "Thomas">
 <!ENTITY author_surname     "Pircher">
 <!ENTITY author_email       "tehpeh@gmx.net">
@@ -167,7 +167,8 @@
                 <option>--generate=</option><replaceable>CODE</replaceable>
             </term>
             <listitem>
-                <para>generate the source code type as a choice from {c, h, c-main, table}</para>
+                <para>generate the source code type as a choice from {<replaceable>c</replaceable>,
+                <replaceable>h</replaceable>, <replaceable>c-main</replaceable>, <replaceable>table</replaceable>}</para>
             </listitem>
         </varlistentry>
         <varlistentry>
@@ -568,7 +569,7 @@ typedef struct {
         </para>
         <para>
             A list of named CRC models is at <ulink url="http://www.tty1.net/pycrc/">http://www.tty1.net/pycrc/crc-models_en.html</ulink>.
-            For a long list of common CRC models, see Greg Cook's <ulink url="http://regregex.bbcmicro.net/crc-catalogue.htm">Catalogue of Parameterised CRC Algorithms</ulink>.
+            For a long list of common CRC models, see Greg Cook's <ulink url="http://reveng.sourceforge.net/crc-catalogue/">Catalogue of Parameterised CRC Algorithms</ulink>.
         </para>
     </refsect1>
 

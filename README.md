@@ -24,20 +24,19 @@ pycrc requires Python 2.6 or later. Python 3.x is supported.
 Installation
 ============
 
-pycrc requires Python 2.6 or later. Python 3.x is supported.
-
 This program doesn't need any particular installation. The script can be
 called from any directory.
 Simply call the python interpreter with the script as parameter:
 
-python pycrc.py [options]
+    python pycrc.py [options]
 
 On UNIX-like systems, you might want to make the script executable:
 
-chmod +x pycrc.py
+    chmod +x pycrc.py
 
 Then the script can be called like an application.
-./pycrc.py [options]
+
+    ./pycrc.py [options]
 
 
 

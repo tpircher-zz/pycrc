@@ -1,4 +1,16 @@
 #
+# Version 0.7.12, 2012-xx-xx
+#
+
+2012-10-22  Thomas Pircher   <tehpeh@gmx.net>
+
+    * README.md:
+    Renamed from README.
+
+    * doc/pycrc.xml:
+    Updated link to the Catalogue of parametrised CRC algorithms.
+
+#
 # Version 0.7.11, 2012-10-20
 #
 
