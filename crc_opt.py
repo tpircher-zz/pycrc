@@ -43,7 +43,7 @@ from crc_models import CrcModels
 ###############################################################################
 class Options(object):
     """
-    The options parsing and validationg class
+    The options parsing and validating class.
     """
 
     # Program details
@@ -56,7 +56,8 @@ class Options(object):
     Algo_None               = 0x00
     Algo_Bit_by_Bit         = 0x01
     Algo_Bit_by_Bit_Fast    = 0x02
-    Algo_Table_Driven       = 0x04
+    Algo_Bitwise_Expression = 0x04
+    Algo_Table_Driven       = 0x08
 
     Action_Check_String     = 0x01
     Action_Check_Hex_String = 0x02
@@ -140,7 +141,7 @@ following parameters:
                         help="C standard style of the generated code from {C89, ANSI, C99}", metavar="STD")
         parser.add_option("--algorithm",
                         action="store", type="string", dest="algorithm", default="all",
-                        help="choose an algorithm from {bit-by-bit, bit-by-bit-fast, table-driven, all}", metavar="ALGO")
+                        help="choose an algorithm from {bit-by-bit, bit-by-bit-fast, bitwise-expression, table-driven, all}", metavar="ALGO")
         parser.add_option("--model",
                         action="callback", callback=self.model_cb, type="string", dest="model", default=None,
                         help="choose a parameter set from {%s}" % model_list, metavar="MODEL")
@@ -251,11 +252,19 @@ following parameters:
                 self.Algorithm      |= self.Algo_Bit_by_Bit
             if alg == "bit-by-bit-fast"  or alg == "all":
                 self.Algorithm      |= self.Algo_Bit_by_Bit_Fast
+            if alg == "bitwise-expression"  or alg == "all":
+                self.Algorithm      |= self.Algo_Bitwise_Expression
             if alg == "table-driven" or alg == "all":
                 self.Algorithm      |= self.Algo_Table_Driven
             if self.Algorithm == 0:
                 sys.stderr.write("%s: error: unknown algorithm %s\n" % (sys.argv[0], options.algorithm))
                 sys.exit(1)
+        if self.Algorithm & self.Algo_Bitwise_Expression and self.UndefinedCrcParameters:
+            if self.Algorithm == self.Algo_Bitwise_Expression:
+                sys.stderr.write("Error: algorithm %s not applicable with undefined parameters\n" % options.algorithm)
+                sys.exit(1)
+            else:
+                self.Algorithm &= ~(self.Algo_Bitwise_Expression)
 
         if options.c_std != None:
             std = options.c_std.upper()
@@ -278,14 +287,17 @@ following parameters:
         if options.check_string != None:
             self.Action         = self.Action_Check_String
             self.CheckString    = options.check_string
+            self.Algorithm &= ~(self.Algo_Bitwise_Expression)
             op_count += 1
         if options.check_hexstring != None:
             self.Action         = self.Action_Check_Hex_String
             self.CheckString    = options.check_hexstring
+            self.Algorithm &= ~(self.Algo_Bitwise_Expression)
             op_count += 1
         if options.check_file != None:
             self.Action         = self.Action_Check_File
             self.CheckFile      = options.check_file
+            self.Algorithm &= ~(self.Algo_Bitwise_Expression)
             op_count += 1
         if options.generate != None:
             arg = options.generate.lower()
@@ -307,7 +319,7 @@ following parameters:
                     sys.stderr.write("%s: error: the --generate table option is incompatible with the --algorithm option\n" % sys.argv[0])
                     sys.exit(1)
                 self.Algorithm = self.Algo_Table_Driven
-            elif self.Algorithm != self.Algo_Bit_by_Bit and self.Algorithm != self.Algo_Bit_by_Bit_Fast and self.Algorithm != self.Algo_Table_Driven:
+            elif self.Algorithm not in set([self.Algo_Bit_by_Bit, self.Algo_Bit_by_Bit_Fast, self.Algo_Bitwise_Expression, self.Algo_Table_Driven]):
                 sys.stderr.write("%s: error: select an algorithm to be used in the generated file\n" % sys.argv[0])
                 sys.exit(1)
         else:
@@ -319,6 +331,11 @@ following parameters:
             self.Action = self.Action_Check_String
         if op_count > 1:
             sys.stderr.write("%s: error: too many actions scecified\n" % sys.argv[0])
+            sys.exit(1)
+
+        if (self.Algorithm == self.Algo_Bitwise_Expression) and \
+            (self.Action == self.Action_Check_String or self.Action == self.Action_Check_Hex_String or self.Action == self.Action_Check_File):
+            sys.stderr.write("Error: algorithm %s is only applicable to generate source code\n" % options.algorithm)
             sys.exit(1)
 
         if len(args) != 0:

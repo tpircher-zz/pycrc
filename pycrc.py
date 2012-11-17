@@ -40,6 +40,7 @@ It supports the following CRC algorithms:
     -  table-driven     the standard table driven algorithm
 """
 
+from __future__ import print_function
 from crc_opt import Options
 from crc_algorithms import Crc
 from crc_parser import MacroParser
@@ -215,7 +216,7 @@ def main():
     if opt.Action == opt.Action_Check_File:
         crc = check_file(opt)
         print("0x%x" % crc)
-    if opt.Action == opt.Action_Generate_H or opt.Action == opt.Action_Generate_C or opt.Action == opt.Action_Generate_C_Main or opt.Action == opt.Action_Generate_Table:
+    if opt.Action in set([opt.Action_Generate_H, opt.Action_Generate_C, opt.Action_Generate_C_Main, opt.Action_Generate_Table]):
         mp = MacroParser(opt)
         if opt.Action == opt.Action_Generate_H:
             in_str = "$h_template"

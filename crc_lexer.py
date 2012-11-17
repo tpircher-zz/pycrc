@@ -43,6 +43,7 @@ A basic example of how the lexer is used:
             lex.advance()
 """
 
+from __future__ import print_function
 import re
 
 
@@ -52,7 +53,7 @@ class Lexer(object):
     """
     A lexical analyser base class.
     """
-
+    # Tokens.
     tok_unknown     = 0
     tok_EOF         = 1
     tok_gibberish   = 10
@@ -67,8 +68,15 @@ class Lexer(object):
     tok_and         = 25
     tok_or          = 26
 
+    # States of the lexer.
     state_gibberish = 0
     state_expr      = 1
+
+    # Regular Expressions used by the parser.
+    re_id = re.compile("^\\$[a-zA-Z][a-zA-Z0-9_-]*")
+    re_num = re.compile("^(0[xX][0-9a-fA-F]+|[0-9]+)")
+    re_op = re.compile("<=|<|==|!=|>=|>")
+    re_str = re.compile("\"?([a-zA-Z0-9_-]+)\"?")
 
 
     # Class constructor
@@ -77,10 +85,6 @@ class Lexer(object):
         """
         The class constructor.
         """
-        self.re_id = re.compile("^\\$[a-zA-Z][a-zA-Z0-9_-]*")
-        self.re_num = re.compile("^(0[xX][0-9a-fA-F]+|[0-9]+)")
-        self.re_op = re.compile("<=|<|==|!=|>=|>")
-        self.re_str = re.compile("\"?([a-zA-Z0-9_-]+)\"?")
         self.set_str(input_str)
         self.state = self.state_gibberish
 

@@ -10,6 +10,7 @@
 <!ENTITY author             "&author_firstname; &author_surname;">
 <!ENTITY bit-by-bit         "bit-by-bit">
 <!ENTITY bit-by-bit-fast    "bit-by-bit-fast">
+<!ENTITY bitwise-expression "bitwise-expression">
 <!ENTITY table-driven       "table-driven">
 <!ENTITY width          "Width">
 <!ENTITY poly           "Polynomial">
@@ -105,6 +106,21 @@
                         speed-up can be measured with respect to the bit-by-bit algorithms.
                     </para>
                 </listitem>
+                <listitem>
+                    <para>
+                        <replaceable>&bitwise-expression;</replaceable>: calculates the CRC byte-wise using bitwise expressions (such as binary and, not, xor,
+                        bit-shifts etc).
+                        This algorithm uses the same approach as the <replaceable>&table-driven;</replaceable> variant, but uses a logical operations instead
+                        of a lookup-table. It is slightly slower than the <replaceable>&table-driven;</replaceable> algorithm, but without the overhead
+                        of a lookup-table.
+                    </para>
+                    <para>
+                        This is an experimental feature and will in most cases result in a slower and bigger binary than any other algorithm.
+                        This option is only valid for code generation, not for checking strings or files.
+                        It can take a long time to generate the output for models with a big &width; parameter.
+                        Use with care.
+                    </para>
+                </listitem>
             </itemizedlist>
         </para>
     </refsect1>
@@ -185,7 +201,7 @@
             </term>
             <listitem>
                 <para>choose an algorithm from {<replaceable>bit-by-bit</replaceable>, <replaceable>bit-by-bit-fast</replaceable>, 
-                <replaceable>table-driven</replaceable>, <replaceable>all</replaceable>}</para>
+                <replaceable>bitwise-expression</replaceable>, <replaceable>table-driven</replaceable>, <replaceable>all</replaceable>}</para>
             </listitem>
         </varlistentry>
         <varlistentry>

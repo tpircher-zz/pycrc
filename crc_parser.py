@@ -72,10 +72,6 @@ class MacroParser(object):
     #re_is_hex = re.compile("^(0[xX])?[0-9a-fA-F]+$")
     re_is_hex = re.compile("^0[xX][0-9a-fA-F]+$")
 
-    opt = None
-    sym = None
-    lex = Lexer()
-
 
     # Class constructor
     ###############################################################################
@@ -83,6 +79,7 @@ class MacroParser(object):
         self.opt = opt
         self.sym = SymbolTable(opt)
         self.out_str = None
+        self.lex = Lexer()
 
     # function parse
     #

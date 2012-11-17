@@ -38,6 +38,8 @@ use as follows:
 """
 
 from crc_algorithms import Crc
+from qm import QuineMcCluskey
+from crc_bwe import BitwiseExpression
 import time
 import os
 
@@ -48,8 +50,6 @@ class SymbolTable:
     """
     The symbol table class.
     """
-    opt = None
-    table = {}
 
 
     # Class constructor
@@ -59,6 +59,7 @@ class SymbolTable:
         The class constructor.
         """
         self.opt = opt
+        self.table = {}
         self.table["nop"] = ""
         self.table["datetime"] = time.asctime()
         self.table["program_version"] = self.opt.VersionStr
@@ -80,7 +81,8 @@ class SymbolTable:
         self.table["crc_table_mask"] = self.__pretty_hex(self.opt.TableWidth - 1, 8)
         self.table["crc_mask"] = self.__pretty_hex(self.opt.Mask, self.opt.Width)
         self.table["crc_msb_mask"] = self.__pretty_hex(self.opt.MSB_Mask, self.opt.Width)
-        if self.opt.Algorithm == self.opt.Algo_Table_Driven and (self.opt.Width == None or self.opt.Width < 8):
+        if self.opt.Algorithm in set([self.opt.Algo_Table_Driven, self.opt.Algo_Bitwise_Expression]) \
+                and (self.opt.Width == None or self.opt.Width < 8):
             self.table["crc_do_shift"] = self.__pretty_bool(True)
             if self.opt.Width == None:
                 self.table["crc_shift"] = self.__pretty_str(None)
@@ -119,11 +121,11 @@ class SymbolTable:
         self.table["crc_t"] = self.opt.SymbolPrefix + "t"
         self.table["cfg_t"] = self.opt.SymbolPrefix + "cfg_t"
         self.table["crc_reflect_function"] = self.opt.SymbolPrefix + "reflect"
+        self.table["crc_bitwise_expression_function"] = self.opt.SymbolPrefix + "bitwise_expression"
         self.table["crc_table_gen_function"] = self.opt.SymbolPrefix + "table_gen"
         self.table["crc_init_function"] = self.opt.SymbolPrefix + "init"
         self.table["crc_update_function"] = self.opt.SymbolPrefix + "update"
         self.table["crc_finalize_function"] = self.opt.SymbolPrefix + "finalize"
-
 
     # function getTerminal
     ###############################################################################
@@ -131,7 +133,6 @@ class SymbolTable:
         """
         Return the expanded terminal, if it exists or None otherwise.
         """
-
         if id != None:
             if id == "":
                 return ""
@@ -166,13 +167,13 @@ class SymbolTable:
             if self.opt.Algorithm in set([self.opt.Algo_Bit_by_Bit, self.opt.Algo_Bit_by_Bit_Fast]):
                 if self.opt.Width != None and self.opt.Poly != None and self.opt.ReflectIn != None:
                     return  self.__pretty_bool(True)
-            elif self.opt.Algorithm == self.opt.Algo_Table_Driven:
+            elif self.opt.Algorithm in set([self.opt.Algo_Bitwise_Expression, self.opt.Algo_Table_Driven]):
                 if self.opt.Width != None and self.opt.ReflectIn != None:
                     return  self.__pretty_bool(True)
             return  self.__pretty_bool(False)
 
         elif id == "inline_crc_finalize":
-            if self.opt.Algorithm in set([self.opt.Algo_Bit_by_Bit_Fast, self.opt.Algo_Table_Driven]) and \
+            if self.opt.Algorithm in set([self.opt.Algo_Bit_by_Bit_Fast, self.opt.Algo_Bitwise_Expression, self.opt.Algo_Table_Driven]) and \
                     (self.opt.Width != None and self.opt.ReflectIn != None and self.opt.ReflectOut != None and self.opt.XorOut != None):
                 return  self.__pretty_bool(True)
             else:
@@ -185,7 +186,7 @@ class SymbolTable:
             elif self.opt.Algorithm == self.opt.Algo_Bit_by_Bit_Fast:
                 if self.opt.Width != None and self.opt.ReflectOut != None and self.opt.XorOut != None:
                     return  self.__pretty_bool(True)
-            elif self.opt.Algorithm == self.opt.Algo_Table_Driven:
+            elif self.opt.Algorithm in set([self.opt.Algo_Bitwise_Expression, self.opt.Algo_Table_Driven]):
                 if self.opt.Width != None and self.opt.ReflectIn != None and self.opt.ReflectOut != None and self.opt.XorOut != None:
                     return  self.__pretty_bool(True)
             return  self.__pretty_bool(False)
@@ -197,7 +198,7 @@ class SymbolTable:
                 return  self.__pretty_bool(True)
 
         elif id == "static_reflect_func":
-            if self.opt.Algorithm == self.opt.Algo_Table_Driven:
+            if self.opt.Algorithm in set([self.opt.Algo_Bitwise_Expression, self.opt.Algo_Table_Driven]):
                 return  self.__pretty_bool(False)
             elif self.opt.ReflectOut != None and self.opt.Algorithm == self.opt.Algo_Bit_by_Bit_Fast:
                 return  self.__pretty_bool(False)
@@ -209,6 +210,8 @@ class SymbolTable:
                 return  "bit-by-bit"
             elif self.opt.Algorithm == self.opt.Algo_Bit_by_Bit_Fast:
                 return  "bit-by-bit-fast"
+            elif self.opt.Algorithm == self.opt.Algo_Bitwise_Expression:
+                return "bitwise-expression"
             elif self.opt.Algorithm == self.opt.Algo_Table_Driven:
                 return  "table-driven"
             else:
@@ -231,9 +234,12 @@ class SymbolTable:
             else:
                 return  ret
 
+        elif id == "crc_byte_by_byte_expression":
+            return self.__get_crc_byte_by_byte_expression()
+
         elif id == "crc_final_value":
             return  """\
-$if ($crc_algorithm == "table-driven") {:
+$if ($crc_algorithm == "bitwise-expression" or $crc_algorithm == "table-driven") {:
 $if ($crc_reflect_in == $crc_reflect_out) {:
 $if ($crc_do_shift == True) {:(crc >> $cfg_shift):} $else {:crc:} ^ $crc_xor_out\
 :} $else {:
@@ -273,8 +279,12 @@ $if ($crc_algorithm == "bit-by-bit") {:
 #define CRC_ALGO_BIT_BY_BIT 1
 :} $elif ($crc_algorithm == "bit-by-bit-fast") {:
 #define CRC_ALGO_BIT_BY_BIT_FAST 1
+:} $elif ($crc_algorithm == "bitwise-expression") {:
+#define CRC_ALGO_BITWISE_EXPRESSION 1
 :} $elif ($crc_algorithm == "table-driven") {:
 #define CRC_ALGO_TABLE_DRIVEN 1
+:} $else {:
+#define CRC_ALGO_UNKNOWN 1
 :}
 
 
@@ -428,6 +438,21 @@ $crc_reflect_function_def$nop
 :}\
 """
 
+        elif id == "crc_bitwise_expression_doc":
+            return  """\
+/**
+ * Calculate the logical equivalent of the crc table at tbl_idx with by a
+ * boolean expression.
+ *
+ * \\return     the logical equivalent of the crc table at tbl_idx.
+ *****************************************************************************/\
+"""
+
+        elif id == "crc_bitwise_expression_function_def":
+            return  """\
+static $if ($c_std != C89) {:inline :}$crc_t $crc_bitwise_expression_function(int tbl_idx)\
+"""
+
         elif id == "crc_table_gen_doc":
             return  """\
 /**
@@ -533,8 +558,12 @@ $if ($crc_algorithm == "bit-by-bit") {:
 $c_bit_by_bit
 :} $elif ($crc_algorithm == "bit-by-bit-fast") {:
 $c_bit_by_bit_fast
+:} $elif ($crc_algorithm == "bitwise-expression") {:
+$c_byte_by_byte
 :} $elif ($crc_algorithm == "table-driven") {:
 $c_table_driven
+:} $else {:
+/* undefined algorithm $crc_algorithm */
 :}
 """
 
@@ -700,6 +729,92 @@ $if ($crc_reflect_out == Undefined) {:
     return (crc ^ $cfg_xor_out) & $cfg_mask;
 }
 
+:}
+"""
+
+        elif id == "c_byte_by_byte":
+            return  """\
+$if ($use_reflect_func == True) {:
+$crc_reflect_function_body
+:}
+
+$if ($constant_crc_init == False) {:
+$crc_init_doc
+$crc_init_function_def$nop
+{
+$if ($crc_reflect_in == Undefined) {:
+    if ($cfg_reflect_in) {
+        return $crc_reflect_function($cfg_xor_in & $cfg_mask, $cfg_width)$if ($crc_do_shift == True) {: << $cfg_shift:};
+    } else {
+        return $cfg_xor_in & $cfg_mask$if ($crc_do_shift == True) {: << $cfg_shift:};
+    }
+:} $elif ($crc_reflect_in == True) {:
+    return $crc_reflect_function($cfg_xor_in & $cfg_mask, $cfg_width)$if ($crc_do_shift == True) {: << $cfg_shift:};
+:} $else {:
+    return $cfg_xor_in & $cfg_mask$if ($crc_do_shift == True) {: << $cfg_shift:};
+:}
+}
+:}
+
+$crc_bitwise_expression_doc
+$crc_bitwise_expression_function_def
+{
+    $crc_t bits = ($crc_t)tbl_idx;
+
+    return $crc_byte_by_byte_expression;
+}
+
+$crc_update_doc
+$crc_update_function_def$nop
+{
+    unsigned int tbl_idx;
+
+$if ($crc_reflect_in == Undefined) {:
+    if (cfg->reflect_in) {
+        while (data_len--) {
+$crc_table_core_algorithm_ri
+            data++;
+        }
+    } else {
+        while (data_len--) {
+$crc_table_core_algorithm_ni
+            data++;
+        }
+    }
+:} $else {:
+    while (data_len--) {
+$if ($crc_reflect_in == True) {:
+$crc_table_core_algorithm_ri
+:} $elif ($crc_reflect_in == False) {:
+$crc_table_core_algorithm_ni
+:}
+        data++;
+    }
+:}
+    return crc & $cfg_mask_shifted;
+}
+
+$if ($inline_crc_finalize == False) {:
+$crc_finalize_doc
+$crc_finalize_function_def$nop
+{
+$if ($crc_do_shift == True) {:
+    crc >>= $cfg_shift;
+:}
+$if ($crc_reflect_in == Undefined or $crc_reflect_out == Undefined) {:
+$if ($crc_reflect_in == Undefined and $crc_reflect_out == Undefined) {:
+    if (cfg->reflect_in == !cfg->reflect_out):}
+ $elif ($crc_reflect_out == Undefined) {:
+    if ($if ($crc_reflect_in == True) {:!:}cfg->reflect_out):}
+ $elif ($crc_reflect_in == Undefined) {:
+    if ($if ($crc_reflect_out == True) {:!:}cfg->reflect_in):} {
+        crc = $crc_reflect_function(crc, $cfg_width);
+    }
+:} $elif ($crc_reflect_in != $crc_reflect_out) {:
+    crc = $crc_reflect_function(crc, $cfg_width);
+:}
+    return (crc ^ $cfg_xor_out) & $cfg_mask;
+}
 :}
 """
 
@@ -1244,7 +1359,7 @@ $if ($crc_xor_out == Undefined) {:
             if self.opt.XorIn == None:
                 return None
             init = self.opt.XorIn
-        elif self.opt.Algorithm == self.opt.Algo_Table_Driven:
+        elif self.opt.Algorithm in set([self.opt.Algo_Bitwise_Expression, self.opt.Algo_Table_Driven]):
             if self.opt.ReflectIn == None or self.opt.XorIn == None or self.opt.Width == None:
                 return None
             if self.opt.Poly == None:
@@ -1305,7 +1420,7 @@ $if ($crc_xor_out == Undefined) {:
         """
         Return the core loop of the table-driven algorithm.
         """
-        if self.opt.Algorithm != self.opt.Algo_Table_Driven:
+        if self.opt.Algorithm not in set([self.opt.Algo_Table_Driven, self.opt.Algo_Bitwise_Expression]):
             return ""
 
         loop_core_ni = ""
@@ -1325,13 +1440,17 @@ $if ($crc_xor_out == Undefined) {:
         reg_shift = "$if ($crc_do_shift == True) {:($cfg_table_idx_width - $cfg_shift):} $else {:$cfg_table_idx_width:}"
 
         if self.opt.TableIdxWidth == 8:
+            crc_lookup = '$if ($crc_algorithm == "table-driven") {:crc_table[tbl_idx]:}' + \
+                         '$elif ($crc_algorithm == "bitwise-expression") {:$crc_bitwise_expression_function(tbl_idx):}'
             loop_core_ni += loop_indent + "tbl_idx = ((crc >> " + shr + ") ^ *data) & $crc_table_mask;" + '\n' + \
-                            loop_indent + "crc = (crc_table[tbl_idx] ^ (crc << " + reg_shift + ")) & $cfg_mask_shifted;" + '\n'
+                            loop_indent + "crc = (" + crc_lookup + " ^ (crc << " + reg_shift + ")) & $cfg_mask_shifted;" + '\n'
         else:
+            crc_lookup = '$if ($crc_algorithm == "table-driven") {:crc_table[tbl_idx & $crc_table_mask]:}' + \
+                         '$elif ($crc_algorithm == "bitwise-expression") {:$crc_bitwise_expression_function(tbl_idx & $crc_table_mask):}'
             for i in range (8 // self.opt.TableIdxWidth):
                 str_idx = "%s" % (8 - (i + 1) * self.opt.TableIdxWidth)
                 loop_core_ni += loop_indent + "tbl_idx = (crc >> " + shr + ") ^ (*data >> " + str_idx + ");" + '\n' + \
-                                loop_indent + "crc = crc_table[tbl_idx & $crc_table_mask] ^ (crc << " + reg_shift + ");" + '\n'
+                                loop_indent + "crc = " + crc_lookup + " ^ (crc << " + reg_shift + ");" + '\n'
         return loop_core_ni
 
 
@@ -1341,7 +1460,7 @@ $if ($crc_xor_out == Undefined) {:
         """
         Return the core loop of the table-driven algorithm.
         """
-        if self.opt.Algorithm != self.opt.Algo_Table_Driven:
+        if self.opt.Algorithm not in set([self.opt.Algo_Table_Driven, self.opt.Algo_Bitwise_Expression]):
             return ""
 
         loop_core_ri = ""
@@ -1353,12 +1472,124 @@ $if ($crc_xor_out == Undefined) {:
         crc_shifted = "$if ($crc_do_shift == True) {:(crc >> $cfg_shift):} $else {:crc:}"
 
         if self.opt.TableIdxWidth == 8:
+            crc_lookup = '$if ($crc_algorithm == "table-driven") {:crc_table[tbl_idx]:}' + \
+                         '$elif ($crc_algorithm == "bitwise-expression") {:$crc_bitwise_expression_function(tbl_idx):}'
             loop_core_ri += loop_indent + "tbl_idx = (" + crc_shifted + " ^ *data) & $crc_table_mask;" + '\n' + \
-                            loop_indent + "crc = (crc_table[tbl_idx] ^ (crc >> $cfg_table_idx_width)) & $cfg_mask_shifted;" + '\n'
+                            loop_indent + "crc = (" + crc_lookup + " ^ (crc >> $cfg_table_idx_width)) & $cfg_mask_shifted;" + '\n'
         else:
+            crc_lookup = '$if ($crc_algorithm == "table-driven") {:crc_table[tbl_idx & $crc_table_mask]:}' + \
+                         '$elif ($crc_algorithm == "bitwise-expression") {:$crc_bitwise_expression_function(tbl_idx & $crc_table_mask):}'
             for i in range (8 // self.opt.TableIdxWidth):
                 str_idx = "%d" % i
                 loop_core_ri += loop_indent + "tbl_idx = " + crc_shifted + " ^ (*data >> (" + str_idx + " * $cfg_table_idx_width));" + '\n' + \
-                                loop_indent + "crc = crc_table[tbl_idx & $crc_table_mask] ^ (crc >> $cfg_table_idx_width);" + '\n'
-
+                                loop_indent + "crc = " + crc_lookup + " ^ (crc >> $cfg_table_idx_width);" + '\n'
         return loop_core_ri
+
+
+    # __get_crc_logic_table
+    ###############################################################################
+    def __get_crc_logic_table(self):
+        """
+        Return the precalculated CRC table for the bitwise-expression implementation
+        """
+        crc = Crc(width = self.opt.Width, poly = self.opt.Poly,
+                reflect_in = self.opt.ReflectIn, xor_in = self.opt.XorIn,
+                reflect_out = self.opt.ReflectOut, xor_out = self.opt.XorOut,
+                table_idx_width = self.opt.TableIdxWidth)
+        qm = QuineMcCluskey()
+        crc_tbl = crc.gen_table()
+        ones_tbl = []
+        # FIXME thp: is this correct? max(self.opt.Width, 8)
+        for bit in range(max(self.opt.Width, 8)):
+            ones = [i for i in range(self.opt.TableWidth) if crc_tbl[i] & (1 << bit) != 0]
+            terms = qm.simplify(ones, [])
+            if self.opt.Verbose:
+                print("    bit %02d: %s" % (bit, terms))
+            ones_tbl.append(terms)
+        return ones_tbl
+
+
+    # __get_crc_byte_by_byte_expression
+    ###############################################################################
+    def __get_crc_byte_by_byte_expression(self):
+        """
+        Return the expression for the bitwise-expression algorithm
+        """
+        if self.opt.Algorithm != self.opt.Algo_Bitwise_Expression or \
+                self.opt.Action == self.opt.Action_Generate_H or \
+                self.opt.UndefinedCrcParameters:
+            return ""
+        table = self.__get_crc_logic_table()
+        out_bits = []
+        for bit in range(len(table)):
+            t = self.__get_crc_byte_by_byte_term(bit, table[bit])
+            if t != None:
+                out_bits.append("(%s & 0x%02x)" % (t, 1 << bit))
+        if out_bits == []:
+            return "0"
+        expr = " |\n            ".join(out_bits)
+
+        bwe = BitwiseExpression()
+        expr = bwe.simplify(expr)
+
+        return expr
+
+
+    # __get_crc_byte_by_byte_term
+    ###############################################################################
+    def __get_crc_byte_by_byte_term(self, bit, minterms):
+        """
+        Return a term for the bitwise-expression algorithm
+        """
+        if minterms == None:
+            return None
+        catchall = "".join(['-' for i in range(self.opt.Width)])
+        if catchall in minterms:
+            return "1"
+        res = []
+        for term in minterms:
+            mt = self.__get_crc_byte_by_byte_minterm(bit, term)
+            res.append(mt)
+        if len(res) == 0:
+            return None
+        elif len(res) == 1:
+            return res[0]
+        else:
+            return "(%s)" % " | ".join(res)
+
+
+    # __get_crc_byte_by_byte_minterm
+    ###############################################################################
+    def __get_crc_byte_by_byte_minterm(self, bit, minterm):
+        """
+        Return a minterm for the bitwise-expression algorithm
+        """
+        res = []
+        # Count down from self.opt.TableIdxWidth-1 to 0.
+        # First xor and xnor operations
+        op = " ^ "
+        for bit_pos in range(self.opt.TableIdxWidth - 1, -1, -1):
+            min_op = minterm[self.opt.TableIdxWidth - bit_pos - 1]
+
+            shift_op = ["<<", ">>"][bit_pos > bit]
+            shift_bits = abs(bit_pos - bit)
+            if min_op == "^":
+                res.append("(bits %s %d)" % (shift_op, shift_bits))
+            elif min_op == "~":
+                res.append("(~bits %s %d)" % (shift_op, shift_bits))
+        if len(res) > 1:
+            res = [ "(%s)" % op.join(res) ]
+
+        # Count down from self.opt.TableIdxWidth-1 to 0.
+        # Then the and operator.
+        op = " & "
+        for bit_pos in range(self.opt.TableIdxWidth - 1, -1, -1):
+            min_op = minterm[self.opt.TableIdxWidth - bit_pos - 1]
+
+            shift_op = ["<<", ">>"][bit_pos > bit]
+            shift_bits = abs(bit_pos-bit)
+            if min_op == "0":
+                res.append("(~bits %s %d)" % (shift_op, shift_bits))
+            elif min_op == "1":
+                res.append("(bits %s %d)" % (shift_op, shift_bits))
+        return "(%s)" % op.join(res)

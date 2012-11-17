@@ -52,7 +52,8 @@ To print the parameters of a particular model:
 class CrcModels(object):
     """
     CRC Models.
-    All models are generated in the constructor.
+
+    All models are defined as constant class variables.
     """
 
     models = []

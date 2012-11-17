@@ -1,6 +1,6 @@
-.*swp
 .svn
 *.pyc
+*.pyo
 __pycache__
 doc/pycrc.1
 doc/pycrc.html

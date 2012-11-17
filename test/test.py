@@ -23,7 +23,7 @@ class Options(object):
     # Class constructor
     ###############################################################################
     def __init__(self):
-        self.AllAlgorithms          = set(["bit-by-bit", "bit-by-bit-fast", "table-driven"])
+        self.AllAlgorithms          = set(["bit-by-bit", "bit-by-bit-fast", "bitwise-expression", "table-driven"])
         self.Compile                = False
         self.RandomParameters       = False
         self.CompileMixedArgs       = False
@@ -43,6 +43,7 @@ class Options(object):
 
         models = CrcModels()
         model_list = ", ".join(models.getList())
+        algorithms = ", ".join(sorted(list(self.AllAlgorithms)) + ["all"])
         parser = OptionParser(usage=usage)
         parser.add_option("-v", "--verbose",
                         action="store_true", dest="verbose", default=self.Verbose,
@@ -58,7 +59,7 @@ class Options(object):
                         help="test random parameters")
         parser.add_option("-m", "--compile-mixed-arguments",
                         action="store_true", dest="compile_mixed_args", default=self.CompileMixedArgs,
-                        help="test compiled C program with mixed arguments")
+                        help="test compiled C program with some arguments given at compile time some arguments given at runtime")
         parser.add_option("-w", "--variable-width",
                         action="store_true", dest="variable_width", default=self.VariableWidth,
                         help="test variable width from 1 to 64")
@@ -67,7 +68,7 @@ class Options(object):
                         help="do all tests")
         parser.add_option("--algorithm",
                         action="store", type="string", dest="algorithm", default="all",
-                        help="choose an algorithm from {bit-by-bit, bit-by-bit-fast, table-driven, all}", metavar="ALGO")
+                        help="choose an algorithm from {%s}" % algorithms, metavar="ALGO")
 
         (options, args) = parser.parse_args(argv)
 
@@ -103,13 +104,16 @@ class CrcTests(object):
         self.use_algo_bit_by_bit = True
         self.use_algo_bit_by_bit_fast = True
         self.use_algo_table_driven = True
+        self.use_algo_bitwise_expression = True
         self.verbose = False
-        self.tmpdir = tempfile.mkdtemp(prefix='pycrc')
+        self.tmpdir = tempfile.mkdtemp(prefix="pycrc_")
         self.check_file = None
         self.crc_bin_bbb_c89 = None
         self.crc_bin_bbb_c99 = None
         self.crc_bin_bbf_c89 = None
         self.crc_bin_bbf_c99 = None
+        self.crc_bin_bwe_c89 = None
+        self.crc_bin_bwe_c99 = None
         self.crc_bin_tbl_c89 = None
         self.crc_bin_tbl_c99 = None
         self.crc_bin_tbl_idx2 = None
@@ -128,6 +132,10 @@ class CrcTests(object):
             self.__del_files([self.crc_bin_bbf_c89, self.crc_bin_bbf_c89+".h", self.crc_bin_bbf_c89+".c"])
         if self.crc_bin_bbf_c99 != None:
             self.__del_files([self.crc_bin_bbf_c99, self.crc_bin_bbf_c99+".h", self.crc_bin_bbf_c99+".c"])
+        if self.crc_bin_bwe_c89 != None:
+            self.__del_files([self.crc_bin_bwe_c89, self.crc_bin_bwe_c89+".h", self.crc_bin_bwe_c89+".c"])
+        if self.crc_bin_bwe_c99 != None:
+            self.__del_files([self.crc_bin_bwe_c99, self.crc_bin_bwe_c99+".h", self.crc_bin_bwe_c99+".c"])
         if self.crc_bin_tbl_c89 != None:
             self.__del_files([self.crc_bin_tbl_c89, self.crc_bin_tbl_c89+".h", self.crc_bin_tbl_c89+".c"])
         if self.crc_bin_tbl_c99 != None:
@@ -337,30 +345,83 @@ class CrcTests(object):
         check_str = "123456789"
         models = CrcModels()
         for m in models.models:
-            if self.__get_crc(m, check_str, m["check"]) != m["check"]:
+            expected_crc = m["check"]
+            if self.__get_crc(m, check_str, expected_crc) != expected_crc:
                 return False
 
             ext_args = "--width %(width)s --poly 0x%(poly)x --xor-in 0x%(xor_in)x --reflect-in %(reflect_in)s --xor-out 0x%(xor_out)x --reflect-out %(reflect_out)s" % m
 
             cmd_str = self.pycrc_bin + " --model %(name)s" % m
-            if not self.__check_command(cmd_str, m["check"]):
+            if not self.__check_command(cmd_str, expected_crc):
                 return False
 
             cmd_str = self.pycrc_bin + " " + ext_args
-            if not self.__check_command(cmd_str, m["check"]):
+            if not self.__check_command(cmd_str, expected_crc):
                 return False
 
             cmd_str = self.pycrc_bin + " --model %s --check-file %s" % (m["name"], self.check_file)
-            if not self.__check_command(cmd_str, m["check"]):
+            if not self.__check_command(cmd_str, expected_crc):
                 return False
 
-            if not self.__check_bin(ext_args, m["check"]):
+            if not self.__check_bin(ext_args, expected_crc):
                 return False
 
         if self.verbose:
             print("")
         return True
 
+
+    # __test_compiled_models
+    ###############################################################################
+    def __test_compiled_models(self):
+        """
+        Standard Tests.
+        Test all known models with the compiled code
+        """
+        if self.verbose:
+            print("Running __test_compiled_models()...")
+        check_str = "123456789"
+        models = CrcModels()
+        for m in models.models:
+            expected_crc = m["check"]
+            cmp_opt = "--model %(name)s" % m
+
+            if self.use_algo_bit_by_bit:
+                filename = self.__make_bin("--algorithm bit-by-bit" + " " + cmp_opt, "crc_bbb_mod")
+                if filename == None:
+                    return False
+                ret = self.__check_command(filename, expected_crc)
+                self.__del_files([filename, filename+".h", filename+".c"])
+                if not ret:
+                    return False
+
+            if self.use_algo_bit_by_bit_fast:
+                filename = self.__make_bin("--algorithm bit-by-bit-fast" + " " + cmp_opt, "crc_bbf_mod")
+                if filename == None:
+                    return False
+                ret = self.__check_command(filename, expected_crc)
+                self.__del_files([filename, filename+".h", filename+".c"])
+                if not ret:
+                    return False
+
+            if self.use_algo_bitwise_expression:
+                filename = self.__make_bin("--algorithm bitwise-expression" + " " + cmp_opt, "crc_bwe_mod")
+                if filename == None:
+                    return False
+                ret = self.__check_command(filename, expected_crc)
+                self.__del_files([filename, filename+".h", filename+".c"])
+                if not ret:
+                    return False
+
+            if self.use_algo_table_driven:
+                filename = self.__make_bin("--algorithm table-driven" + " " + cmp_opt, "crc_tbl_mod")
+                if filename == None:
+                    return False
+                ret = self.__check_command(filename, expected_crc)
+                self.__del_files([filename, filename+".h", filename+".c"])
+                if not ret:
+                    return False
+        return True
 
     # __test_random_params
     ###############################################################################
@@ -393,7 +454,7 @@ class CrcTests(object):
         Test compiled arguments.
         """
         if self.verbose:
-            print("Running __test_compiled_aruments()...")
+            print("Running __test_compiled_mixed_args()...")
         m =  {
             'name':         'zmodem',
             'width':         ["", "--width 16"],
@@ -489,7 +550,7 @@ class CrcTests(object):
                     if not self.__check_command(self.crc_bin_bbb_c99 + " " + args, check):
                         return False
 
-                filename = self.__make_bin("--algorithm table-driven" + " " + args, "crc_bbb_arg")
+                filename = self.__make_bin("--algorithm bit-by-bit" + " " + args, "crc_bbb_arg")
                 if filename == None:
                     return False
                 ret = self.__check_command(filename, check)
@@ -502,7 +563,20 @@ class CrcTests(object):
                     if not self.__check_command(self.crc_bin_bbf_c99 + " " + args, check):
                         return False
 
-                filename = self.__make_bin("--algorithm table-driven" + " " + args, "crc_bbf_arg")
+                filename = self.__make_bin("--algorithm bit-by-bit-fast" + " " + args, "crc_bbf_arg")
+                if filename == None:
+                    return False
+                ret = self.__check_command(filename, check)
+                self.__del_files([filename, filename+".h", filename+".c"])
+                if not ret:
+                    return False
+
+            if self.use_algo_bitwise_expression:
+                if self.crc_bin_bwe_c99 != None:
+                    if not self.__check_command(self.crc_bin_bwe_c99 + " " + args, check):
+                        return False
+
+                filename = self.__make_bin("--algorithm bitwise-expression" + " " + args, "crc_bwe_arg")
                 if filename == None:
                     return False
                 ret = self.__check_command(filename, check)
@@ -533,6 +607,7 @@ class CrcTests(object):
         """
         self.use_algo_bit_by_bit = "bit-by-bit" in opt.Algorithm
         self.use_algo_bit_by_bit_fast = "bit-by-bit-fast" in opt.Algorithm
+        self.use_algo_bitwise_expression = "bitwise-expression" in opt.Algorithm
         self.use_algo_table_driven = "table-driven" in opt.Algorithm
         self.verbose = opt.Verbose
 
@@ -547,17 +622,17 @@ class CrcTests(object):
         if not self.__test_models():
             return False
 
-        if opt.RandomParameters:
-            if not self.__test_random_params():
-                return False
+        if opt.Compile and not self.__test_compiled_models():
+            return False
 
-        if opt.CompileMixedArgs:
-            if not self.__test_compiled_mixed_args():
-                return False
+        if opt.RandomParameters and not self.__test_random_params():
+            return False
 
-        if opt.VariableWidth:
-            if not self.__test_variable_width():
-                return False
+        if opt.CompileMixedArgs and not self.__test_compiled_mixed_args():
+            return False
+
+        if opt.VariableWidth and not self.__test_variable_width():
+            return False
 
         return True
 
