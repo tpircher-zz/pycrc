@@ -18,6 +18,7 @@ System Requirements
 ===================
 
 pycrc requires Python 2.6 or later. Python 3.x is supported.
+The last version compatible with Python 2.x is pycrc v0.7.10.
 
 
 
