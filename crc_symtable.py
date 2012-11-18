@@ -234,8 +234,8 @@ class SymbolTable:
             else:
                 return  ret
 
-        elif id == "crc_byte_by_byte_expression":
-            return self.__get_crc_byte_by_byte_expression()
+        elif id == "crc_bitwise_expression_expression":
+            return self.__get_crc_bitwise_expression_expression()
 
         elif id == "crc_final_value":
             return  """\
@@ -559,7 +559,7 @@ $c_bit_by_bit
 :} $elif ($crc_algorithm == "bit-by-bit-fast") {:
 $c_bit_by_bit_fast
 :} $elif ($crc_algorithm == "bitwise-expression") {:
-$c_byte_by_byte
+$c_bitwise_expression
 :} $elif ($crc_algorithm == "table-driven") {:
 $c_table_driven
 :} $else {:
@@ -732,7 +732,7 @@ $if ($crc_reflect_out == Undefined) {:
 :}
 """
 
-        elif id == "c_byte_by_byte":
+        elif id == "c_bitwise_expression":
             return  """\
 $if ($use_reflect_func == True) {:
 $crc_reflect_function_body
@@ -761,7 +761,7 @@ $crc_bitwise_expression_function_def
 {
     $crc_t bits = ($crc_t)tbl_idx;
 
-    return $crc_byte_by_byte_expression;
+    return $crc_bitwise_expression_expression;
 }
 
 $crc_update_doc
@@ -1509,9 +1509,9 @@ $if ($crc_xor_out == Undefined) {:
         return ones_tbl
 
 
-    # __get_crc_byte_by_byte_expression
+    # __get_crc_bitwise_expression_expression
     ###############################################################################
-    def __get_crc_byte_by_byte_expression(self):
+    def __get_crc_bitwise_expression_expression(self):
         """
         Return the expression for the bitwise-expression algorithm
         """
@@ -1522,9 +1522,10 @@ $if ($crc_xor_out == Undefined) {:
         table = self.__get_crc_logic_table()
         out_bits = []
         for bit in range(len(table)):
-            t = self.__get_crc_byte_by_byte_term(bit, table[bit])
+            t = self.__get_crc_bitwise_expression_term(bit, table[bit])
             if t != None:
                 out_bits.append("(%s & 0x%02x)" % (t, 1 << bit))
+            print("FIXME bit = %d; %s" %(bit, t))
         if out_bits == []:
             return "0"
         expr = " |\n            ".join(out_bits)
@@ -1535,9 +1536,9 @@ $if ($crc_xor_out == Undefined) {:
         return expr
 
 
-    # __get_crc_byte_by_byte_term
+    # __get_crc_bitwise_expression_term
     ###############################################################################
-    def __get_crc_byte_by_byte_term(self, bit, minterms):
+    def __get_crc_bitwise_expression_term(self, bit, minterms):
         """
         Return a term for the bitwise-expression algorithm
         """
@@ -1547,9 +1548,13 @@ $if ($crc_xor_out == Undefined) {:
         if catchall in minterms:
             return "1"
         res = []
+        fixme_mt = set()
         for term in minterms:
-            mt = self.__get_crc_byte_by_byte_minterm(bit, term)
+            mt = self.__get_crc_bitwise_expression_minterm(bit, term)
             res.append(mt)
+            fixme_mt.add("".join(['.' for i in range(bit)]) + term + "".join(['.' for i in range(self.opt.Width - bit - 1)]))
+        print("FIXME %s" % minterms)
+        print("FIXME %s" % fixme_mt)
         if len(res) == 0:
             return None
         elif len(res) == 1:
@@ -1558,9 +1563,9 @@ $if ($crc_xor_out == Undefined) {:
             return "(%s)" % " | ".join(res)
 
 
-    # __get_crc_byte_by_byte_minterm
+    # __get_crc_bitwise_expression_minterm
     ###############################################################################
-    def __get_crc_byte_by_byte_minterm(self, bit, minterm):
+    def __get_crc_bitwise_expression_minterm(self, bit, minterm):
         """
         Return a minterm for the bitwise-expression algorithm
         """
