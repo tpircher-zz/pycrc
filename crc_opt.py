@@ -140,7 +140,7 @@ following parameters:
                         help="C standard style of the generated code from {C89, ANSI, C99}", metavar="STD")
         parser.add_option("--algorithm",
                         action="store", type="string", dest="algorithm", default="all",
-                        help="choose an algorithm from {bit-by-bit, bit-by-bit-fast, table-driven, all}", metavar="ALGO")
+                        help="choose an algorithm from {bit-by-bit, bbb, bit-by-bit-fast, bbbf, table-driven, td, all}", metavar="ALGO")
         parser.add_option("--model",
                         action="callback", callback=self.model_cb, type="string", dest="model", default=None,
                         help="choose a parameter set from {%s}" % model_list, metavar="MODEL")
@@ -247,11 +247,11 @@ following parameters:
 
         if options.algorithm != None:
             alg = options.algorithm.lower()
-            if alg == "bit-by-bit" or alg == "all":
+            if alg in set(["bit-by-bit", "bbb", "all"]):
                 self.Algorithm      |= self.Algo_Bit_by_Bit
-            if alg == "bit-by-bit-fast"  or alg == "all":
+            if alg in set(["bit-by-bit-fast", "bbbf", "all"]):
                 self.Algorithm      |= self.Algo_Bit_by_Bit_Fast
-            if alg == "table-driven" or alg == "all":
+            if alg in set(["table-driven", "td", "all"]):
                 self.Algorithm      |= self.Algo_Table_Driven
             if self.Algorithm == 0:
                 sys.stderr.write("%s: error: unknown algorithm %s\n" % (sys.argv[0], options.algorithm))
@@ -349,7 +349,9 @@ following parameters:
             setattr(parser.values, 'reflect_out',   model['reflect_out'])
             setattr(parser.values, 'xor_out',       model['xor_out'])
         else:
-            raise OptionValueError("Error: unsupported model %s" % (value))
+            models = CrcModels()
+            model_list = ", ".join(models.getList())
+            raise OptionValueError("unsupported model %s.  Supported models are: %s." % (value, model_list))
 
 
 # function check_hex

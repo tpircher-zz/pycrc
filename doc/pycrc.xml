@@ -2,15 +2,18 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
                     "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
 <!ENTITY program_name       "pycrc">
-<!ENTITY program_version    "0.7.11">
-<!ENTITY date               "2012-10-22">
+<!ENTITY program_version    "0.7.12">
+<!ENTITY date               "2012-11-18">
 <!ENTITY author_firstname   "Thomas">
 <!ENTITY author_surname     "Pircher">
 <!ENTITY author_email       "tehpeh@gmx.net">
 <!ENTITY author             "&author_firstname; &author_surname;">
 <!ENTITY bit-by-bit         "bit-by-bit">
+<!ENTITY bbb                "bbb">
 <!ENTITY bit-by-bit-fast    "bit-by-bit-fast">
+<!ENTITY bbbf               "bbbf">
 <!ENTITY table-driven       "table-driven">
+<!ENTITY td                 "td">
 <!ENTITY width          "Width">
 <!ENTITY poly           "Polynomial">
 <!ENTITY reflect_in     "ReflectIn">
@@ -82,7 +85,8 @@
             <itemizedlist>
                 <listitem>
                     <para>
-                        <replaceable>&bit-by-bit;</replaceable>: the basic algorithm which operates individually on every bit of the augmented message 
+                        <replaceable>&bit-by-bit;</replaceable> or <replaceable>&bbb;</replaceable>: the basic algorithm which operates individually
+                        on every bit of the augmented message 
                         (i.e. the input data with <replaceable>&width;</replaceable> 0-bits attached to the end).
                         This algorithm is the easiest to understand because it is a straightforward implementation of the basic polynomial division, 
                         but it is also the slowest among all possible variants.
@@ -90,19 +94,21 @@
                 </listitem>
                 <listitem>
                     <para>
-                        <replaceable>&bit-by-bit-fast;</replaceable>: a variation of the simple <replaceable>&bit-by-bit;</replaceable> algorithm, 
+                        <replaceable>&bit-by-bit-fast;</replaceable> or <replaceable>&bbbf;</replaceable>: a variation of the basic
+                        <replaceable>&bit-by-bit;</replaceable> algorithm, 
                         with the difference that it does not need to augment the data, i.e. it does not add <replaceable>&width;</replaceable> zero 
                         bits at the end of the message.
-                        This algorithm might be a good choice for embedded platforms, where code space is a major concern.
+                        This algorithm can be a good choice for embedded platforms, where code space is a major concern.
                     </para>
                 </listitem>
                 <listitem>
                     <para>
-                        <replaceable>&table-driven;</replaceable>: the standard table driven algorithm.
+                        <replaceable>&table-driven;</replaceable> or <replaceable>&td;</replaceable>: the standard table driven algorithm.
                         This is the fastest variant because it operates on one byte at a time, as opposed to bits, and uses a look-up table of 256 elements, 
                         which might not be feasible for small embedded systems, though. Anyway, the number of elements in the look-up table can be reduced by 
                         means of the <option>--table-idx-width</option> command line switch. By using 4 bits (16 elements in the look-up table) a significant 
-                        speed-up can be measured with respect to the bit-by-bit algorithms.
+                        speed-up can be measured with respect to the <replaceable>&bit-by-bit;</replaceable> or <replaceable>&bit-by-bit-fast;</replaceable>
+                        algorithms.
                     </para>
                 </listitem>
             </itemizedlist>
@@ -184,8 +190,10 @@
                 <option>--algorithm=</option><replaceable>ALGO</replaceable>
             </term>
             <listitem>
-                <para>choose an algorithm from {<replaceable>bit-by-bit</replaceable>, <replaceable>bit-by-bit-fast</replaceable>, 
-                <replaceable>table-driven</replaceable>, <replaceable>all</replaceable>}</para>
+                <para>choose an algorithm from {<replaceable>bit-by-bit</replaceable>, <replaceable>bbb</replaceable>,
+                <replaceable>bit-by-bit-fast</replaceable>, <replaceable>bbbf</replaceable>,
+                <replaceable>table-driven</replaceable>, <replaceable>td</replaceable>,
+                <replaceable>all</replaceable>}</para>
             </listitem>
         </varlistentry>
         <varlistentry>
