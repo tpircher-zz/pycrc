@@ -14,7 +14,7 @@ def generate_input(s_terms):
     """
     generate input for a desired result
     """
-    qm = QuineMcCluskey()
+    qm = QuineMcCluskey(use_xor = True)
     res = set()
     if len(s_terms) == 0:
         return res
@@ -45,7 +45,7 @@ def main():
     """
     Main function
     """
-    qm = QuineMcCluskey()
+    qm = QuineMcCluskey(use_xor = True)
 
     test_vector = [
         { 'res': set(['--^^']) },

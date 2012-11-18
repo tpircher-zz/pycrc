@@ -43,11 +43,12 @@ class QuineMcCluskey:
 
     # function __init__
     ###############################################################################
-    def __init__(self):
+    def __init__(self, use_xor = False):
         """
         The class constructor.
         """
-        self.n_bits = 0         # number of bits (i.e. self.n_bits == len(ones[i]) for every i)
+        self.use_xor = use_xor  # Whether or not to use XOR and XNOR operations.
+        self.n_bits = 0         # number of bits (i.e. self.n_bits == len(ones[i]) for every i).
 
 
     # function __num2str
@@ -258,20 +259,21 @@ class QuineMcCluskey:
         for t in terms:
             n_bits = t.count('1')
             groups[n_bits].add(t)
-        # Add 'simple' XOR and XNOR terms to the set of terms.
-        # Simple means the terms can be obtained by combining just two
-        # bits.
-        for gi, group in enumerate(groups):
-            for t1 in group:
-                for t2 in group:
-                    t12 = self.__reduce_simple_xor_terms(t1, t2)
-                    if t12 != None:
-                        terms.add(t12)
-                if gi < n_groups - 2:
-                    for t2 in groups[gi + 2]:
-                        t12 = self.__reduce_simple_xnor_terms(t1, t2)
+        if self.use_xor:
+            # Add 'simple' XOR and XNOR terms to the set of terms.
+            # Simple means the terms can be obtained by combining just two
+            # bits.
+            for gi, group in enumerate(groups):
+                for t1 in group:
+                    for t2 in group:
+                        t12 = self.__reduce_simple_xor_terms(t1, t2)
                         if t12 != None:
                             terms.add(t12)
+                    if gi < n_groups - 2:
+                        for t2 in groups[gi + 2]:
+                            t12 = self.__reduce_simple_xnor_terms(t1, t2)
+                            if t12 != None:
+                                terms.add(t12)
 
         done = False
         while not done:

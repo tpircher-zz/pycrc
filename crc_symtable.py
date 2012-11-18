@@ -1496,7 +1496,7 @@ $if ($crc_xor_out == Undefined) {:
                 reflect_in = self.opt.ReflectIn, xor_in = self.opt.XorIn,
                 reflect_out = self.opt.ReflectOut, xor_out = self.opt.XorOut,
                 table_idx_width = self.opt.TableIdxWidth)
-        qm = QuineMcCluskey()
+        qm = QuineMcCluskey(use_xor = True)
         crc_tbl = crc.gen_table()
         ones_tbl = []
         # FIXME thp: is this correct? max(self.opt.Width, 8)
