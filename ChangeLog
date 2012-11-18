@@ -2,6 +2,27 @@
 # Version 0.7.12, 2012-xx-xx
 #
 
+2012-11-18  Thomas Pircher   <tehpeh@gmx.net>
+
+    * crc_opt.py:
+    It is possible now to abbreviate the algorithms (bbb for bit-by-bit,
+    bbbf for bit-by-bit-fast and td for table-driven).
+    Added the list of supported CRC models to the error message when an
+    unknown model parameter was supplied.
+
+    * doc/pycrc.xml:
+    Documented the possibility to abbreviate the algorithms. Minor
+    improvements.
+
+2012-11-17  Thomas Pircher   <tehpeh@gmx.net>
+
+    * README.md:
+    Added a note to README.md that version 0.7.10 of pycrc is the last one
+    known to work with Python 2.x.
+
+    * doc/pycrc.xml:
+    Updated a link to the list of CRC models.
+
 2012-10-22  Thomas Pircher   <tehpeh@gmx.net>
 
     * README.md:
@@ -176,7 +197,7 @@
 2010-01-24  Thomas Pircher   <tehpeh@gmx.net>
 
     * crc_models.py: changed the xor-in value of the crc-64-jones model.
-    * crc_models.py: Set xmodem parameters equal to the zmodem params.
+    * crc_models.py: Set xmodem parameters equal to the zmodem parameters.
 
 2009-12-29  Thomas Pircher   <tehpeh@gmx.net>
 
@@ -352,7 +373,7 @@
 	* crc_lexer.py: changed the macro language syntax to a better format
 	* crc_symtable.py: changed the macro language syntax to a better format
 	* crc_parser.py: Renamed crc_code_gen.py to crc_parser.py
-	* all files: Documented thge usage of the crc_* modules
+	* all files: Documented the usage of the crc_* modules
 
 #
 # Version 0.6.1, 2007-08-12
