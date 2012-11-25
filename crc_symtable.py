@@ -39,7 +39,6 @@ use as follows:
 
 from crc_algorithms import Crc
 from qm import QuineMcCluskey
-from crc_bwe import BitwiseExpression
 import time
 import os
 
@@ -234,8 +233,8 @@ class SymbolTable:
             else:
                 return  ret
 
-        elif id == "crc_bitwise_expression_expression":
-            return self.__get_crc_bitwise_expression_expression()
+        elif id == "crc_bitwise_expression":
+            return self.__get_crc_bwe_expression()
 
         elif id == "crc_final_value":
             return  """\
@@ -761,7 +760,7 @@ $crc_bitwise_expression_function_def
 {
     $crc_t bits = ($crc_t)tbl_idx;
 
-    return $crc_bitwise_expression_expression;
+    return $crc_bitwise_expression;
 }
 
 $crc_update_doc
@@ -1281,19 +1280,11 @@ $if ($crc_xor_out == Undefined) {:
         """
         Return the name of a C header protection (e.g. __CRC_IMPLEMENTATION_H__).
         """
-        tr_str = ""
-        for i in range(256):
-            if chr(i).isalnum():
-                tr_str += chr(i).upper()
-            else:
-                tr_str += '_'
         if self.opt.OutputFile == None:
-            out_str = "pycrc_stdout"
+            filename = "pycrc_stdout"
         else:
-            out_str = self.opt.OutputFile
-        out_str = os.path.basename(out_str)
-        out_str = out_str.upper()
-        out_str = out_str.translate(tr_str)
+            filename = os.path.basename(self.opt.OutputFile)
+        out_str = "".join([s.upper() if s.isalnum() else "_" for s in filename])
         return "__" + out_str + "__"
 
 
@@ -1486,11 +1477,11 @@ $if ($crc_xor_out == Undefined) {:
         return loop_core_ri
 
 
-    # __get_crc_logic_table
+    # __get_crc_bwe_bitmask_minterms
     ###############################################################################
-    def __get_crc_logic_table(self):
+    def __get_crc_bwe_bitmask_minterms(self):
         """
-        Return the precalculated CRC table for the bitwise-expression implementation
+        Return a list of (bitmask, minterms), for all bits.
         """
         crc = Crc(width = self.opt.Width, poly = self.opt.Poly,
                 reflect_in = self.opt.ReflectIn, xor_in = self.opt.XorIn,
@@ -1498,103 +1489,68 @@ $if ($crc_xor_out == Undefined) {:
                 table_idx_width = self.opt.TableIdxWidth)
         qm = QuineMcCluskey(use_xor = True)
         crc_tbl = crc.gen_table()
-        ones_tbl = []
-        # FIXME thp: is this correct? max(self.opt.Width, 8)
+        bm_mt = []
         for bit in range(max(self.opt.Width, 8)):
             ones = [i for i in range(self.opt.TableWidth) if crc_tbl[i] & (1 << bit) != 0]
             terms = qm.simplify(ones, [])
             if self.opt.Verbose:
-                print("    bit %02d: %s" % (bit, terms))
-            ones_tbl.append(terms)
-        return ones_tbl
+                print("bit %02d: %s" % (bit, terms))
+            if terms != None:
+                for term in terms:
+                    shifted_term = '.' * bit + term + '.' * (self.opt.Width - bit - 1)
+                    bm_mt.append((1 << bit, shifted_term))
+        return bm_mt
 
 
-    # __get_crc_bitwise_expression_expression
+    # __format_bwe_expression
     ###############################################################################
-    def __get_crc_bitwise_expression_expression(self):
+    def __format_bwe_expression(self, minterms):
         """
-        Return the expression for the bitwise-expression algorithm
+        Return the formatted bwe expression.
+        """
+        or_exps = []
+        and_fmt = "((%%s) & 0x%%0%dx)" % ((self.opt.Width + 3) // 4)
+        for (bitmask, minterm) in minterms:
+            xors = []
+            ands = []
+            for (bit_pos, operator) in enumerate(minterm):
+                shift = bit_pos - self.opt.TableIdxWidth + 1
+                if shift > 0:
+                    bits_fmt = "(%%sbits << %d)" % (shift)
+                elif shift < 0:
+                    bits_fmt = "(%%sbits >> %d)" % (-shift)
+                else:
+                    bits_fmt = "%sbits"
+
+                if operator == "^":
+                    xors.append(bits_fmt % "")
+                elif operator == "~":
+                    xors.append(bits_fmt % "~")
+                elif operator == "0":
+                    ands.append(bits_fmt % "~")
+                elif operator == "1":
+                    ands.append(bits_fmt % "")
+
+            if len(xors) > 0:
+                ands.append(" ^ ".join(xors))
+            if len(ands) > 0:
+                and_out = " & ".join(ands)
+                or_exps.append(and_fmt % (and_out, bitmask))
+        if len(or_exps) == 0:
+            return "0"
+        return " |\n            ".join(or_exps)
+
+
+    # __get_crc_bwe_expression
+    ###############################################################################
+    def __get_crc_bwe_expression(self):
+        """
+        Return the expression for the bitwise-expression algorithm.
         """
         if self.opt.Algorithm != self.opt.Algo_Bitwise_Expression or \
                 self.opt.Action == self.opt.Action_Generate_H or \
                 self.opt.UndefinedCrcParameters:
             return ""
-        table = self.__get_crc_logic_table()
-        out_bits = []
-        for bit in range(len(table)):
-            t = self.__get_crc_bitwise_expression_term(bit, table[bit])
-            if t != None:
-                out_bits.append("(%s & 0x%02x)" % (t, 1 << bit))
-            print("FIXME bit = %d; %s" %(bit, t))
-        if out_bits == []:
-            return "0"
-        expr = " |\n            ".join(out_bits)
-
-        bwe = BitwiseExpression()
-        expr = bwe.simplify(expr)
-
-        return expr
-
-
-    # __get_crc_bitwise_expression_term
-    ###############################################################################
-    def __get_crc_bitwise_expression_term(self, bit, minterms):
-        """
-        Return a term for the bitwise-expression algorithm
-        """
-        if minterms == None:
-            return None
-        catchall = "".join(['-' for i in range(self.opt.Width)])
-        if catchall in minterms:
-            return "1"
-        res = []
-        fixme_mt = set()
-        for term in minterms:
-            mt = self.__get_crc_bitwise_expression_minterm(bit, term)
-            res.append(mt)
-            fixme_mt.add("".join(['.' for i in range(bit)]) + term + "".join(['.' for i in range(self.opt.Width - bit - 1)]))
-        print("FIXME %s" % minterms)
-        print("FIXME %s" % fixme_mt)
-        if len(res) == 0:
-            return None
-        elif len(res) == 1:
-            return res[0]
-        else:
-            return "(%s)" % " | ".join(res)
-
-
-    # __get_crc_bitwise_expression_minterm
-    ###############################################################################
-    def __get_crc_bitwise_expression_minterm(self, bit, minterm):
-        """
-        Return a minterm for the bitwise-expression algorithm
-        """
-        res = []
-        # Count down from self.opt.TableIdxWidth-1 to 0.
-        # First xor and xnor operations
-        op = " ^ "
-        for bit_pos in range(self.opt.TableIdxWidth - 1, -1, -1):
-            min_op = minterm[self.opt.TableIdxWidth - bit_pos - 1]
-
-            shift_op = ["<<", ">>"][bit_pos > bit]
-            shift_bits = abs(bit_pos - bit)
-            if min_op == "^":
-                res.append("(bits %s %d)" % (shift_op, shift_bits))
-            elif min_op == "~":
-                res.append("(~bits %s %d)" % (shift_op, shift_bits))
-        if len(res) > 1:
-            res = [ "(%s)" % op.join(res) ]
-
-        # Count down from self.opt.TableIdxWidth-1 to 0.
-        # Then the and operator.
-        op = " & "
-        for bit_pos in range(self.opt.TableIdxWidth - 1, -1, -1):
-            min_op = minterm[self.opt.TableIdxWidth - bit_pos - 1]
-
-            shift_op = ["<<", ">>"][bit_pos > bit]
-            shift_bits = abs(bit_pos-bit)
-            if min_op == "0":
-                res.append("(~bits %s %d)" % (shift_op, shift_bits))
-            elif min_op == "1":
-                res.append("(bits %s %d)" % (shift_op, shift_bits))
-        return "(%s)" % op.join(res)
+        minterms = self.__get_crc_bwe_bitmask_minterms()
+        ret = self.__format_bwe_expression(minterms)
+        return ret
