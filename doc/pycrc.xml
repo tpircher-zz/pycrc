@@ -11,9 +11,9 @@
 <!ENTITY bit-by-bit         "bit-by-bit">
 <!ENTITY bbb                "bbb">
 <!ENTITY bit-by-bit-fast    "bit-by-bit-fast">
-<!ENTITY bbbf               "bbbf">
+<!ENTITY bbf                "bbf">
 <!ENTITY table-driven       "table-driven">
-<!ENTITY td                 "td">
+<!ENTITY tbl                "tbl">
 <!ENTITY width          "Width">
 <!ENTITY poly           "Polynomial">
 <!ENTITY reflect_in     "ReflectIn">
@@ -94,7 +94,7 @@
                 </listitem>
                 <listitem>
                     <para>
-                        <replaceable>&bit-by-bit-fast;</replaceable> or <replaceable>&bbbf;</replaceable>: a variation of the basic
+                        <replaceable>&bit-by-bit-fast;</replaceable> or <replaceable>&bbf;</replaceable>: a variation of the basic
                         <replaceable>&bit-by-bit;</replaceable> algorithm, 
                         with the difference that it does not need to augment the data, i.e. it does not add <replaceable>&width;</replaceable> zero 
                         bits at the end of the message.
@@ -103,7 +103,7 @@
                 </listitem>
                 <listitem>
                     <para>
-                        <replaceable>&table-driven;</replaceable> or <replaceable>&td;</replaceable>: the standard table driven algorithm.
+                        <replaceable>&table-driven;</replaceable> or <replaceable>&tbl;</replaceable>: the standard table driven algorithm.
                         This is the fastest variant because it operates on one byte at a time, as opposed to bits, and uses a look-up table of 256 elements, 
                         which might not be feasible for small embedded systems, though. Anyway, the number of elements in the look-up table can be reduced by 
                         means of the <option>--table-idx-width</option> command line switch. By using 4 bits (16 elements in the look-up table) a significant 
@@ -191,8 +191,8 @@
             </term>
             <listitem>
                 <para>choose an algorithm from {<replaceable>bit-by-bit</replaceable>, <replaceable>bbb</replaceable>,
-                <replaceable>bit-by-bit-fast</replaceable>, <replaceable>bbbf</replaceable>,
-                <replaceable>table-driven</replaceable>, <replaceable>td</replaceable>,
+                <replaceable>bit-by-bit-fast</replaceable>, <replaceable>bbf</replaceable>,
+                <replaceable>table-driven</replaceable>, <replaceable>tbl</replaceable>,
                 <replaceable>all</replaceable>}</para>
             </listitem>
         </varlistentry>

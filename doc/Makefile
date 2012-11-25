@@ -1,6 +1,6 @@
 XSLTPROC		= xsltproc
 XSLTPARAM		= --nonet --novalid
-HTML_STYLESHEET	= /usr/share/xml/docbook/stylesheet/nwalsh/xhtml/docbook.xsl
+HTML_STYLESHEET	= /usr/share/xml/docbook/stylesheet/nwalsh/html/docbook.xsl
 MAN_STYLESHEET	= /usr/share/xml/docbook/stylesheet/nwalsh/manpages/docbook.xsl
 
 source      = pycrc.xml
