@@ -141,7 +141,7 @@ following parameters:
                         help="C standard style of the generated code from {C89, ANSI, C99}", metavar="STD")
         parser.add_option("--algorithm",
                         action="store", type="string", dest="algorithm", default="all",
-                        help="choose an algorithm from {bit-by-bit, bbb, bit-by-bit-fast, bbbf, bitwise-expression, be, table-driven, td, all}", metavar="ALGO")
+                        help="choose an algorithm from {bit-by-bit, bbb, bit-by-bit-fast, bbf, bitwise-expression, bwe, table-driven, tbl, all}", metavar="ALGO")
         parser.add_option("--model",
                         action="callback", callback=self.model_cb, type="string", dest="model", default=None,
                         help="choose a parameter set from {%s}" % model_list, metavar="MODEL")
@@ -250,11 +250,11 @@ following parameters:
             alg = options.algorithm.lower()
             if alg in set(["bit-by-bit", "bbb", "all"]):
                 self.Algorithm      |= self.Algo_Bit_by_Bit
-            if alg in set(["bit-by-bit-fast", "bbbf", "all"]):
+            if alg in set(["bit-by-bit-fast", "bbf", "all"]):
                 self.Algorithm      |= self.Algo_Bit_by_Bit_Fast
-            if alg in set(["bitwise-expression", "be", "all"]):
+            if alg in set(["bitwise-expression", "bwe", "all"]):
                 self.Algorithm      |= self.Algo_Bitwise_Expression
-            if alg in set(["table-driven", "td", "all"]):
+            if alg in set(["table-driven", "tbl", "all"]):
                 self.Algorithm      |= self.Algo_Table_Driven
             if self.Algorithm == 0:
                 sys.stderr.write("%s: error: unknown algorithm %s\n" % (sys.argv[0], options.algorithm))
