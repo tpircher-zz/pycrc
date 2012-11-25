@@ -2,11 +2,17 @@
 # Version 0.7.12, 2012-xx-xx
 #
 
+2012-11-25  Thomas Pircher   <tehpeh@gmx.net>
+
+    * crc_opt.py:
+    * doc/pycrc.xml:
+    Renamed abbreviations to bbb, bbf, tbl.
+
 2012-11-18  Thomas Pircher   <tehpeh@gmx.net>
 
     * crc_opt.py:
     It is possible now to abbreviate the algorithms (bbb for bit-by-bit,
-    bbbf for bit-by-bit-fast and td for table-driven).
+    bbf for bit-by-bit-fast and tbl for table-driven).
     Added the list of supported CRC models to the error message when an
     unknown model parameter was supplied.
 
