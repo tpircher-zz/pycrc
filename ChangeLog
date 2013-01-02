@@ -1,6 +1,15 @@
 #
-# Version 0.7.12, 2012-xx-xx
+# Version 0.7.12, 2013-xx-xx
 #
+
+2013-01-01  Thomas Pircher   <tehpeh@gmx.net>
+
+    * all *.py files:
+    Removed the -*- coding: Latin-1 -*- string.
+    Updated the copyright year to 2013.
+
+    * COPYING:
+    Updated the copyright year to 2013.
 
 2012-11-25  Thomas Pircher   <tehpeh@gmx.net>
 
@@ -24,7 +33,7 @@
 
     * README.md:
     Added a note to README.md that version 0.7.10 of pycrc is the last one
-    known to work with Python 2.x.
+    known to work with Python 2.4.
 
     * doc/pycrc.xml:
     Updated a link to the list of CRC models.
@@ -174,6 +183,8 @@
     * crc_symtable.py:
     C/C++ code can now be generated for the table-driven algorithm with widths
     that are not byte-ligned or less than 8.
+    This feature was heavily inspired by a similar feature in Danjel McGougan's
+    Universal Crc (http://mcgougan.se/universal_crc/).
 
     W A R N I N G: introduced new variable crc_shift, member of the crc_cfg_t
                    structure, that must be initialised manually when the width
