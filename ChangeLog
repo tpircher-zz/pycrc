@@ -2,6 +2,14 @@
 # Version 0.7.12, 2013-xx-xx
 #
 
+2013-01-02  Thomas Pircher   <tehpeh@gmx.net>
+
+    * doc/pycrc.xml:
+    Completely revisited and reworked the documentation.
+
+    * crc_opt.py:
+    Updated the command line help screen with more useful command descriptions.
+
 2013-01-01  Thomas Pircher   <tehpeh@gmx.net>
 
     * all *.py files:

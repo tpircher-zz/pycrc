@@ -99,20 +99,20 @@ class Options(object):
         Parses and validates the options given as arguments
         """
         usage = """\
-%prog [OPTIONS]
+python %prog [OPTIONS]
 
-To generate the checksum of a string or hexadecimal data:
-    %prog [model] --check-string "123456789"
-    %prog [model] --check-hexstring "313233343536373839"
+To calculate the checksum of a string or hexadecimal data:
+    python %prog [model] --check-string "123456789"
+    python %prog [model] --check-hexstring "313233343536373839"
 
-To generate the checksum of a file:
-    %prog [model] --check-file filename
+To calculate the checksum of a file:
+    python %prog [model] --check-file filename
 
-To generate the c-source and write it to filename:
-    %prog [model] --generate c -o filename
+To generate the C source code and write it to filename:
+    python %prog [model] --generate c -o filename
 
-The model can be defined by the --model switch or by specifying each of the
-following parameters:
+The model can be defined either with the --model switch or by specifying each
+of the following parameters:
     --width --poly --reflect-in --xor-in --reflect-out --xor-out"""
 
         models = CrcModels()
@@ -120,22 +120,22 @@ following parameters:
         parser = OptionParser(option_class=MyOption, usage=usage, version=self.VersionStr)
         parser.add_option("-v", "--verbose",
                         action="store_true", dest="verbose", default=False,
-                        help="print information about the model")
+                        help="be more verbose; print the value of the parameters and the chosen model to stdout")
         parser.add_option("--check-string",
                         action="store", type="string", dest="check_string",
-                        help="calculate the checksum of the given string (default: '123456789')", metavar="STRING")
+                        help="calculate the checksum of a string (default: '123456789')", metavar="STRING")
         parser.add_option("--check-hexstring",
                         action="store", type="string", dest="check_hexstring",
-                        help="calculate the checksum of the given hexadecimal number string", metavar="STRING")
+                        help="calculate the checksum of a hexadecimal number string", metavar="STRING")
         parser.add_option("--check-file",
                         action="store", type="string", dest="check_file",
-                        help="calculate the checksum of the given file", metavar="FILE")
+                        help="calculate the checksum of a file", metavar="FILE")
         parser.add_option("--generate",
                         action="store", type="string", dest="generate", default=None,
-                        help="choose which type of code to generate from {c, h, c-main, table}", metavar="CODE")
+                        help="generate C source code; choose the type from {h, c, c-main, table}", metavar="CODE")
         parser.add_option("--std",
                         action="store", type="string", dest="c_std", default="C99",
-                        help="C standard style of the generated code from {C89, ANSI, C99}", metavar="STD")
+                        help="choose the C dialect of the generated code from {C89, ANSI, C99}", metavar="STD")
         parser.add_option("--algorithm",
                         action="store", type="string", dest="algorithm", default="all",
                         help="choose an algorithm from {bit-by-bit, bbb, bit-by-bit-fast, bbf, table-driven, tbl, all}", metavar="ALGO")
@@ -147,31 +147,31 @@ following parameters:
                         help="use NUM bits in the polynomial", metavar="NUM")
         parser.add_option("--poly",
                         action="store", type="hex", dest="poly",
-                        help="use HEX as Polynom", metavar="HEX")
+                        help="use HEX as polynomial", metavar="HEX")
         parser.add_option("--reflect-in",
                         action="store", type="bool", dest="reflect_in",
-                        help="reflect input bytes", metavar="BOOL")
+                        help="reflect the octets in the input message", metavar="BOOL")
         parser.add_option("--xor-in",
                         action="store", type="hex", dest="xor_in",
                         help="use HEX as initial value", metavar="HEX")
         parser.add_option("--reflect-out",
                         action="store", type="bool", dest="reflect_out",
-                        help="reflect output bytes", metavar="BOOL")
+                        help="reflect the resulting checksum before applying the --xor-out value", metavar="BOOL")
         parser.add_option("--xor-out",
                         action="store", type="hex", dest="xor_out",
-                        help="xor the final crc value with HEX", metavar="HEX")
+                        help="xor the final CRC value with HEX", metavar="HEX")
         parser.add_option("--table-idx-width",
                         action="store", type="int", dest="table_idx_width",
-                        help="use NUM bits to index the crc table; NUM must be one of the values {1, 2, 4, 8}", metavar="NUM")
+                        help="use NUM bits to index the CRC table; NUM must be one of the values {1, 2, 4, 8}", metavar="NUM")
         parser.add_option("--symbol-prefix",
                         action="store", type="string", dest="symbol_prefix",
-                        help="when generating source code, use STRING as prefix to the generated symbols", metavar="STRING")
+                        help="when generating source code, use STRING as prefix to the exported C symbols", metavar="STRING")
         parser.add_option("--crc-type",
                         action="store", type="string", dest="crc_type",
                         help="when generating source code, use STRING as crc_t type", metavar="STRING")
         parser.add_option("--include-file",
                         action="store", type="string", dest="include_file",
-                        help="when generating source code, use FILE as additional include file", metavar="FILE")
+                        help="when generating source code, include also FILE as header file", metavar="FILE")
         parser.add_option("-o", "--output",
                         action="store", type="string", dest="output_file",
                         help="write the generated code to file instead to stdout", metavar="FILE")
