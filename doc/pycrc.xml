@@ -311,7 +311,8 @@
                 <option>--include-file=</option><replaceable>FILE</replaceable>
             </term>
             <listitem>
-                <para>when generating source code, include also <replaceable>FILE</replaceable> as header file.</para>
+                <para>when generating source code, include also <replaceable>FILE</replaceable> as header file.
+                    This option can be specified multiple times.</para>
             </listitem>
         </varlistentry>
         <varlistentry>

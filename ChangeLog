@@ -4,6 +4,12 @@
 
 2013-01-02  Thomas Pircher   <tehpeh@gmx.net>
 
+    * crc_opt.py:
+    * doc/pycrc.xml:
+    Now it is possible to specify the --include option multiple times.
+
+2013-01-02  Thomas Pircher   <tehpeh@gmx.net>
+
     * doc/pycrc.xml:
     Completely revisited and reworked the documentation.
 

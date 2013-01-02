@@ -84,7 +84,7 @@ class Options(object):
         self.Algorithm      = self.Algo_None
         self.SymbolPrefix   = "crc_"
         self.CrcType        = None
-        self.IncludeFile    = None
+        self.IncludeFiles   = []
         self.OutputFile     = None
         self.Action         = self.Action_Check_String
         self.CheckFile      = None
@@ -170,8 +170,8 @@ of the following parameters:
                         action="store", type="string", dest="crc_type",
                         help="when generating source code, use STRING as crc_t type", metavar="STRING")
         parser.add_option("--include-file",
-                        action="store", type="string", dest="include_file",
-                        help="when generating source code, include also FILE as header file", metavar="FILE")
+                        action="append", type="string", dest="include_files",
+                        help="when generating source code, include also FILE as header file; can be specified multiple times", metavar="FILE")
         parser.add_option("-o", "--output",
                         action="store", type="string", dest="output_file",
                         help="write the generated code to file instead to stdout", metavar="FILE")
@@ -266,8 +266,8 @@ of the following parameters:
                 sys.exit(1)
         if options.symbol_prefix != None:
             self.SymbolPrefix = options.symbol_prefix
-        if options.include_file != None:
-            self.IncludeFile = options.include_file
+        if options.include_files != None:
+            self.IncludeFiles = options.include_files
         if options.crc_type != None:
             self.CrcType = options.crc_type
         if options.output_file != None:
