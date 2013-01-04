@@ -2,6 +2,25 @@
 # Version 0.7.12, 2013-xx-xx
 #
 
+2013-01-04  Thomas Pircher   <tehpeh@gmx.net>
+
+    * pycrc.py:
+    * crc_parser.py:
+    * crc_lexer.py:
+    * crc_symtable.py:
+    * crc_opt.py:
+    * crc_models.py:
+    * qm.py:
+    * doc/pycrc.xml:
+    * test/test.py:
+    * test/performance.sh:
+    Merged (private) bitwise-expression branch to main.
+    This adds the highly experimental bitwise-expression (bwe) code generator
+    target, which might one day be almost as fast as the table-driven code but
+    much smaller.
+    At the moment the generated code is bigger and slower than any other
+    algorithm, so use at your own risk.
+
 2013-01-02  Thomas Pircher   <tehpeh@gmx.net>
 
     * crc_opt.py:

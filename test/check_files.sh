@@ -72,7 +72,7 @@ populate() {
 do_check() {
     tar xzf "$tarfile" -C "`dirname $outdir_new`"
     populate "$outdir_new"
-    diff -r -I'Generated on' "$outdir_old" "$outdir_new"
+    diff -r -I'Generated on' -I'by pycrc v' "$outdir_old" "$outdir_new"
 }
 
 
