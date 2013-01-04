@@ -1,8 +1,6 @@
-# -*- coding: Latin-1 -*-
-
 #  pycrc -- parameterisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2012  Thomas Pircher  <tehpeh@gmx.net>
+#  Copyright (c) 2006-2013  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to
@@ -131,7 +129,7 @@ class SymbolTable:
         self.table["c_false"] = "$if ($c_std == C89) {:0:} $else {:false:}"
 
         self.table["underlying_crc_t"] = self.__get_underlying_crc_t()
-        self.table["include_file"] = self.__get_include_file()
+        self.table["include_files"] = self.__get_include_files()
 
         self.table["crc_prefix"] = self.opt.SymbolPrefix
         self.table["crc_t"] = self.opt.SymbolPrefix + "t"
@@ -272,8 +270,8 @@ $source_header
 #ifndef $header_protection
 #define $header_protection
 
-$if ($include_file != Undefined) {:
-#include $include_file
+$if ($include_files != Undefined) {:
+$include_files
 :}
 #include <stdlib.h>
 $if ($c_std != C89) {:
@@ -554,8 +552,8 @@ $crc_t $crc_finalize_function($crc_t crc)\
         elif id == "c_template":
             return  """\
 $source_header
-$if ($include_file != Undefined) {:
-#include $include_file
+$if ($include_files != Undefined) {:
+$include_files
 :}
 #include "$header_filename"     /* include the header file generated with pycrc */
 #include <stdlib.h>
@@ -966,8 +964,8 @@ $if ($crc_reflect_in == Undefined and $crc_reflect_out == Undefined) {:
 
         elif id == "main_template":
             return  """\
-$if ($include_file != Undefined) {:
-#include $include_file
+$if ($include_files != Undefined) {:
+$include_files
 :}
 #include <stdio.h>
 #include <getopt.h>
@@ -1334,17 +1332,21 @@ $if ($crc_xor_out == Undefined) {:
         return "unsigned long"
 
 
-    # function __get_include_file
+    # function __get_include_files
     ###############################################################################
-    def __get_include_file(self):
+    def __get_include_files(self):
         """
-        Return an additional include instruction, if specified.
+        Return an additional include instructions, if specified.
         """
-        if self.opt.IncludeFile == None:
+        if self.opt.IncludeFiles == None or len(self.opt.IncludeFiles) == 0:
             return None
-        if self.opt.IncludeFile[0] == '"' or self.opt.IncludeFile[0] == '<':
-            return self.opt.IncludeFile
-        return '"%s"' % self.opt.IncludeFile
+        ret = []
+        for include_file in self.opt.IncludeFiles:
+            if include_file[0] == '"' or include_file[0] == '<':
+                ret.append('#include %s' % include_file)
+            else:
+                ret.append('#include "%s"' % include_file)
+        return '\n'.join(ret)
 
 
     # function __get_init_value
