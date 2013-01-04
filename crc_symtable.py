@@ -43,6 +43,23 @@ import time
 import os
 
 
+# Class SymbolLookupError
+###############################################################################
+class SymbolLookupError(Exception):
+    """The exception class for the sumbol table.
+    """
+
+    # Class constructor
+    ###############################################################################
+    def __init__(self, reason):
+        self.reason = reason
+
+    # function __str__
+    ###############################################################################
+    def __str__(self):
+        return self.reason
+
+
 # Class SymbolTable
 ###############################################################################
 class SymbolTable:
@@ -141,7 +158,7 @@ class SymbolTable:
             if key != None:
                 self.table[id] = key
                 return key
-        raise LookupError
+        raise SymbolLookupError
 
 
     # function __getTerminal

@@ -43,7 +43,7 @@ It supports the following CRC algorithms:
 from __future__ import print_function
 from crc_opt import Options
 from crc_algorithms import Crc
-from crc_parser import MacroParser
+from crc_parser import MacroParser, ParseError
 import binascii
 import sys
 

@@ -29,7 +29,7 @@ use as follows:
 
     import sys
     from crc_opt import Options
-    from crc_parser import MacroParser
+    from crc_parser import MacroParser, ParseError
 
     opt = Options()
     opt.parse(sys.argv[1:])
@@ -38,7 +38,7 @@ use as follows:
         print(mp.out_str)
 """
 
-from crc_symtable import SymbolTable
+from crc_symtable import SymbolTable, SymbolLookupError
 from crc_lexer import Lexer
 import re
 import sys
@@ -174,7 +174,7 @@ class MacroParser(object):
         """
         try:
             sym_value = self.sym.getTerminal(self.lex.text)
-        except LookupError:
+        except SymbolLookupError:
             raise ParseError("%s: error: unknown terminal '%s'" % (sys.argv[0], self.lex.text))
         self.lex.advance()
         if do_print:
@@ -374,7 +374,7 @@ class MacroParser(object):
         if tok == self.lex.tok_identifier:
             try:
                 ret = self.sym.getTerminal(self.lex.text)
-            except LookupError:
+            except SymbolLookupError:
                 raise ParseError("%s: error: unknown terminal '%s'" % (sys.argv[0], self.lex.text))
             if ret == None:
                 ret = "Undefined"
