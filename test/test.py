@@ -87,7 +87,7 @@ class Options(object):
                 self.Algorithm = copy(self.AllAlgorithms)
             else:
                 sys.stderr.write("unknown algorithm: %s\n" % alg)
-                sys.exit(main())
+                sys.exit(1)
 
 
 # Class CrcTests
