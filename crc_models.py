@@ -64,7 +64,6 @@ class CrcModels(object):
         'xor_in':        0x1f,
         'reflect_out':   True,
         'xor_out':       0x1f,
-        'direct':        True,
         'check':         0x19,
     })
     models.append({
@@ -75,7 +74,6 @@ class CrcModels(object):
         'xor_in':        0x0,
         'reflect_out':   False,
         'xor_out':       0x0,
-        'direct':        True,
         'check':         0xf4,
     })
     models.append({
@@ -86,7 +84,6 @@ class CrcModels(object):
         'xor_in':        0x0,
         'reflect_out':   True,
         'xor_out':       0x0,
-        'direct':        True,
         'check':         0xa1,
     })
     models.append({
@@ -97,7 +94,6 @@ class CrcModels(object):
         'xor_in':        0x0,
         'reflect_out':   True,
         'xor_out':       0x0,
-        'direct':        True,
         'check':         0xdaf,
     })
     models.append({
@@ -108,7 +104,6 @@ class CrcModels(object):
         'xor_in':        0x0,
         'reflect_out':   False,
         'xor_out':       0x0,
-        'direct':        True,
         'check':         0x59e,
     })
     models.append({
@@ -119,7 +114,6 @@ class CrcModels(object):
         'xor_in':        0x0,
         'reflect_out':   True,
         'xor_out':       0x0,
-        'direct':        True,
         'check':         0xbb3d,
     })
     models.append({
@@ -130,7 +124,6 @@ class CrcModels(object):
         'xor_in':        0xffff,
         'reflect_out':   True,
         'xor_out':       0xffff,
-        'direct':        True,
         'check':         0xb4c8,
     })
     models.append({
@@ -141,7 +134,6 @@ class CrcModels(object):
         'xor_in':        0xffff,
         'reflect_out':   True,
         'xor_out':       0x0,
-        'direct':        True,
         'check':         0x4b37,
     })
     models.append({
@@ -152,7 +144,6 @@ class CrcModels(object):
         'xor_in':        0xffff,
         'reflect_out':   False,
         'xor_out':       0xffff,
-        'direct':        True,
         'check':         0xd64e,
     })
     models.append({
@@ -163,7 +154,6 @@ class CrcModels(object):
         'xor_in':        0xffff,
         'reflect_out':   False,
         'xor_out':       0x0,
-        'direct':        True,
         'check':         0x29b1,
     })
     models.append({
@@ -174,7 +164,6 @@ class CrcModels(object):
         'xor_in':        0x0,
         'reflect_out':   False,
         'xor_out':       0x0001,
-        'direct':        True,
         'check':         0x007e,
     })
     models.append({
@@ -185,7 +174,6 @@ class CrcModels(object):
         'xor_in':        0x0,
         'reflect_out':   True,
         'xor_out':       0x0,
-        'direct':        True,
         'check':         0x2189,
     })
     models.append({
@@ -196,7 +184,6 @@ class CrcModels(object):
         'xor_in':        0xffff,
         'reflect_out':   True,
         'xor_out':       0xffff,
-        'direct':        True,
         'check':         0x906e,
     })
     models.append({
@@ -207,7 +194,6 @@ class CrcModels(object):
         'xor_in':        0x0,
         'reflect_out':   False,
         'xor_out':       0x0,
-        'direct':        True,
         'check':         0x31c3,
     })
     models.append({
@@ -218,7 +204,6 @@ class CrcModels(object):
         'xor_in':        0x0,
         'reflect_out':   False,
         'xor_out':       0x0,
-        'direct':        True,
         'check':         0x31c3,
     })
     models.append({
@@ -229,7 +214,6 @@ class CrcModels(object):
         'xor_in':        0xb704ce,
         'reflect_out':   False,
         'xor_out':       0x0,
-        'direct':        True,
         'check':         0x21cf02,
     })
     models.append({
@@ -240,7 +224,6 @@ class CrcModels(object):
         'xor_in':        0xffffffff,
         'reflect_out':   True,
         'xor_out':       0xffffffff,
-        'direct':        True,
         'check':         0xcbf43926,
     })
     models.append({
@@ -251,7 +234,6 @@ class CrcModels(object):
         'xor_in':        0xffffffff,
         'reflect_out':   True,
         'xor_out':       0xffffffff,
-        'direct':        True,
         'check':         0xe3069283,
     })
     models.append({
@@ -262,7 +244,6 @@ class CrcModels(object):
         'xor_in':        0xffffffff,
         'reflect_out':   False,
         'xor_out':       0x0,
-        'direct':        False,
         'check':         0x0376e6e7,
     })
     models.append({
@@ -273,7 +254,6 @@ class CrcModels(object):
         'xor_in':        0xffffffff,
         'reflect_out':   False,
         'xor_out':       0xffffffff,
-        'direct':        True,
         'check':         0xfc891918,
     })
     models.append({
@@ -284,7 +264,6 @@ class CrcModels(object):
         'xor_in':        0x0,
         'reflect_out':   False,
         'xor_out':       0xffffffff,
-        'direct':        True,
         'check':         0x765e7680,
     })
     models.append({
@@ -295,7 +274,6 @@ class CrcModels(object):
         'xor_in':        0xffffffff,
         'reflect_out':   True,
         'xor_out':       0x0,
-        'direct':        True,
         'check':         0x340bc6d9,
     })
     models.append({
@@ -306,7 +284,6 @@ class CrcModels(object):
         'xor_in':        0x0,
         'reflect_out':   False,
         'xor_out':       0x0,
-        'direct':        True,
         'check':         0xbd0be338,
     })
     models.append({
@@ -317,7 +294,6 @@ class CrcModels(object):
         'xor_in':        0x0,
         'reflect_out':   True,
         'xor_out':       0x0,
-        'direct':        True,
         'check':         0x46a5a9388a5beffe,
     })
     models.append({
@@ -328,7 +304,6 @@ class CrcModels(object):
         'xor_in':        0xffffffffffffffff,
         'reflect_out':   True,
         'xor_out':       0x0,
-        'direct':        True,
         'check':         0xcaa717168609f281,
     })
     models.append({
@@ -339,7 +314,6 @@ class CrcModels(object):
         'xor_in':        0xffffffffffffffff,
         'reflect_out':   True,
         'xor_out':       0xffffffffffffffff,
-        'direct':        True,
         'check':         0x995dc9bbdf1939fa,
     })
 
