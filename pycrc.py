@@ -125,11 +125,15 @@ def check_hexstring(opt):
         sys.exit(1)
     if len(opt.CheckString) % 2 != 0:
         opt.CheckString = "0" + opt.CheckString
+    if sys.version_info >= (3,0):
+        opt.CheckString = bytes(opt.CheckString, 'UTF-8')
     try:
         check_str = binascii.unhexlify(opt.CheckString)
     except TypeError:
         sys.stderr.write("%s: error: invalid hex string %s\n" % (sys.argv[0], opt.CheckString))
         sys.exit(1)
+    if sys.version_info >= (3,0):
+        check_str = str(check_str, 'ASCII')
 
     opt.CheckString = check_str
     return check_string(opt)

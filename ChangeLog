@@ -1,4 +1,13 @@
-2013-01-12  Thomas Pircher   <tehpeh@gmx.net>
+2013-02-19  Thomas Pircher   <tehpeh@gmx.net>
+
+    * pycrc.py:
+    Fixed a bug in the handling of hexstrings in Python3.
+    Thanks to Matthias Kuehlewein.
+
+    * test/test.py:
+    Added --check-hexstring to the tests.
+
+2013-02-19  Thomas Pircher   <tehpeh@gmx.net>
 
     * doc/pycrc.xml:
     Minor formatting change in the manpage.

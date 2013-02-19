@@ -359,6 +359,10 @@ class CrcTests(object):
             if not self.__check_command(cmd_str, expected_crc):
                 return False
 
+            cmd_str = self.pycrc_bin + " %s --check-hexstring %s" % (ext_args, "".join(["%02x" % ord(c) for c in check_str]))
+            if not self.__check_command(cmd_str, expected_crc):
+                return False
+
             cmd_str = self.pycrc_bin + " --model %s --check-file %s" % (m["name"], self.check_file)
             if not self.__check_command(cmd_str, expected_crc):
                 return False
