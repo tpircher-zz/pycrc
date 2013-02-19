@@ -1,3 +1,26 @@
+2013-01-12  Thomas Pircher   <tehpeh@gmx.net>
+
+    * doc/pycrc.xml:
+    Minor formatting change in the manpage.
+
+    * qm.py:
+    Better python3 compatibility.
+
+    * test/check_files.sh:
+    Added the files generated with the bwe algorithm to check_files.sh.
+
+2013-01-12  Thomas Pircher   <tehpeh@gmx.net>
+
+    * crc_models.py:
+    Remove obsolete and unused 'direct' parameter.
+    Merge pull request #2 from smurfix/master.
+    Thanks to Matthias Urlichs.
+
+    * test/test.py:
+    Don't recurse into main() when an unknown algorithm is selected.
+    Merge pull request #2 from smurfix/master.
+    Thanks to Matthias Urlichs.
+
 #
 # Version 0.8, 2013-01-04
 #

@@ -2,10 +2,10 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
                     "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
 <!ENTITY project_name       "pycrc">
-<!ENTITY project_version    "0.7.12">
+<!ENTITY project_version    "0.8">
 <!ENTITY project_homepage   "http://www.tty1.net/pycrc/">
 <!ENTITY project_models     "http://www.tty1.net/pycrc/crc-models_en.html">
-<!ENTITY date               "2013-01-02">
+<!ENTITY date               "2013-01-04">
 <!ENTITY author_firstname   "Thomas">
 <!ENTITY author_surname     "Pircher">
 <!ENTITY author_email       "tehpeh@gmx.net">
@@ -96,20 +96,19 @@
                         This algorithm still iterates over every bit of the message, but does not augment
                         it (does not add <replaceable>&width;</replaceable> zero bits at the end).
                         It gives the same result as the <replaceable>&bit-by-bit;</replaceable> method by
-                        carefully choosing the <replaceable>&xor_in;</replaceable> value of the algorithm.
+                        carefully choosing the initial value of the algorithm.
                         This method might be a good choice for embedded platforms, where code space is more
                         important than execution speed.
                     </para>
                 </listitem>
                 <listitem>
-                    <para>
-                        <replaceable>&bitwise-expression;</replaceable> or <replaceable>&bwe;</replaceable>:
-                        calculates the CRC byte-wise using bitwise expressions (such as binary and, not, xor,
+                    <para><replaceable>&bitwise-expression;</replaceable> or <replaceable>&bwe;</replaceable>:
+                        calculates the CRC byte-wise using bit-wise expressions (such as binary and, not, xor,
                         bit-shifts etc).
                         This algorithm uses the same approach as the <replaceable>&table-driven;</replaceable>
-                        variant, but uses a logical operations instead of a lookup-table. It is slightly
+                        variant, but uses a logical operations instead of a look-up table. It is slightly
                         slower than the <replaceable>&table-driven;</replaceable> algorithm, but without the
-                        overhead of a lookup-table.
+                        overhead of a look-up table.
                     </para>
                     <para>
                         This is an experimental feature and will in most cases result in a slower and bigger

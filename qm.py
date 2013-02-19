@@ -352,7 +352,7 @@ class QuineMcCluskey:
                                     terms.add(t12)
 
             # Add the unused terms to the list of marked terms
-            for group in groups.values():
+            for g in list(groups.values()):
                 marked |= group - used
 
             if len(used) == 0:
@@ -360,7 +360,7 @@ class QuineMcCluskey:
 
         # Prepare the list of prime implicants
         pi = marked
-        for g in groups.values():
+        for g in list(groups.values()):
             pi |= g
         return pi
 
@@ -400,7 +400,7 @@ class QuineMcCluskey:
             if n not in groups:
                 groups[n] = set()
             groups[n].add(t)
-        for t in sorted(groups.keys(), reverse=True):
+        for t in sorted(list(groups.keys()), reverse=True):
             for g in groups[t]:
                 if not perms[g] <= ei_range:
                     ei.add(g)
