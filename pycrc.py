@@ -84,6 +84,7 @@ def check_string(opt):
         reflect_in = opt.ReflectIn, xor_in = opt.XorIn,
         reflect_out = opt.ReflectOut, xor_out = opt.XorOut,
         table_idx_width = opt.TableIdxWidth)
+
     crc = None
     if opt.Algorithm & opt.Algo_Bit_by_Bit:
         bbb_crc = alg.bit_by_bit(opt.CheckString)
@@ -96,7 +97,8 @@ def check_string(opt):
             error = True
         crc = bbf_crc
     if opt.Algorithm & opt.Algo_Table_Driven:
-        opt.TableIdxWidth = 8            # no point making the python implementation slower by using less than 8 bits as index.
+        # no point making the python implementation slower by using less than 8 bits as index.
+        opt.TableIdxWidth = 8
         tbl_crc = alg.table_driven(opt.CheckString)
         if crc != None and tbl_crc != crc:
             error = True
@@ -132,8 +134,6 @@ def check_hexstring(opt):
     except TypeError:
         sys.stderr.write("%s: error: invalid hex string %s\n" % (sys.argv[0], opt.CheckString))
         sys.exit(1)
-    if sys.version_info >= (3,0):
-        check_str = str(check_str, 'ASCII')
 
     opt.CheckString = check_str
     return check_string(opt)

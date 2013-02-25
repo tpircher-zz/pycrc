@@ -1,3 +1,9 @@
+2013-02-25  Thomas Pircher   <tehpeh@gmx.net>
+
+    * pycrc.py:
+    * crc_algorithms.py:
+    The input to the CRC routines can now be bytes or strings.
+
 2013-02-19  Thomas Pircher   <tehpeh@gmx.net>
 
     * pycrc.py:

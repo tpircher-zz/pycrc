@@ -121,15 +121,18 @@ class Crc(object):
 
     # function bit_by_bit
     ###############################################################################
-    def bit_by_bit(self, in_str):
+    def bit_by_bit(self, in_data):
         """
         Classic simple and slow CRC implementation.  This function iterates bit
         by bit over the augmented input message and returns the calculated CRC
         value at the end.
         """
+        # If the input data is a string, convert to bytes.
+        if isinstance(in_data, str):
+            in_data = [ord(c) for c in in_data]
+
         register = self.NonDirectInit
-        for c in in_str:
-            octet = ord(c)
+        for octet in in_data:
             if self.ReflectIn:
                 octet = self.reflect(octet, 8)
             for i in range(8):
@@ -151,15 +154,18 @@ class Crc(object):
 
     # function bit_by_bit_fast
     ###############################################################################
-    def bit_by_bit_fast(self, in_str):
+    def bit_by_bit_fast(self, in_data):
         """
         This is a slightly modified version of the bit-by-bit algorithm: it
         does not need to loop over the augmented bits, i.e. the Width 0-bits
         wich are appended to the input message in the bit-by-bit algorithm.
         """
+        # If the input data is a string, convert to bytes.
+        if isinstance(in_data, str):
+            in_data = [ord(c) for c in in_data]
+
         register = self.DirectInit
-        for c in in_str:
-            octet = ord(c)
+        for octet in in_data:
             if self.ReflectIn:
                 octet = self.reflect(octet, 8)
             for i in range(8):
@@ -204,22 +210,26 @@ class Crc(object):
 
     # function table_driven
     ###############################################################################
-    def table_driven(self, in_str):
+    def table_driven(self, in_data):
         """
         The Standard table_driven CRC algorithm.
         """
+        # If the input data is a string, convert to bytes.
+        if isinstance(in_data, str):
+            in_data = [ord(c) for c in in_data]
+
         tbl = self.gen_table()
 
         register = self.DirectInit << self.CrcShift
         if not self.ReflectIn:
-            for c in in_str:
-                tblidx = ((register >> (self.Width - self.TableIdxWidth + self.CrcShift)) ^ ord(c)) & 0xff
+            for octet in in_data:
+                tblidx = ((register >> (self.Width - self.TableIdxWidth + self.CrcShift)) ^ octet) & 0xff
                 register = ((register << (self.TableIdxWidth - self.CrcShift)) ^ tbl[tblidx]) & (self.Mask << self.CrcShift)
             register = register >> self.CrcShift
         else:
             register = self.reflect(register, self.Width + self.CrcShift) << self.CrcShift
-            for c in in_str:
-                tblidx = ((register >> self.CrcShift) ^ ord(c)) & 0xff
+            for octet in in_data:
+                tblidx = ((register >> self.CrcShift) ^ octet) & 0xff
                 register = ((register >> self.TableIdxWidth) ^ tbl[tblidx]) & (self.Mask << self.CrcShift)
             register = self.reflect(register, self.Width + self.CrcShift) & self.Mask
 
