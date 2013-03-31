@@ -262,8 +262,7 @@ $crc_reflect_function($if ($crc_do_shift == True) {:(crc >> $cfg_shift):} $else 
 $crc_reflect_function(crc, $crc_width) ^ $crc_xor_out\
 :} $else {:
 crc ^ $crc_xor_out\
-:}\
-"""
+:}"""
         elif id == "h_template":
             return  """\
 $source_header
@@ -433,8 +432,9 @@ $crc_finalize_function_def;
 $crc_t $crc_reflect_function($crc_t data, size_t data_len)\
 """
 
-        elif id == "crc_reflect_function_body":
+        elif id == "crc_reflect_function_gen":
             return  """\
+$if ($use_reflect_func == True) {:
 $if ($crc_reflect_in == Undefined or $crc_reflect_in == True or $crc_reflect_out == Undefined or $crc_reflect_out == True) {:
 $crc_reflect_doc
 $crc_reflect_function_def$nop
@@ -449,8 +449,270 @@ $crc_reflect_function_def$nop
     }
     return ret;
 }
-:}\
+
+
+:}
+:}"""
+
+        elif id == "crc_init_function_gen":
+            return  """\
+$if ($constant_crc_init == False) {:
+$crc_init_doc
+$crc_init_function_def$nop
+{
+$if ($crc_algorithm == "bit-by-bit") {:
+    unsigned int i;
+    $c_bool bit;
+    $crc_t crc = $cfg_xor_in;
+    for (i = 0; i < $cfg_width; i++) {
+        bit = crc & 0x01;
+        if (bit) {
+            crc = ((crc ^ $cfg_poly) >> 1) | $cfg_msb_mask;
+        } else {
+            crc >>= 1;
+        }
+    }
+    return crc & $cfg_mask;
+:} $elif ($crc_algorithm == "bit-by-bit-fast") {:
+    return $cfg_xor_in & $cfg_mask;
+:} $elif ($crc_algorithm == "bitwise-expression" or $crc_algorithm == "table-driven") {:
+$if ($crc_reflect_in == Undefined) {:
+    if ($cfg_reflect_in) {
+        return $crc_reflect_function($cfg_xor_in & $cfg_mask, $cfg_width)$if ($crc_do_shift == True) {: << $cfg_shift:};
+    } else {
+        return $cfg_xor_in & $cfg_mask$if ($crc_do_shift == True) {: << $cfg_shift:};
+    }
+:} $elif ($crc_reflect_in == True) {:
+    return $crc_reflect_function($cfg_xor_in & $cfg_mask, $cfg_width)$if ($crc_do_shift == True) {: << $cfg_shift:};
+:} $else {:
+    return $cfg_xor_in & $cfg_mask$if ($crc_do_shift == True) {: << $cfg_shift:};
+:}
+:}
+}
+
+
+:}"""
+
+        elif id == "crc_update_function_gen":
+            return  """\
+$crc_bitwise_expression_function_gen
+$crc_table_driven_func_gen
+$crc_update_doc
+$crc_update_function_def$nop
+{
+$if ($crc_algorithm == "bit-by-bit") {:
+    unsigned int i;
+    $c_bool bit;
+    unsigned char c;
+
+    while (data_len--) {
+$if ($crc_reflect_in == Undefined) {:
+        if ($cfg_reflect_in) {
+            c = $crc_reflect_function(*data++, 8);
+        } else {
+            c = *data++;
+        }
+:} $elif ($crc_reflect_in == True) {:
+        c = $crc_reflect_function(*data++, 8);
+:} $else {:
+        c = *data++;
+:}
+        for (i = 0; i < 8; i++) {
+            bit = $if ($c_std == C89) {:!!(crc & $cfg_msb_mask):} $else {:crc & $cfg_msb_mask:};
+            crc = (crc << 1) | ((c >> (7 - i)) & 0x01);
+            if (bit) {
+                crc ^= $cfg_poly;
+            }
+        }
+        crc &= $cfg_mask;
+    }
+    return crc & $cfg_mask;
+:} $elif ($crc_algorithm == "bit-by-bit-fast") {:
+    unsigned int i;
+    $c_bool bit;
+    unsigned char c;
+
+    while (data_len--) {
+$if ($crc_reflect_in == Undefined) {:
+        if ($cfg_reflect_in) {
+            c = $crc_reflect_function(*data++, 8);
+        } else {
+            c = *data++;
+        }
+:} $else {:
+        c = *data++;
+:}
+$if ($crc_reflect_in == True) {:
+        for (i = 0x01; i & 0xff; i <<= 1){::}
+:} $else {:
+        for (i = 0x80; i > 0; i >>= 1){::}
+:} {
+            bit = $if ($c_std == C89) {:!!(crc & $cfg_msb_mask):} $else {:crc & $cfg_msb_mask:};
+            if (c & i) {
+                bit = !bit;
+            }
+            crc <<= 1;
+            if (bit) {
+                crc ^= $cfg_poly;
+            }
+        }
+        crc &= $cfg_mask;
+    }
+    return crc & $cfg_mask;
+:} $elif ($crc_algorithm == "bitwise-expression" or $crc_algorithm == "table-driven") {:
+    unsigned int tbl_idx;
+
+$if ($crc_reflect_in == Undefined) {:
+    if (cfg->reflect_in) {
+        while (data_len--) {
+$crc_table_core_algorithm_ri
+            data++;
+        }
+    } else {
+        while (data_len--) {
+$crc_table_core_algorithm_ni
+            data++;
+        }
+    }
+:} $else {:
+    while (data_len--) {
+$if ($crc_reflect_in == True) {:
+$crc_table_core_algorithm_ri
+:} $elif ($crc_reflect_in == False) {:
+$crc_table_core_algorithm_ni
+:}
+        data++;
+    }
+:}
+    return crc & $cfg_mask_shifted;
+:}
+}
+
 """
+
+        elif id == "crc_finalize_function_gen":
+            return  """\
+$if ($inline_crc_finalize != True) {:
+$crc_finalize_doc
+$crc_finalize_function_def$nop
+{
+$if ($crc_algorithm == "bit-by-bit") {:
+    unsigned int i;
+    $c_bool bit;
+
+    for (i = 0; i < $cfg_width; i++) {
+        bit = $if ($c_std == C89) {:!!(crc & $cfg_msb_mask):} $else {:crc & $cfg_msb_mask:};
+        crc = (crc << 1) | 0x00;
+        if (bit) {
+            crc ^= $cfg_poly;
+        }
+    }
+$if ($crc_reflect_out == Undefined) {:
+    if ($cfg_reflect_out) {
+        crc = $crc_reflect_function(crc, $cfg_width);
+    }
+:} $elif ($crc_reflect_out == True) {:
+    crc = $crc_reflect_function(crc, $cfg_width);
+:}
+    return (crc ^ $cfg_xor_out) & $cfg_mask;
+:} $elif ($crc_algorithm == "bit-by-bit-fast") {:
+$if ($crc_reflect_out == Undefined) {:
+    if (cfg->reflect_out) {
+        crc = $crc_reflect_function(crc, $cfg_width);
+    }
+:} $elif ($crc_reflect_out == True) {:
+    crc = $crc_reflect_function(crc, $cfg_width);
+:}
+    return (crc ^ $cfg_xor_out) & $cfg_mask;
+:} $elif ($crc_algorithm == "bitwise-expression" or $crc_algorithm == "table-driven") {:
+$if ($crc_do_shift == True) {:
+    crc >>= $cfg_shift;
+:}
+$if ($crc_reflect_in == Undefined or $crc_reflect_out == Undefined) {:
+$if ($crc_reflect_in == Undefined and $crc_reflect_out == Undefined) {:
+    if (cfg->reflect_in == !cfg->reflect_out):}
+ $elif ($crc_reflect_out == Undefined) {:
+    if ($if ($crc_reflect_in == True) {:!:}cfg->reflect_out):}
+ $elif ($crc_reflect_in == Undefined) {:
+    if ($if ($crc_reflect_out == True) {:!:}cfg->reflect_in):} {
+        crc = $crc_reflect_function(crc, $cfg_width);
+    }
+:} $elif ($crc_reflect_in != $crc_reflect_out) {:
+    crc = $crc_reflect_function(crc, $cfg_width);
+:}
+    return (crc ^ $cfg_xor_out) & $cfg_mask;
+:}
+}
+
+:}"""
+
+        elif id == "crc_table_driven_func_gen":
+            return  """\
+$if ($crc_algorithm == "table-driven" and $constant_crc_table != True) {:
+$crc_table_gen_doc
+$crc_table_gen_function_def
+{
+    $crc_t crc;
+    unsigned int i, j;
+
+    for (i = 0; i < $cfg_table_width; i++) {
+$if ($crc_reflect_in == Undefined) {:
+        if (cfg->reflect_in) {
+            crc = $crc_reflect_function(i, $cfg_table_idx_width);
+        } else {
+            crc = i;
+        }
+:} $elif ($crc_reflect_in == True) {:
+        crc = $crc_reflect_function(i, $cfg_table_idx_width);
+:} $else {:
+        crc = i;
+:}
+$if ($crc_do_shift == True) {:
+        crc <<= ($cfg_width - $cfg_table_idx_width + $cfg_shift);
+:} $else {:
+        crc <<= ($cfg_width - $cfg_table_idx_width);
+:}
+        for (j = 0; j < $cfg_table_idx_width; j++) {
+            if (crc & $cfg_msb_mask_shifted) {
+                crc = (crc << 1) ^ $cfg_poly_shifted;
+            } else {
+                crc = crc << 1;
+            }
+        }
+$if ($crc_reflect_in == Undefined) {:
+        if (cfg->reflect_in) {
+$if ($crc_do_shift == True) {:
+            crc = $crc_reflect_function(crc >> $cfg_shift, $cfg_width) << $cfg_shift;
+:} $else {:
+            crc = $crc_reflect_function(crc, $cfg_width);
+:}
+        }
+:} $elif ($crc_reflect_in == True) {:
+$if ($crc_do_shift == True) {:
+        crc = $crc_reflect_function(crc >> $cfg_shift, $cfg_width) << $cfg_shift;
+:} $else {:
+        crc = $crc_reflect_function(crc, $cfg_width);
+:}
+:}
+        crc_table[i] = crc & $cfg_mask_shifted;
+    }
+}
+
+
+:}"""
+
+        elif id == "crc_bitwise_expression_function_gen":
+            return  """\
+$if ($crc_algorithm == "bitwise-expression") {:
+$crc_bitwise_expression_doc
+$crc_bitwise_expression_function_def
+{
+    $crc_t bits = ($crc_t)tbl_idx;
+
+    return $crc_bitwise_expression;
+}
+
+:}"""
 
         elif id == "crc_bitwise_expression_doc":
             return  """\
@@ -568,21 +830,16 @@ $if ($use_reflect_func == True and $static_reflect_func == True) {:
 static $crc_reflect_function_def;
 
 :}
-$if ($crc_algorithm == "bit-by-bit") {:
-$c_bit_by_bit
-:} $elif ($crc_algorithm == "bit-by-bit-fast") {:
-$c_bit_by_bit_fast
-:} $elif ($crc_algorithm == "bitwise-expression") {:
-$c_bitwise_expression
-:} $elif ($crc_algorithm == "table-driven") {:
-$c_table_driven
-:} $else {:
-/* undefined algorithm $crc_algorithm */
-:}
+$c_table_gen\
+$crc_reflect_function_gen\
+$crc_init_function_gen\
+$crc_update_function_gen\
+$crc_finalize_function_gen\
 """
 
-        elif id == "c_table":
+        elif id == "c_table_gen":
             return  """\
+$if ($crc_algorithm == "table-driven") {:
 /**
  * Static table used for the table_driven implementation.
 $if ($undefined_parameters == True) {:
@@ -595,372 +852,9 @@ static $crc_t crc_table[$crc_table_width];
 static const $crc_t crc_table[$crc_table_width] = {
 $crc_table_init
 };
-:}
-"""
-
-        elif id == "c_bit_by_bit":
-            return  """\
-$if ($use_reflect_func == True) {:
-$crc_reflect_function_body
 
 :}
-$if ($constant_crc_init == False) {:
-$crc_init_doc
-$crc_init_function_def$nop
-{
-    unsigned int i;
-    $c_bool bit;
-    $crc_t crc = $cfg_xor_in;
-    for (i = 0; i < $cfg_width; i++) {
-        bit = crc & 0x01;
-        if (bit) {
-            crc = ((crc ^ $cfg_poly) >> 1) | $cfg_msb_mask;
-        } else {
-            crc >>= 1;
-        }
-    }
-    return crc & $cfg_mask;
-}
-:}
-
-$crc_update_doc
-$crc_update_function_def$nop
-{
-    unsigned int i;
-    $c_bool bit;
-    unsigned char c;
-
-    while (data_len--) {
-$if ($crc_reflect_in == Undefined) {:
-        if ($cfg_reflect_in) {
-            c = $crc_reflect_function(*data++, 8);
-        } else {
-            c = *data++;
-        }
-:} $elif ($crc_reflect_in == True) {:
-        c = $crc_reflect_function(*data++, 8);
-:} $else {:
-        c = *data++;
-:}
-        for (i = 0; i < 8; i++) {
-            bit = $if ($c_std == C89) {:!!(crc & $cfg_msb_mask):} $else {:crc & $cfg_msb_mask:};
-            crc = (crc << 1) | ((c >> (7 - i)) & 0x01);
-            if (bit) {
-                crc ^= $cfg_poly;
-            }
-        }
-        crc &= $cfg_mask;
-    }
-    return crc & $cfg_mask;
-}
-
-
-$crc_finalize_doc
-$crc_finalize_function_def$nop
-{
-    unsigned int i;
-    $c_bool bit;
-
-    for (i = 0; i < $cfg_width; i++) {
-        bit = $if ($c_std == C89) {:!!(crc & $cfg_msb_mask):} $else {:crc & $cfg_msb_mask:};
-        crc = (crc << 1) | 0x00;
-        if (bit) {
-            crc ^= $cfg_poly;
-        }
-    }
-$if ($crc_reflect_out == Undefined) {:
-    if ($cfg_reflect_out) {
-        crc = $crc_reflect_function(crc, $cfg_width);
-    }
-:} $elif ($crc_reflect_out == True) {:
-    crc = $crc_reflect_function(crc, $cfg_width);
-:}
-    return (crc ^ $cfg_xor_out) & $cfg_mask;
-}
-"""
-
-        elif id == "c_bit_by_bit_fast":
-            return  """\
-$if ($use_reflect_func == True) {:
-$crc_reflect_function_body
-
-:}
-$if ($constant_crc_init == False) {:
-$crc_init_doc
-$crc_init_function_def$nop
-{
-    return $cfg_xor_in & $cfg_mask;
-}
-:}
-
-$crc_update_doc
-$crc_update_function_def$nop
-{
-    unsigned int i;
-    $c_bool bit;
-    unsigned char c;
-
-    while (data_len--) {
-$if ($crc_reflect_in == Undefined) {:
-        if ($cfg_reflect_in) {
-            c = $crc_reflect_function(*data++, 8);
-        } else {
-            c = *data++;
-        }
-:} $else {:
-        c = *data++;
-:}
-$if ($crc_reflect_in == True) {:
-        for (i = 0x01; i & 0xff; i <<= 1) {
-:} $else {:
-        for (i = 0x80; i > 0; i >>= 1) {
-:}
-            bit = $if ($c_std == C89) {:!!(crc & $cfg_msb_mask):} $else {:crc & $cfg_msb_mask:};
-            if (c & i) {
-                bit = !bit;
-            }
-            crc <<= 1;
-            if (bit) {
-                crc ^= $cfg_poly;
-            }
-        }
-        crc &= $cfg_mask;
-    }
-    return crc & $cfg_mask;
-}
-
-$if ($inline_crc_finalize != True) {:
-$crc_finalize_doc
-$crc_finalize_function_def$nop
-{
-$if ($crc_reflect_out == Undefined) {:
-    if (cfg->reflect_out) {
-        crc = $crc_reflect_function(crc, $cfg_width);
-    }
-:} $elif ($crc_reflect_out == True) {:
-    crc = $crc_reflect_function(crc, $cfg_width);
-:}
-    return (crc ^ $cfg_xor_out) & $cfg_mask;
-}
-
-:}
-"""
-
-        elif id == "c_bitwise_expression":
-            return  """\
-$if ($use_reflect_func == True) {:
-$crc_reflect_function_body
-:}
-
-$if ($constant_crc_init == False) {:
-$crc_init_doc
-$crc_init_function_def$nop
-{
-$if ($crc_reflect_in == Undefined) {:
-    if ($cfg_reflect_in) {
-        return $crc_reflect_function($cfg_xor_in & $cfg_mask, $cfg_width)$if ($crc_do_shift == True) {: << $cfg_shift:};
-    } else {
-        return $cfg_xor_in & $cfg_mask$if ($crc_do_shift == True) {: << $cfg_shift:};
-    }
-:} $elif ($crc_reflect_in == True) {:
-    return $crc_reflect_function($cfg_xor_in & $cfg_mask, $cfg_width)$if ($crc_do_shift == True) {: << $cfg_shift:};
-:} $else {:
-    return $cfg_xor_in & $cfg_mask$if ($crc_do_shift == True) {: << $cfg_shift:};
-:}
-}
-:}
-
-$crc_bitwise_expression_doc
-$crc_bitwise_expression_function_def
-{
-    $crc_t bits = ($crc_t)tbl_idx;
-
-    return $crc_bitwise_expression;
-}
-
-$crc_update_doc
-$crc_update_function_def$nop
-{
-    unsigned int tbl_idx;
-
-$if ($crc_reflect_in == Undefined) {:
-    if (cfg->reflect_in) {
-        while (data_len--) {
-$crc_table_core_algorithm_ri
-            data++;
-        }
-    } else {
-        while (data_len--) {
-$crc_table_core_algorithm_ni
-            data++;
-        }
-    }
-:} $else {:
-    while (data_len--) {
-$if ($crc_reflect_in == True) {:
-$crc_table_core_algorithm_ri
-:} $elif ($crc_reflect_in == False) {:
-$crc_table_core_algorithm_ni
-:}
-        data++;
-    }
-:}
-    return crc & $cfg_mask_shifted;
-}
-
-$if ($inline_crc_finalize == False) {:
-$crc_finalize_doc
-$crc_finalize_function_def$nop
-{
-$if ($crc_do_shift == True) {:
-    crc >>= $cfg_shift;
-:}
-$if ($crc_reflect_in == Undefined or $crc_reflect_out == Undefined) {:
-$if ($crc_reflect_in == Undefined and $crc_reflect_out == Undefined) {:
-    if (cfg->reflect_in == !cfg->reflect_out):}
- $elif ($crc_reflect_out == Undefined) {:
-    if ($if ($crc_reflect_in == True) {:!:}cfg->reflect_out):}
- $elif ($crc_reflect_in == Undefined) {:
-    if ($if ($crc_reflect_out == True) {:!:}cfg->reflect_in):} {
-        crc = $crc_reflect_function(crc, $cfg_width);
-    }
-:} $elif ($crc_reflect_in != $crc_reflect_out) {:
-    crc = $crc_reflect_function(crc, $cfg_width);
-:}
-    return (crc ^ $cfg_xor_out) & $cfg_mask;
-}
-:}
-"""
-
-        elif id == "c_table_driven":
-            return  """\
-$c_table
-$if ($use_reflect_func == True) {:
-$crc_reflect_function_body
-:}
-
-$if ($constant_crc_init == False) {:
-$crc_init_doc
-$crc_init_function_def$nop
-{
-$if ($crc_reflect_in == Undefined) {:
-    if ($cfg_reflect_in) {
-        return $crc_reflect_function($cfg_xor_in & $cfg_mask, $cfg_width)$if ($crc_do_shift == True) {: << $cfg_shift:};
-    } else {
-        return $cfg_xor_in & $cfg_mask$if ($crc_do_shift == True) {: << $cfg_shift:};
-    }
-:} $elif ($crc_reflect_in == True) {:
-    return $crc_reflect_function($cfg_xor_in & $cfg_mask, $cfg_width)$if ($crc_do_shift == True) {: << $cfg_shift:};
-:} $else {:
-    return $cfg_xor_in & $cfg_mask$if ($crc_do_shift == True) {: << $cfg_shift:};
-:}
-}
-:}
-
-$if ($constant_crc_table != True) {:
-$crc_table_gen_doc
-$crc_table_gen_function_def
-{
-    $crc_t crc;
-    unsigned int i, j;
-
-    for (i = 0; i < $cfg_table_width; i++) {
-$if ($crc_reflect_in == Undefined) {:
-        if (cfg->reflect_in) {
-            crc = $crc_reflect_function(i, $cfg_table_idx_width);
-        } else {
-            crc = i;
-        }
-:} $elif ($crc_reflect_in == True) {:
-        crc = $crc_reflect_function(i, $cfg_table_idx_width);
-:} $else {:
-        crc = i;
-:}
-$if ($crc_do_shift == True) {:
-        crc <<= ($cfg_width - $cfg_table_idx_width + $cfg_shift);
-:} $else {:
-        crc <<= ($cfg_width - $cfg_table_idx_width);
-:}
-        for (j = 0; j < $cfg_table_idx_width; j++) {
-            if (crc & $cfg_msb_mask_shifted) {
-                crc = (crc << 1) ^ $cfg_poly_shifted;
-            } else {
-                crc = crc << 1;
-            }
-        }
-$if ($crc_reflect_in == Undefined) {:
-        if (cfg->reflect_in) {
-$if ($crc_do_shift == True) {:
-            crc = $crc_reflect_function(crc >> $cfg_shift, $cfg_width) << $cfg_shift;
-:} $else {:
-            crc = $crc_reflect_function(crc, $cfg_width);
-:}
-        }
-:} $elif ($crc_reflect_in == True) {:
-$if ($crc_do_shift == True) {:
-        crc = $crc_reflect_function(crc >> $cfg_shift, $cfg_width) << $cfg_shift;
-:} $else {:
-        crc = $crc_reflect_function(crc, $cfg_width);
-:}
-:}
-        crc_table[i] = crc & $cfg_mask_shifted;
-    }
-}
-
-:}
-$crc_update_doc
-$crc_update_function_def$nop
-{
-    unsigned int tbl_idx;
-
-$if ($crc_reflect_in == Undefined) {:
-    if (cfg->reflect_in) {
-        while (data_len--) {
-$crc_table_core_algorithm_ri
-            data++;
-        }
-    } else {
-        while (data_len--) {
-$crc_table_core_algorithm_ni
-            data++;
-        }
-    }
-:} $else {:
-    while (data_len--) {
-$if ($crc_reflect_in == True) {:
-$crc_table_core_algorithm_ri
-:} $elif ($crc_reflect_in == False) {:
-$crc_table_core_algorithm_ni
-:}
-        data++;
-    }
-:}
-    return crc & $cfg_mask_shifted;
-}
-
-$if ($inline_crc_finalize == False) {:
-$crc_finalize_doc
-$crc_finalize_function_def$nop
-{
-$if ($crc_do_shift == True) {:
-    crc >>= $cfg_shift;
-:}
-$if ($crc_reflect_in == Undefined or $crc_reflect_out == Undefined) {:
-$if ($crc_reflect_in == Undefined and $crc_reflect_out == Undefined) {:
-    if (cfg->reflect_in == !cfg->reflect_out):}
- $elif ($crc_reflect_out == Undefined) {:
-    if ($if ($crc_reflect_in == True) {:!:}cfg->reflect_out):}
- $elif ($crc_reflect_in == Undefined) {:
-    if ($if ($crc_reflect_out == True) {:!:}cfg->reflect_in):} {
-        crc = $crc_reflect_function(crc, $cfg_width);
-    }
-:} $elif ($crc_reflect_in != $crc_reflect_out) {:
-    crc = $crc_reflect_function(crc, $cfg_width);
-:}
-    return (crc ^ $cfg_xor_out) & $cfg_mask;
-}
-:}
-"""
+:}"""
 
         elif id == "main_template":
             return  """\

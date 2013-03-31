@@ -1,3 +1,13 @@
+2013-03-31  Thomas Pircher   <tehpeh@gmx.net>
+
+    * README.md:
+    Esplicitly stated that the output of pycrc is not considered a substantial
+    part of the code of pycrc.
+
+    * crc_symtable.py:
+    Re-organised the symbol table: grouped the code by functionality, not by
+    algorithm.
+
 2013-02-25  Thomas Pircher   <tehpeh@gmx.net>
 
     * pycrc.py:

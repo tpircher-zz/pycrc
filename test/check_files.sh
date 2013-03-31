@@ -65,6 +65,8 @@ populate() {
         for algo in "bit-by-bit" "bit-by-bit-fast" "bitwise-expression" "table-driven"; do
             $PYCRC --model $m --algorithm $algo --generate h -o "${outdir}/${m}_${algo}.h"
             $PYCRC --model $m --algorithm $algo --generate c -o "${outdir}/${m}_${algo}.c"
+            sed -i -e 's/Generated on ... ... .. ..:..:.. ....,/Generated on XXX XXX XX XX:XX:XX XXXX,/; s/by pycrc v[0-9.]*/by pycrc vXXX/;' "${outdir}/${m}_${algo}.h"
+            sed -i -e 's/Generated on ... ... .. ..:..:.. ....,/Generated on XXX XXX XX XX:XX:XX XXXX,/; s/by pycrc v[0-9.]*/by pycrc vXXX/;' "${outdir}/${m}_${algo}.c"
         done
     done
 }
@@ -72,7 +74,7 @@ populate() {
 do_check() {
     tar xzf "$tarfile" -C "`dirname $outdir_new`"
     populate "$outdir_new"
-    diff -r -I'Generated on' -I'by pycrc v' "$outdir_old" "$outdir_new"
+    diff -ru "$outdir_old" "$outdir_new"
 }
 
 
