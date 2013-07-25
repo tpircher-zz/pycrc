@@ -1,3 +1,12 @@
+2013-07-25  Thomas Pircher   <tehpeh@gmx.net>
+
+    * crc_opt.py:
+    Removed warning about even polynomials. As Lars Pötter rightly pointed out,
+    polynomials may be even.
+
+    * doc/pycrc.xml:
+    Added a caveat emptor about even polinomials.
+
 #
 # Version 0.8.1, 2013-05-17
 #
@@ -309,7 +318,7 @@
 2009-12-29  Thomas Pircher   <tehpeh@gmx.net>
 
     * pycrc.py, crc_opt.py, crc_parser: uniform error messages.
-    * crc_opt.py: added a warning for even polynoms.
+    * crc_opt.py: added a warning for even polynomials.
 
 2009-11-12  Thomas Pircher   <tehpeh@gmx.net>
 

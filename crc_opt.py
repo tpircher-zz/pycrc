@@ -215,9 +215,6 @@ of the following parameters:
                 sys.stderr.write("%s: error: unsupported table-idx-width %d\n" % (sys.argv[0], options.table_idx_width))
                 sys.exit(1)
 
-        if self.Poly != None and self.Poly % 2 == 0:
-            sys.stderr.write("%s: warning: the polynomial 0x%x is even. A valid CRC polynomial must be odd.\n" % (sys.argv[0], self.Poly))
-
         if self.Width != None:
             if self.Width <= 0:
                 sys.stderr.write("%s: error: Width must be strictly positive\n" % sys.argv[0])

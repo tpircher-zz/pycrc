@@ -5,7 +5,7 @@
 <!ENTITY project_version    "0.8">
 <!ENTITY project_homepage   "http://www.tty1.net/pycrc/">
 <!ENTITY project_models     "http://www.tty1.net/pycrc/crc-models_en.html">
-<!ENTITY date               "2013-01-04">
+<!ENTITY date               "2013-07-25">
 <!ENTITY author_firstname   "Thomas">
 <!ENTITY author_surname     "Pircher">
 <!ENTITY author_email       "tehpeh@gmx.net">
@@ -381,6 +381,13 @@
                         bit may also be omitted.
                         For example, both numbers 0x18005 and 0x8005 are accepted for a 16-bit
                         <replaceable>&poly;</replaceable>.
+                        </para>
+                        <para>
+                        Most <replaceable>&poly;</replaceable>s used in real world applications are odd (the least significant
+                        bit is 1), but there are some good even ones.
+                        &project_name; allows the use of even <replaceable>&poly;</replaceable>s but some of them may yield
+                        incorrect checksums depending on the used algorithm.
+                        Use at your own risk and if in doubt pick a well-known <replaceable>MODEL</replaceable> above.
                         </para>
                     </glossdef>
                 </glossentry>
