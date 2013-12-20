@@ -1,4 +1,4 @@
-//  Copyright (c) 2006-2010  Thomas Pircher  <tehpeh@gmx.net>
+//  Copyright (c) 2006-2013  Thomas Pircher  <tehpeh@gmx.net>
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -104,15 +104,15 @@ int get_config(int argc, char *argv[], crc_cfg_t *cfg)
     while (1) {
         option_index = 0;
 
-        c = getopt_long (argc, argv, "w:p:ni:uo:v", long_options, &option_index);
+        c = getopt_long(argc, argv, "w:p:ni:uo:v", long_options, &option_index);
         if (c == -1)
             break;
 
         switch (c) {
             case 0:
-                printf ("option %s", long_options[option_index].name);
+                printf("option %s", long_options[option_index].name);
                 if (optarg)
-                    printf (" with arg %s", optarg);
+                    printf(" with arg %s", optarg);
                 printf ("\n");
             case 'w':
                 cfg->width = atoi(optarg);
@@ -152,7 +152,7 @@ int get_config(int argc, char *argv[], crc_cfg_t *cfg)
                 return -1;
         }
     }
-    cfg->msb_mask = 1UL << (cfg->width - 1);
+    cfg->msb_mask = (crc_t)1u << (cfg->width - 1);
     cfg->crc_mask = (cfg->msb_mask - 1) | cfg->msb_mask;
     cfg->crc_shift = cfg->width < 8 ? 8 - cfg->width : 0;
 
@@ -277,7 +277,7 @@ int main(int argc, char *argv[])
             printf(format, "crc_mask", (unsigned int)cfg.crc_mask);
             printf(format, "msb_mask", (unsigned int)cfg.msb_mask);
         }
-        printf("0x%lx\n", (unsigned long)crc);
+        printf("0x%llx\n", (unsigned long long int)crc);
     }
     return !ret;
 }

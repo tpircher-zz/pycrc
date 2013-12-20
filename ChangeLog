@@ -1,3 +1,14 @@
+2013-12-20  Thomas Pircher   <tehpeh@gmx.net>
+
+    * crc_symtable.py:
+    * test/test.py:
+    Updated the generated code to cope with big Widths (>32 bits) on 32 bit
+    processors.
+    Since C89 does not give a way to specify the minimum length of a data type,
+    the test does not validate C89 code using Widths > 32.
+    For C99, the uint_fastN_t data types are used or long long, if the Width is
+    unknown.
+
 2013-07-25  Thomas Pircher   <tehpeh@gmx.net>
 
     * crc_opt.py:

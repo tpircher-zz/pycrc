@@ -336,7 +336,7 @@ $if ($crc_width == Undefined) {:
 
     /* internal parameters */
     $crc_t msb_mask;             /*!< a bitmask with the Most Significant Bit set to 1
-                                     initialise as 1UL << (width - 1) */
+                                     initialise as (crc_t)1u << (width - 1) */
     $crc_t crc_mask;             /*!< a bitmask with all width bits set to 1
                                      initialise as (cfg->msb_mask - 1) | cfg->msb_mask */
     unsigned int crc_shift;     /*!< a shift count that is used when width < 8
@@ -884,18 +884,26 @@ void print_params($if ($undefined_parameters == True) {:const $cfg_t *cfg:} $els
     char format[20];
 
 $if ($c_std == C89) {:
-    sprintf(format, "%%-16s = 0x%%0%dx\\n", (unsigned int)($cfg_width + 3) / 4);
-:} $else {:
-    snprintf(format, sizeof(format), "%%-16s = 0x%%0%dx\\n", (unsigned int)($cfg_width + 3) / 4);
-:}
+    sprintf(format, "%%-16s = 0x%%0%dlx\\n", (unsigned int)($cfg_width + 3) / 4);
     printf("%-16s = %d\\n", "width", (unsigned int)$cfg_width);
-    printf(format, "poly", (unsigned int)$cfg_poly);
+    printf(format, "poly", (unsigned long int)$cfg_poly);
     printf("%-16s = %s\\n", "reflect_in", $if ($crc_reflect_in == Undefined) {:$cfg_reflect_in ? "true": "false":} $else {:$if ($crc_reflect_in == True) {:"true":} $else {:"false":}:});
-    printf(format, "xor_in", $cfg_xor_in);
+    printf(format, "xor_in", (unsigned long int)$cfg_xor_in);
     printf("%-16s = %s\\n", "reflect_out", $if ($crc_reflect_out == Undefined) {:$cfg_reflect_out ? "true": "false":} $else {:$if ($crc_reflect_out == True) {:"true":} $else {:"false":}:});
-    printf(format, "xor_out", (unsigned int)$cfg_xor_out);
-    printf(format, "crc_mask", (unsigned int)$cfg_mask);
-    printf(format, "msb_mask", (unsigned int)$cfg_msb_mask);
+    printf(format, "xor_out", (unsigned long int)$cfg_xor_out);
+    printf(format, "crc_mask", (unsigned long int)$cfg_mask);
+    printf(format, "msb_mask", (unsigned long int)$cfg_msb_mask);
+:} $else {:
+    snprintf(format, sizeof(format), "%%-16s = 0x%%0%dllx\\n", (unsigned int)($cfg_width + 3) / 4);
+    printf("%-16s = %d\\n", "width", (unsigned int)$cfg_width);
+    printf(format, "poly", (unsigned long long int)$cfg_poly);
+    printf("%-16s = %s\\n", "reflect_in", $if ($crc_reflect_in == Undefined) {:$cfg_reflect_in ? "true": "false":} $else {:$if ($crc_reflect_in == True) {:"true":} $else {:"false":}:});
+    printf(format, "xor_in", (unsigned long long int)$cfg_xor_in);
+    printf("%-16s = %s\\n", "reflect_out", $if ($crc_reflect_out == Undefined) {:$cfg_reflect_out ? "true": "false":} $else {:$if ($crc_reflect_out == True) {:"true":} $else {:"false":}:});
+    printf(format, "xor_out", (unsigned long long int)$cfg_xor_out);
+    printf(format, "crc_mask", (unsigned long long int)$cfg_mask);
+    printf(format, "msb_mask", (unsigned long long int)$cfg_msb_mask);
+:}
 }
 
 /**
@@ -950,7 +958,11 @@ $if ($crc_algorithm == "table-driven" and $constant_crc_table != True) {:
     if (verbose) {
         print_params($if ($undefined_parameters == True) {:&cfg:});
     }
-    printf("0x%lx\\n", (unsigned long)crc);
+$if ($c_std == C89) {:
+    printf("0x%lx\\n", (unsigned long int)crc);
+:} $else {:
+    printf("0x%llx\\n", (unsigned long long int)crc);
+:}
     return 0;
 }
 """
@@ -1049,16 +1061,16 @@ $if ($crc_width == Undefined) {:
     while (1) {
         option_index = 0;
 
-        c = getopt_long (argc, argv, "w:p:n:i:u:o:s:vt", long_options, &option_index);
+        c = getopt_long(argc, argv, "w:p:n:i:u:o:s:vt", long_options, &option_index);
         if (c == -1)
             break;
 
         switch (c) {
             case 0:
-                printf ("option %s", long_options[option_index].name);
+                printf("option %s", long_options[option_index].name);
                 if (optarg)
-                    printf (" with arg %s", optarg);
-                printf ("\\n");
+                    printf(" with arg %s", optarg);
+                printf("\\n");
 $if ($crc_width == Undefined) {:
             case 'w':
                 cfg->width = atoi(optarg);
@@ -1112,7 +1124,7 @@ $if ($crc_width == Undefined) {:
         }
     }
 $if ($crc_width == Undefined) {:
-    cfg->msb_mask = 1UL << (cfg->width - 1);
+    cfg->msb_mask = (crc_t)1u << (cfg->width - 1);
     cfg->crc_mask = (cfg->msb_mask - 1) | cfg->msb_mask;
     cfg->crc_shift = cfg->width < 8 ? 8 - cfg->width : 0;
 :}
@@ -1151,9 +1163,9 @@ $if ($crc_xor_out == Undefined) {:
         if value == None:
             return "Undefined"
         if width == None:
-            return "0x%x" % value
+            return "0x%xu" % value
         width = (width + 3) // 4
-        hex_str = "0x%%0%dx" % width
+        hex_str = "0x%%0%dxu" % width
         return hex_str % value
 
 
@@ -1205,25 +1217,30 @@ $if ($crc_xor_out == Undefined) {:
         """
         if self.opt.CrcType != None:
             return self.opt.CrcType
-        if self.opt.Width == None:
-            return "unsigned long"
         if self.opt.CStd == "C89":
+            if self.opt.Width == None:
+                return "unsigned long int"
             if self.opt.Width <= 8:
                 return "unsigned char"
             elif self.opt.Width <= 16:
                 return "unsigned int"
             else:
-                return "unsigned long"
+                return "unsigned long int"
         else:       # C99
+            if self.opt.Width == None:
+                return "unsigned long long int"
             if self.opt.Width <= 8:
-                return "uint8_t"
+                return "uint_fast8_t"
             elif self.opt.Width <= 16:
-                return "uint16_t"
+                return "uint_fast16_t"
             elif self.opt.Width <= 32:
-                return "uint32_t"
+                return "uint_fast32_t"
+            elif self.opt.Width <= 64:
+                return "uint_fast64_t"
+            elif self.opt.Width <= 128:
+                return "uint_fast128_t"
             else:
-                return "unsigned long"
-        return "unsigned long"
+                return "uintmax_t"
 
 
     # function __get_include_files
