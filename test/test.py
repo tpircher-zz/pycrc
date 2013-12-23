@@ -12,16 +12,11 @@ from crc_models import CrcModels
 from crc_algorithms import Crc
 
 
-# Class Options
-###############################################################################
 class Options(object):
     """
     The options parsing and validating class
     """
 
-
-    # Class constructor
-    ###############################################################################
     def __init__(self):
         self.AllAlgorithms          = set(["bit-by-bit", "bbb", "bit-by-bit-fast", "bbf", "bitwise-expression", "bwe", "table-driven", "tbl"])
         self.Compile                = False
@@ -32,8 +27,6 @@ class Options(object):
         self.Python3                = False
         self.Algorithm = copy(self.AllAlgorithms)
 
-    # function parse
-    ###############################################################################
     def parse(self, argv = None):
         """
         Parses and validates the options given as arguments
@@ -89,23 +82,22 @@ class Options(object):
                 sys.exit(1)
 
 
-# Class CrcTests
-###############################################################################
 class CrcTests(object):
     """
     The CRC test class.
     """
 
-    # Class constructor
-    ###############################################################################
     def __init__(self):
+        """
+        The class constructor.
+        """
         self.pycrc_bin = "/bin/false"
         self.use_algo_bit_by_bit = True
         self.use_algo_bit_by_bit_fast = True
         self.use_algo_table_driven = True
         self.use_algo_bitwise_expression = True
         self.verbose = False
-        self.tmpdir = tempfile.mkdtemp(prefix="pycrc_")
+        self.tmpdir = tempfile.mkdtemp(prefix="pycrc.")
         self.check_file = None
         self.crc_bin_bbb_c89 = None
         self.crc_bin_bbb_c99 = None
@@ -118,9 +110,10 @@ class CrcTests(object):
         self.crc_bin_tbl_idx2 = None
         self.crc_bin_tbl_idx4 = None
 
-    # Class destructor
-    ###############################################################################
     def __del__(self):
+        """
+        The class destructor. Delete all generated files.
+        """
         if self.check_file != None:
             os.remove(self.check_file)
         if self.crc_bin_bbb_c89 != None:
@@ -145,8 +138,10 @@ class CrcTests(object):
             self.__del_files([self.crc_bin_tbl_idx4, self.crc_bin_tbl_idx4+".h", self.crc_bin_tbl_idx4+".c"])
         os.removedirs(self.tmpdir)
 
-
     def __del_files(delf, files):
+        """
+        Helper function to delete files.
+        """
         for f in files:
             try:
                 os.remove(f)
@@ -155,8 +150,11 @@ class CrcTests(object):
                 pass
 
     def __make_src(self, args, basename, cstd):
-        binfile = "%s/%s" % (self.tmpdir, basename)
-        cmd_str = self.pycrc_bin + " %s --std %s --generate h -o %s.h" % (args, cstd, binfile)
+        """
+        Generate the *.h and *.c source files for a test.
+        """
+        gen_src = "%s/%s" % (self.tmpdir, basename)
+        cmd_str = self.pycrc_bin + " %s --std %s --generate h -o %s.h" % (args, cstd, gen_src)
         if self.verbose:
             print(cmd_str)
         ret = commands.getstatusoutput(cmd_str)
@@ -166,7 +164,7 @@ class CrcTests(object):
             print(ret[2])
             return None
 
-        cmd_str = self.pycrc_bin + " %s --std %s --generate c-main -o %s.c" % (args, cstd, binfile)
+        cmd_str = self.pycrc_bin + " %s --std %s --generate c-main -o %s.c" % (args, cstd, gen_src)
         if self.verbose:
             print(cmd_str)
         ret = commands.getstatusoutput(cmd_str)
@@ -175,9 +173,12 @@ class CrcTests(object):
             print(ret[1])
             print(ret[2])
             return None
-        return binfile
+        return gen_src
 
     def __compile(self, args, binfile, cstd):
+        """
+        Compile a generated source file.
+        """
         cmd_str = "gcc -W -Wall -pedantic -Werror -std=%s -o %s %s.c" % (cstd, binfile, binfile)
         if self.verbose:
             print(cmd_str)
@@ -190,6 +191,9 @@ class CrcTests(object):
         return binfile
 
     def __make_bin(self, args, basename, cstd="c99"):
+        """
+        Generate the source and compile to a binary.
+        """
         filename = self.__make_src(args, basename, cstd)
         if filename == None:
             return None
@@ -199,6 +203,9 @@ class CrcTests(object):
         return filename
 
     def __setup_files(self, opt):
+        """
+        Set up files needed during the test.
+        """
         if self.verbose:
             print("Setting up files...")
         self.check_file = "%s/check.txt" % self.tmpdir
@@ -253,8 +260,6 @@ class CrcTests(object):
         return True
 
 
-    # __run_command
-    ###############################################################################
     def __run_command(self, cmd_str):
         """
         Run a command and return its stdout.
@@ -269,9 +274,10 @@ class CrcTests(object):
             return None
         return ret[1]
 
-    # __check_command
-    ###############################################################################
     def __check_command(self, cmd_str, expected_result):
+        """
+        Run a command and check if the stdout matches the expected result.
+        """
         ret = self.__run_command(cmd_str)
         if int(ret, 16) != expected_result:
             print("error: different checksums!")
@@ -279,9 +285,10 @@ class CrcTests(object):
             return False
         return True
 
-    # __check_bin
-    ###############################################################################
     def __check_bin(self, args, expected_result, long_data_type = True):
+        """
+        Check all precompiled binaries.
+        """
         for binary in [self.crc_bin_bbb_c89, self.crc_bin_bbb_c99, self.crc_bin_bbf_c89, self.crc_bin_bbf_c99, self.crc_bin_tbl_c89, self.crc_bin_tbl_c99, self.crc_bin_tbl_idx2, self.crc_bin_tbl_idx4]:
             if binary != None:
                 # Don't test width > 32 for C89, as I don't know how to ask for an data type > 32 bits.
@@ -292,9 +299,10 @@ class CrcTests(object):
                     return False
         return True
 
-    # __get_crc
-    ###############################################################################
     def __get_crc(self, model, check_str = "123456789", expected_crc = None):
+        """
+        Get the CRC for a set of parameters from the Python reference implementation.
+        """
         if self.verbose:
             out_str = "Crc(width = %(width)d, poly = 0x%(poly)x, reflect_in = %(reflect_in)s, xor_in = 0x%(xor_in)x, reflect_out = %(reflect_out)s, xor_out = 0x%(xor_out)x)" % model
             if expected_crc != None:
@@ -335,8 +343,6 @@ class CrcTests(object):
             return None
         return crc
 
-    # __compile_and_check_res
-    ###############################################################################
     def __compile_and_check_res(self, cmp_opt, name, expected_crc):
         """
         Compile a model and run it.
@@ -350,8 +356,7 @@ class CrcTests(object):
             return False
         return True
 
-    # __test_models
-    ###############################################################################
+
     def __test_models(self):
         """
         Standard Tests.
@@ -391,8 +396,7 @@ class CrcTests(object):
             print("")
         return True
 
-    # __test_compiled_models
-    ###############################################################################
+
     def __test_compiled_models(self):
         """
         Standard Tests.
@@ -429,88 +433,23 @@ class CrcTests(object):
                     return False
         return True
 
-    # __test_random_params
-    ###############################################################################
-    def __test_random_params(self):
-        """
-        Test random parameters.
-        """
-        if self.verbose:
-            print("Running __test_random_params()...")
-        for width in [8, 16, 32]:
-            for poly in [0x8005, 0x4c11db7, 0xa5a5a5a5]:
-                for refin in [0, 1]:
-                    for refout in [0, 1]:
-                        for init in [0x0, 0x1, 0x5a5a5a5a]:
-                            args="--width %d --poly 0x%x --reflect-in %s --reflect-out %s --xor-in 0x%x --xor-out 0x0" % (width, poly, refin, refout, init)
-                            cmd_str = self.pycrc_bin + " " + args
-                            ret = self.__run_command(cmd_str)
-                            if ret == None:
-                                return False
-                            ret = int(ret, 16)
-                            if not self.__check_bin(args, ret, width > 32):
-                                return False
-        return True
 
-
-    # __test_compiled_mixed_args
-    ###############################################################################
-    def __test_compiled_mixed_args(self):
+    def __test_compiled_special_cases(self):
         """
-        Test compiled arguments.
+        Standard Tests.
+        Test some special cases.
         """
         if self.verbose:
-            print("Running __test_compiled_mixed_args()...")
-        m =  {
-            'name':         'zmodem',
-            'width':         ["", "--width 16"],
-            'poly':          ["", "--poly 0x1021"],
-            'reflect_in':    ["", "--reflect-in False"],
-            'xor_in':        ["", "--xor-in 0x0"],
-            'reflect_out':   ["", "--reflect-out False"],
-            'xor_out':       ["", "--xor-out 0x0"],
-            'check':         0x31c3,
-        }
-        cmp_param = {}
-        arg_param = {}
-        for b_width in range(2):
-            cmp_param["width"] = m["width"][b_width]
-            arg_param["width"] = m["width"][1 - b_width]
-            for b_poly in range(2):
-                cmp_param["poly"] = m["poly"][b_poly]
-                arg_param["poly"] = m["poly"][1 - b_poly]
-                for b_ref_in in range(2):
-                    cmp_param["reflect_in"] = m["reflect_in"][b_ref_in]
-                    arg_param["reflect_in"] = m["reflect_in"][1 - b_ref_in]
-                    for b_xor_in in range(2):
-                        cmp_param["xor_in"] = m["xor_in"][b_xor_in]
-                        arg_param["xor_in"] = m["xor_in"][1 - b_xor_in]
-                        for b_ref_out in range(2):
-                            cmp_param["reflect_out"] = m["reflect_out"][b_ref_out]
-                            arg_param["reflect_out"] = m["reflect_out"][1 - b_ref_out]
-                            for b_xor_out in range(2):
-                                cmp_param["xor_out"] = m["xor_out"][b_xor_out]
-                                arg_param["xor_out"] = m["xor_out"][1 - b_xor_out]
-
-                                cmp_opt = "%(width)s %(poly)s %(reflect_in)s %(xor_in)s %(reflect_out)s %(xor_out)s" %  cmp_param
-                                arg_opt = "%(width)s %(poly)s %(reflect_in)s %(xor_in)s %(reflect_out)s %(xor_out)s" %  arg_param
-
-                                if self.use_algo_bit_by_bit:
-                                    if not self.__compile_and_check_res("--algorithm bit-by-bit" + " " + cmp_opt, "crc_bbb_arg", m["check"]):
-                                        return False
-
-                                if self.use_algo_bit_by_bit_fast:
-                                    if not self.__compile_and_check_res("--algorithm bit-by-bit-fast" + " " + cmp_opt, "crc_bbf_arg", m["check"]):
-                                        return False
-
-                                if self.use_algo_table_driven:
-                                    if not self.__compile_and_check_res("--algorithm table-driven" + " " + cmp_opt, "crc_tbl_arg", m["check"]):
-                                        return False
-        return True
+            print("Running __test_compiled_special_cases()...")
+        if self.use_algo_table_driven:
+            if not self.__compile_and_check_res("--model=crc-5 --reflect-in=0 --algorithm table-driven --table-idx-width=8", "crc_tbl_special", 0x01):
+                return False
+            if not self.__compile_and_check_res("--model=crc-5 --reflect-in=0 --algorithm table-driven --table-idx-width=4", "crc_tbl_special", 0x01):
+                return False
+            if not self.__compile_and_check_res("--model=crc-5 --reflect-in=0 --algorithm table-driven --table-idx-width=2", "crc_tbl_special", 0x01):
+                return False
 
 
-    # __test_variable_width
-    ###############################################################################
     def __test_variable_width(self):
         """
         Test variable width.
@@ -570,8 +509,82 @@ class CrcTests(object):
         return True
 
 
-    # run
-    ###############################################################################
+    def __test_compiled_mixed_args(self):
+        """
+        Test compiled arguments.
+        """
+        if self.verbose:
+            print("Running __test_compiled_mixed_args()...")
+        m =  {
+            'name':         'zmodem',
+            'width':         ["", "--width 16"],
+            'poly':          ["", "--poly 0x1021"],
+            'reflect_in':    ["", "--reflect-in False"],
+            'xor_in':        ["", "--xor-in 0x0"],
+            'reflect_out':   ["", "--reflect-out False"],
+            'xor_out':       ["", "--xor-out 0x0"],
+            'check':         0x31c3,
+        }
+        cmp_param = {}
+        arg_param = {}
+        for b_width in range(2):
+            cmp_param["width"] = m["width"][b_width]
+            arg_param["width"] = m["width"][1 - b_width]
+            for b_poly in range(2):
+                cmp_param["poly"] = m["poly"][b_poly]
+                arg_param["poly"] = m["poly"][1 - b_poly]
+                for b_ref_in in range(2):
+                    cmp_param["reflect_in"] = m["reflect_in"][b_ref_in]
+                    arg_param["reflect_in"] = m["reflect_in"][1 - b_ref_in]
+                    for b_xor_in in range(2):
+                        cmp_param["xor_in"] = m["xor_in"][b_xor_in]
+                        arg_param["xor_in"] = m["xor_in"][1 - b_xor_in]
+                        for b_ref_out in range(2):
+                            cmp_param["reflect_out"] = m["reflect_out"][b_ref_out]
+                            arg_param["reflect_out"] = m["reflect_out"][1 - b_ref_out]
+                            for b_xor_out in range(2):
+                                cmp_param["xor_out"] = m["xor_out"][b_xor_out]
+                                arg_param["xor_out"] = m["xor_out"][1 - b_xor_out]
+
+                                cmp_opt = "%(width)s %(poly)s %(reflect_in)s %(xor_in)s %(reflect_out)s %(xor_out)s" %  cmp_param
+                                arg_opt = "%(width)s %(poly)s %(reflect_in)s %(xor_in)s %(reflect_out)s %(xor_out)s" %  arg_param
+
+                                if self.use_algo_bit_by_bit:
+                                    if not self.__compile_and_check_res("--algorithm bit-by-bit" + " " + cmp_opt, "crc_bbb_arg", m["check"]):
+                                        return False
+
+                                if self.use_algo_bit_by_bit_fast:
+                                    if not self.__compile_and_check_res("--algorithm bit-by-bit-fast" + " " + cmp_opt, "crc_bbf_arg", m["check"]):
+                                        return False
+
+                                if self.use_algo_table_driven:
+                                    if not self.__compile_and_check_res("--algorithm table-driven" + " " + cmp_opt, "crc_tbl_arg", m["check"]):
+                                        return False
+        return True
+
+
+    def __test_random_params(self):
+        """
+        Test random parameters.
+        """
+        if self.verbose:
+            print("Running __test_random_params()...")
+        for width in [8, 16, 32]:
+            for poly in [0x8005, 0x4c11db7, 0xa5a5a5a5]:
+                for refin in [0, 1]:
+                    for refout in [0, 1]:
+                        for init in [0x0, 0x1, 0x5a5a5a5a]:
+                            args="--width %d --poly 0x%x --reflect-in %s --reflect-out %s --xor-in 0x%x --xor-out 0x0" % (width, poly, refin, refout, init)
+                            cmd_str = self.pycrc_bin + " " + args
+                            ret = self.__run_command(cmd_str)
+                            if ret == None:
+                                return False
+                            ret = int(ret, 16)
+                            if not self.__check_bin(args, ret, width > 32):
+                                return False
+        return True
+
+
     def run(self, opt):
         """
         Run all tests
@@ -596,20 +609,21 @@ class CrcTests(object):
         if opt.Compile and not self.__test_compiled_models():
             return False
 
-        if opt.RandomParameters and not self.__test_random_params():
-            return False
-
-        if opt.CompileMixedArgs and not self.__test_compiled_mixed_args():
+        if opt.Compile and not self.__test_compiled_special_cases():
             return False
 
         if opt.VariableWidth and not self.__test_variable_width():
             return False
 
+        if opt.CompileMixedArgs and not self.__test_compiled_mixed_args():
+            return False
+
+        if opt.RandomParameters and not self.__test_random_params():
+            return False
+
         return True
 
 
-# main function
-###############################################################################
 def main():
     """
     Main function.
@@ -625,6 +639,5 @@ def main():
 
 
 # program entry point
-###############################################################################
 if __name__ == "__main__":
     sys.exit(main())

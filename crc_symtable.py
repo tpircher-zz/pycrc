@@ -97,18 +97,16 @@ class SymbolTable:
         self.table["crc_msb_mask"] = self.__pretty_hex(self.opt.MSB_Mask, self.opt.Width)
         if self.opt.Algorithm in set([self.opt.Algo_Table_Driven, self.opt.Algo_Bitwise_Expression]) \
                 and (self.opt.Width == None or self.opt.Width < 8):
-            self.table["crc_do_shift"] = self.__pretty_bool(True)
             if self.opt.Width == None:
                 self.table["crc_shift"] = self.__pretty_str(None)
             else:
                 self.table["crc_shift"] = self.__pretty_str(8 - self.opt.Width)
         else:
-            self.table["crc_do_shift"] = self.__pretty_bool(False)
             self.table["crc_shift"] = self.__pretty_str(0)
 
         self.table["cfg_width"] = "$if ($crc_width != Undefined) {:$crc_width:} $else {:cfg->width:}"
         self.table["cfg_poly"] = "$if ($crc_poly != Undefined) {:$crc_poly:} $else {:cfg->poly:}"
-        self.table["cfg_poly_shifted"] = "$if ($crc_do_shift == True) {:($cfg_poly << $cfg_shift):} $else {:$cfg_poly:}"
+        self.table["cfg_poly_shifted"] = "$if ($crc_shift != 0) {:($cfg_poly << $cfg_shift):} $else {:$cfg_poly:}"
         self.table["cfg_reflect_in"] = "$if ($crc_reflect_in != Undefined) {:$crc_reflect_in:} $else {:cfg->reflect_in:}"
         self.table["cfg_xor_in"] = "$if ($crc_xor_in != Undefined) {:$crc_xor_in:} $else {:cfg->xor_in:}"
         self.table["cfg_reflect_out"] = "$if ($crc_reflect_out != Undefined) {:$crc_reflect_out:} $else {:cfg->reflect_out:}"
@@ -116,9 +114,9 @@ class SymbolTable:
         self.table["cfg_table_idx_width"] = "$if ($crc_table_idx_width != Undefined) {:$crc_table_idx_width:} $else {:cfg->table_idx_width:}"
         self.table["cfg_table_width"] = "$if ($crc_table_width != Undefined) {:$crc_table_width:} $else {:cfg->table_width:}"
         self.table["cfg_mask"] = "$if ($crc_mask != Undefined) {:$crc_mask:} $else {:cfg->crc_mask:}"
-        self.table["cfg_mask_shifted"] = "$if ($crc_do_shift == True) {:($cfg_mask << $cfg_shift):} $else {:$cfg_mask:}"
+        self.table["cfg_mask_shifted"] = "$if ($crc_shift != 0) {:($cfg_mask << $cfg_shift):} $else {:$cfg_mask:}"
         self.table["cfg_msb_mask"] = "$if ($crc_msb_mask != Undefined) {:$crc_msb_mask:} $else {:cfg->msb_mask:}"
-        self.table["cfg_msb_mask_shifted"] = "$if ($crc_do_shift == True) {:($cfg_msb_mask << $cfg_shift):} $else {:$cfg_msb_mask:}"
+        self.table["cfg_msb_mask_shifted"] = "$if ($crc_shift != 0) {:($cfg_msb_mask << $cfg_shift):} $else {:$cfg_msb_mask:}"
         self.table["cfg_shift"] = "$if ($crc_shift != Undefined) {:$crc_shift:} $else {:cfg->crc_shift:}"
 
         self.table["undefined_parameters"] = self.__pretty_bool(self.opt.UndefinedCrcParameters)
@@ -233,10 +231,10 @@ class SymbolTable:
 
         elif id == "crc_table_init":
             return  self.__get_table_init()
-        elif id == "crc_table_core_algorithm_ni":
-            return  self.__get_table_core_algorithm_ni()
-        elif id == "crc_table_core_algorithm_ri":
-            return  self.__get_table_core_algorithm_ri()
+        elif id == "crc_table_core_algorithm_nonreflected":
+            return  self.__get_table_core_algorithm_nonreflected()
+        elif id == "crc_table_core_algorithm_reflected":
+            return  self.__get_table_core_algorithm_reflected()
 
         elif id == "header_protection":
             return  self.__pretty_hdrprotection()
@@ -255,9 +253,9 @@ class SymbolTable:
             return  """\
 $if ($crc_algorithm == "bitwise-expression" or $crc_algorithm == "table-driven") {:
 $if ($crc_reflect_in == $crc_reflect_out) {:
-$if ($crc_do_shift == True) {:(crc >> $cfg_shift):} $else {:crc:} ^ $crc_xor_out\
+$if ($crc_shift != 0) {:(crc >> $cfg_shift):} $else {:crc:} ^ $crc_xor_out\
 :} $else {:
-$crc_reflect_function($if ($crc_do_shift == True) {:(crc >> $cfg_shift):} $else {:crc:}, $crc_width) ^ $crc_xor_out\
+$crc_reflect_function($if ($crc_shift != 0) {:(crc >> $cfg_shift):} $else {:crc:}, $crc_width) ^ $crc_xor_out\
 :}:} $elif ($crc_reflect_out == True) {:
 $crc_reflect_function(crc, $crc_width) ^ $crc_xor_out\
 :} $else {:
@@ -362,11 +360,11 @@ $crc_init_doc
 $if ($constant_crc_init == False) {:
 $crc_init_function_def;
 :} $elif ($c_std == C89) {:
-#define $crc_init_function()      ($crc_init_value$if ($crc_do_shift == True) {: << $cfg_shift:})
+#define $crc_init_function()      ($crc_init_value$if ($crc_shift != 0) {: << $cfg_shift:})
 :} $else {:
 static inline $crc_init_function_def$nop
 {
-    return $crc_init_value$if ($crc_do_shift == True) {: << $cfg_shift:};
+    return $crc_init_value$if ($crc_shift != 0) {: << $cfg_shift:};
 }
 :}
 
@@ -478,14 +476,14 @@ $if ($crc_algorithm == "bit-by-bit") {:
 :} $elif ($crc_algorithm == "bitwise-expression" or $crc_algorithm == "table-driven") {:
 $if ($crc_reflect_in == Undefined) {:
     if ($cfg_reflect_in) {
-        return $crc_reflect_function($cfg_xor_in & $cfg_mask, $cfg_width)$if ($crc_do_shift == True) {: << $cfg_shift:};
+        return $crc_reflect_function($cfg_xor_in & $cfg_mask, $cfg_width)$if ($crc_shift != 0) {: << $cfg_shift:};
     } else {
-        return $cfg_xor_in & $cfg_mask$if ($crc_do_shift == True) {: << $cfg_shift:};
+        return $cfg_xor_in & $cfg_mask$if ($crc_shift != 0) {: << $cfg_shift:};
     }
 :} $elif ($crc_reflect_in == True) {:
-    return $crc_reflect_function($cfg_xor_in & $cfg_mask, $cfg_width)$if ($crc_do_shift == True) {: << $cfg_shift:};
+    return $crc_reflect_function($cfg_xor_in & $cfg_mask, $cfg_width)$if ($crc_shift != 0) {: << $cfg_shift:};
 :} $else {:
-    return $cfg_xor_in & $cfg_mask$if ($crc_do_shift == True) {: << $cfg_shift:};
+    return $cfg_xor_in & $cfg_mask$if ($crc_shift != 0) {: << $cfg_shift:};
 :}
 :}
 }
@@ -565,21 +563,21 @@ $if ($crc_reflect_in == True) {:
 $if ($crc_reflect_in == Undefined) {:
     if (cfg->reflect_in) {
         while (data_len--) {
-$crc_table_core_algorithm_ri
+$crc_table_core_algorithm_reflected
             data++;
         }
     } else {
         while (data_len--) {
-$crc_table_core_algorithm_ni
+$crc_table_core_algorithm_nonreflected
             data++;
         }
     }
 :} $else {:
     while (data_len--) {
 $if ($crc_reflect_in == True) {:
-$crc_table_core_algorithm_ri
+$crc_table_core_algorithm_reflected
 :} $elif ($crc_reflect_in == False) {:
-$crc_table_core_algorithm_ni
+$crc_table_core_algorithm_nonreflected
 :}
         data++;
     }
@@ -625,7 +623,7 @@ $if ($crc_reflect_out == Undefined) {:
 :}
     return (crc ^ $cfg_xor_out) & $cfg_mask;
 :} $elif ($crc_algorithm == "bitwise-expression" or $crc_algorithm == "table-driven") {:
-$if ($crc_do_shift == True) {:
+$if ($crc_shift != 0) {:
     crc >>= $cfg_shift;
 :}
 $if ($crc_reflect_in == Undefined or $crc_reflect_out == Undefined) {:
@@ -667,7 +665,7 @@ $if ($crc_reflect_in == Undefined) {:
 :} $else {:
         crc = i;
 :}
-$if ($crc_do_shift == True) {:
+$if ($crc_shift != 0) {:
         crc <<= ($cfg_width - $cfg_table_idx_width + $cfg_shift);
 :} $else {:
         crc <<= ($cfg_width - $cfg_table_idx_width);
@@ -681,14 +679,14 @@ $if ($crc_do_shift == True) {:
         }
 $if ($crc_reflect_in == Undefined) {:
         if (cfg->reflect_in) {
-$if ($crc_do_shift == True) {:
+$if ($crc_shift != 0) {:
             crc = $crc_reflect_function(crc >> $cfg_shift, $cfg_width) << $cfg_shift;
 :} $else {:
             crc = $crc_reflect_function(crc, $cfg_width);
 :}
         }
 :} $elif ($crc_reflect_in == True) {:
-$if ($crc_do_shift == True) {:
+$if ($crc_shift != 0) {:
         crc = $crc_reflect_function(crc >> $cfg_shift, $cfg_width) << $cfg_shift;
 :} $else {:
         crc = $crc_reflect_function(crc, $cfg_width);
@@ -1325,7 +1323,7 @@ $if ($crc_xor_out == Undefined) {:
         out  = ""
         for i in range(self.opt.TableWidth):
             if i % values_per_line == 0:
-                out += "    "
+                out += " " * 4
             if i == (self.opt.TableWidth - 1):
                 out += "%s" % self.__pretty_hex(tbl[i], format_width)
             elif i % values_per_line == (values_per_line - 1):
@@ -1335,21 +1333,21 @@ $if ($crc_xor_out == Undefined) {:
         return out
 
 
-    # function __get_table_core_algorithm_ni
+    # function __get_table_core_algorithm_nonreflected
     ###############################################################################
-    def __get_table_core_algorithm_ni(self):
+    def __get_table_core_algorithm_nonreflected(self):
         """
-        Return the core loop of the table-driven algorithm.
+        Return the core loop of the table-driven algorithm, non-reflected variant
         """
         if self.opt.Algorithm not in set([self.opt.Algo_Table_Driven, self.opt.Algo_Bitwise_Expression]):
             return ""
 
-        loop_core_ni = ""
+        loop_core = ""
         loop_indent = ""
         if self.opt.UndefinedCrcParameters:
-            loop_indent = "            "
+            loop_indent = " " * 12
         else:
-            loop_indent = "        "
+            loop_indent = " " * 8
 
         if self.opt.Width == None:
             shr = "($cfg_width - $cfg_table_idx_width + $cfg_shift)"
@@ -1358,53 +1356,53 @@ $if ($crc_xor_out == Undefined) {:
         else:
             shr = "%d" % (self.opt.Width - self.opt.TableIdxWidth)
 
-        reg_shift = "$if ($crc_do_shift == True) {:($cfg_table_idx_width - $cfg_shift):} $else {:$cfg_table_idx_width:}"
+        reg_shift = "$if ($crc_shift != 0) {:($cfg_table_idx_width - $cfg_shift):} $else {:$cfg_table_idx_width:}"
 
         if self.opt.TableIdxWidth == 8:
             crc_lookup = '$if ($crc_algorithm == "table-driven") {:crc_table[tbl_idx]:}' + \
                          '$elif ($crc_algorithm == "bitwise-expression") {:$crc_bitwise_expression_function(tbl_idx):}'
-            loop_core_ni += loop_indent + "tbl_idx = ((crc >> " + shr + ") ^ *data) & $crc_table_mask;" + '\n' + \
+            loop_core += loop_indent + "tbl_idx = ((crc >> " + shr + ") ^ *data) & $crc_table_mask;" + '\n' + \
                             loop_indent + "crc = (" + crc_lookup + " ^ (crc << " + reg_shift + ")) & $cfg_mask_shifted;" + '\n'
         else:
             crc_lookup = '$if ($crc_algorithm == "table-driven") {:crc_table[tbl_idx & $crc_table_mask]:}' + \
                          '$elif ($crc_algorithm == "bitwise-expression") {:$crc_bitwise_expression_function(tbl_idx & $crc_table_mask):}'
             for i in range (8 // self.opt.TableIdxWidth):
                 str_idx = "%s" % (8 - (i + 1) * self.opt.TableIdxWidth)
-                loop_core_ni += loop_indent + "tbl_idx = (crc >> " + shr + ") ^ (*data >> " + str_idx + ");" + '\n' + \
+                loop_core += loop_indent + "tbl_idx = (crc >> " + shr + ") ^ (*data >> " + str_idx + ");" + '\n' + \
                                 loop_indent + "crc = " + crc_lookup + " ^ (crc << " + reg_shift + ");" + '\n'
-        return loop_core_ni
+        return loop_core
 
 
-    # function __get_table_core_algorithm_ri
+    # function __get_table_core_algorithm_reflected
     ###############################################################################
-    def __get_table_core_algorithm_ri(self):
+    def __get_table_core_algorithm_reflected(self):
         """
-        Return the core loop of the table-driven algorithm.
+        Return the core loop of the table-driven algorithm, reflected variant.
         """
         if self.opt.Algorithm not in set([self.opt.Algo_Table_Driven, self.opt.Algo_Bitwise_Expression]):
             return ""
 
-        loop_core_ri = ""
+        loop_core = ""
         loop_indent = ""
         if self.opt.UndefinedCrcParameters:
-            loop_indent = "            "
+            loop_indent = " " * 12
         else:
-            loop_indent = "        "
-        crc_shifted = "$if ($crc_do_shift == True) {:(crc >> $cfg_shift):} $else {:crc:}"
+            loop_indent = " " * 8
+        crc_shifted = "$if ($crc_shift != 0) {:(crc >> $cfg_shift):} $else {:crc:}"
 
         if self.opt.TableIdxWidth == 8:
             crc_lookup = '$if ($crc_algorithm == "table-driven") {:crc_table[tbl_idx]:}' + \
                          '$elif ($crc_algorithm == "bitwise-expression") {:$crc_bitwise_expression_function(tbl_idx):}'
-            loop_core_ri += loop_indent + "tbl_idx = (" + crc_shifted + " ^ *data) & $crc_table_mask;" + '\n' + \
+            loop_core += loop_indent + "tbl_idx = (" + crc_shifted + " ^ *data) & $crc_table_mask;" + '\n' + \
                             loop_indent + "crc = (" + crc_lookup + " ^ (crc >> $cfg_table_idx_width)) & $cfg_mask_shifted;" + '\n'
         else:
             crc_lookup = '$if ($crc_algorithm == "table-driven") {:crc_table[tbl_idx & $crc_table_mask]:}' + \
                          '$elif ($crc_algorithm == "bitwise-expression") {:$crc_bitwise_expression_function(tbl_idx & $crc_table_mask):}'
             for i in range (8 // self.opt.TableIdxWidth):
                 str_idx = "%d" % i
-                loop_core_ri += loop_indent + "tbl_idx = " + crc_shifted + " ^ (*data >> (" + str_idx + " * $cfg_table_idx_width));" + '\n' + \
+                loop_core += loop_indent + "tbl_idx = " + crc_shifted + " ^ (*data >> (" + str_idx + " * $cfg_table_idx_width));" + '\n' + \
                                 loop_indent + "crc = " + crc_lookup + " ^ (crc >> $cfg_table_idx_width);" + '\n'
-        return loop_core_ri
+        return loop_core
 
 
     # __get_crc_bwe_bitmask_minterms

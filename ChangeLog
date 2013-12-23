@@ -1,3 +1,13 @@
+2013-12-23  Thomas Pircher   <tehpeh@gmx.net>
+
+    * crc_symtable.py:
+    Small cleanups.
+
+    * test/test.py:
+    Small cleanups.
+    Added a tests for special cases. For now, added crc-5 with non-inverted
+    input. This test is currently failing.
+
 2013-12-20  Thomas Pircher   <tehpeh@gmx.net>
 
     * crc_symtable.py:
