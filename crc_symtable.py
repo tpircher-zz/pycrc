@@ -586,6 +586,7 @@ $crc_table_core_algorithm_nonreflected
 :}
 }
 
+
 """
 
         elif id == "crc_finalize_function_gen":
@@ -641,6 +642,7 @@ $if ($crc_reflect_in == Undefined and $crc_reflect_out == Undefined) {:
     return (crc ^ $cfg_xor_out) & $cfg_mask;
 :}
 }
+
 
 :}"""
 
@@ -850,8 +852,8 @@ static $crc_t crc_table[$crc_table_width];
 static const $crc_t crc_table[$crc_table_width] = {
 $crc_table_init
 };
-
 :}
+
 :}"""
 
         elif id == "main_template":

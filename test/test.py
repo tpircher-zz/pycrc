@@ -71,7 +71,7 @@ class Options(object):
         self.CompileMixedArgs = options.all or options.compile_mixed_args
         self.VariableWidth = options.all or options.variable_width
 
-        if options.algorithm != None:
+        if options.algorithm is not None:
             alg = options.algorithm.lower()
             if alg in self.AllAlgorithms:
                 self.Algorithm = set([alg])
@@ -114,27 +114,27 @@ class CrcTests(object):
         """
         The class destructor. Delete all generated files.
         """
-        if self.check_file != None:
+        if self.check_file is not None:
             os.remove(self.check_file)
-        if self.crc_bin_bbb_c89 != None:
+        if self.crc_bin_bbb_c89 is not None:
             self.__del_files([self.crc_bin_bbb_c89, self.crc_bin_bbb_c89+".h", self.crc_bin_bbb_c89+".c"])
-        if self.crc_bin_bbb_c99 != None:
+        if self.crc_bin_bbb_c99 is not None:
             self.__del_files([self.crc_bin_bbb_c99, self.crc_bin_bbb_c99+".h", self.crc_bin_bbb_c99+".c"])
-        if self.crc_bin_bbf_c89 != None:
+        if self.crc_bin_bbf_c89 is not None:
             self.__del_files([self.crc_bin_bbf_c89, self.crc_bin_bbf_c89+".h", self.crc_bin_bbf_c89+".c"])
-        if self.crc_bin_bbf_c99 != None:
+        if self.crc_bin_bbf_c99 is not None:
             self.__del_files([self.crc_bin_bbf_c99, self.crc_bin_bbf_c99+".h", self.crc_bin_bbf_c99+".c"])
-        if self.crc_bin_bwe_c89 != None:
+        if self.crc_bin_bwe_c89 is not None:
             self.__del_files([self.crc_bin_bwe_c89, self.crc_bin_bwe_c89+".h", self.crc_bin_bwe_c89+".c"])
-        if self.crc_bin_bwe_c99 != None:
+        if self.crc_bin_bwe_c99 is not None:
             self.__del_files([self.crc_bin_bwe_c99, self.crc_bin_bwe_c99+".h", self.crc_bin_bwe_c99+".c"])
-        if self.crc_bin_tbl_c89 != None:
+        if self.crc_bin_tbl_c89 is not None:
             self.__del_files([self.crc_bin_tbl_c89, self.crc_bin_tbl_c89+".h", self.crc_bin_tbl_c89+".c"])
-        if self.crc_bin_tbl_c99 != None:
+        if self.crc_bin_tbl_c99 is not None:
             self.__del_files([self.crc_bin_tbl_c99, self.crc_bin_tbl_c99+".h", self.crc_bin_tbl_c99+".c"])
-        if self.crc_bin_tbl_idx2 != None:
+        if self.crc_bin_tbl_idx2 is not None:
             self.__del_files([self.crc_bin_tbl_idx2, self.crc_bin_tbl_idx2+".h", self.crc_bin_tbl_idx2+".c"])
-        if self.crc_bin_tbl_idx4 != None:
+        if self.crc_bin_tbl_idx4 is not None:
             self.__del_files([self.crc_bin_tbl_idx4, self.crc_bin_tbl_idx4+".h", self.crc_bin_tbl_idx4+".c"])
         os.removedirs(self.tmpdir)
 
@@ -195,7 +195,7 @@ class CrcTests(object):
         Generate the source and compile to a binary.
         """
         filename = self.__make_src(args, basename, cstd)
-        if filename == None:
+        if filename is None:
             return None
         if not self.__compile(args, filename, cstd):
             self.__del_files([filename, filename+".h", filename+".c"])
@@ -216,44 +216,44 @@ class CrcTests(object):
         if opt.Compile:
             if self.use_algo_bit_by_bit:
                 filename = self.__make_bin("--algorithm bit-by-bit", "crc_bbb_c89", "c89")
-                if filename == None:
+                if filename is None:
                     return False
                 self.crc_bin_bbb_c89 = filename
 
                 filename = self.__make_bin("--algorithm bit-by-bit", "crc_bbb_c99", "c99")
-                if filename == None:
+                if filename is None:
                     return False
                 self.crc_bin_bbb_c99 = filename
 
             if self.use_algo_bit_by_bit_fast:
                 filename = self.__make_bin("--algorithm bit-by-bit-fast", "crc_bbf_c89", "c89")
-                if filename == None:
+                if filename is None:
                     return False
                 self.crc_bin_bbf_c89 = filename
 
                 filename = self.__make_bin("--algorithm bit-by-bit-fast", "crc_bbf_c99", "c99")
-                if filename == None:
+                if filename is None:
                     return False
                 self.crc_bin_bbf_c99 = filename
 
             if self.use_algo_table_driven:
                 filename = self.__make_bin("--algorithm table-driven", "crc_tbl_c89", "c89")
-                if filename == None:
+                if filename is None:
                     return False
                 self.crc_bin_tbl_c89 = filename
 
                 filename = self.__make_bin("--algorithm table-driven", "crc_tbl_c99", "c99")
-                if filename == None:
+                if filename is None:
                     return False
                 self.crc_bin_tbl_c99 = filename
 
                 filename = self.__make_bin("--algorithm table-driven --table-idx-width 2", "crc_tbl_idx2")
-                if filename == None:
+                if filename is None:
                     return False
                 self.crc_bin_tbl_idx2 = filename
 
                 filename = self.__make_bin("--algorithm table-driven --table-idx-width 4", "crc_tbl_idx4")
-                if filename == None:
+                if filename is None:
                     return False
                 self.crc_bin_tbl_idx4 = filename
 
@@ -290,7 +290,7 @@ class CrcTests(object):
         Check all precompiled binaries.
         """
         for binary in [self.crc_bin_bbb_c89, self.crc_bin_bbb_c99, self.crc_bin_bbf_c89, self.crc_bin_bbf_c99, self.crc_bin_tbl_c89, self.crc_bin_tbl_c99, self.crc_bin_tbl_idx2, self.crc_bin_tbl_idx4]:
-            if binary != None:
+            if binary is not None:
                 # Don't test width > 32 for C89, as I don't know how to ask for an data type > 32 bits.
                 if binary[-3:] == "c89" and long_data_type:
                     continue
@@ -305,7 +305,7 @@ class CrcTests(object):
         """
         if self.verbose:
             out_str = "Crc(width = %(width)d, poly = 0x%(poly)x, reflect_in = %(reflect_in)s, xor_in = 0x%(xor_in)x, reflect_out = %(reflect_out)s, xor_out = 0x%(xor_out)x)" % model
-            if expected_crc != None:
+            if expected_crc is not None:
                 out_str += " [check = 0x%x]" % expected_crc
             print(out_str)
         alg = Crc(width = model["width"], poly = model["poly"],
@@ -316,23 +316,23 @@ class CrcTests(object):
 
         if self.use_algo_bit_by_bit:
             bbb_crc = alg.bit_by_bit(check_str)
-            if crc == None:
+            if crc is None:
                 crc = bbb_crc
             error = error or bbb_crc != crc
         if self.use_algo_bit_by_bit_fast:
             bbf_crc = alg.bit_by_bit_fast(check_str)
-            if crc == None:
+            if crc is None:
                 crc = bbf_crc
             error = error or bbf_crc != crc
         if self.use_algo_table_driven:
             tbl_crc = alg.table_driven(check_str)
-            if crc == None:
+            if crc is None:
                 crc = tbl_crc
             error = error or tbl_crc != crc
 
         if error:
             print("error: different checksums!")
-            if expected_crc != None:
+            if expected_crc is not None:
                 print("       check:             0x%x" % expected_crc)
             if self.use_algo_bit_by_bit:
                 print("       bit-by-bit:        0x%x" % bbb_crc)
@@ -343,14 +343,18 @@ class CrcTests(object):
             return None
         return crc
 
-    def __compile_and_check_res(self, cmp_opt, name, expected_crc):
+    def __compile_and_check_res(self, cmp_opt, run_opt, name, expected_crc):
         """
         Compile a model and run it.
         """
         filename = self.__make_bin(cmp_opt, name)
-        if filename == None:
+        if filename is None:
             return False
-        ret = self.__check_command(filename, expected_crc)
+        if run_opt is None:
+            cmd = filename
+        else:
+            cmd = filename + " " + run_opt
+        ret = self.__check_command(cmd, expected_crc)
         self.__del_files([filename, filename+".h", filename+".c"])
         if not ret:
             return False
@@ -411,25 +415,25 @@ class CrcTests(object):
             cmp_opt = "--model %(name)s" % m
 
             if self.use_algo_bit_by_bit:
-                if not self.__compile_and_check_res("--algorithm bit-by-bit" + " " + cmp_opt, "crc_bbb_mod", expected_crc):
+                if not self.__compile_and_check_res("--algorithm bit-by-bit" + " " + cmp_opt, None, "crc_bbb_mod", expected_crc):
                     return False
 
             if self.use_algo_bit_by_bit_fast:
-                if not self.__compile_and_check_res("--algorithm bit-by-bit-fast" + " " + cmp_opt, "crc_bbf_mod", expected_crc):
+                if not self.__compile_and_check_res("--algorithm bit-by-bit-fast" + " " + cmp_opt, None, "crc_bbf_mod", expected_crc):
                     return False
 
             if self.use_algo_bitwise_expression:
-                if not self.__compile_and_check_res("--algorithm bitwise-expression" + " " + cmp_opt, "crc_bwe_mod", expected_crc):
+                if not self.__compile_and_check_res("--algorithm bitwise-expression" + " " + cmp_opt, None, "crc_bwe_mod", expected_crc):
                     return False
 
             if self.use_algo_table_driven:
-                if not self.__compile_and_check_res("--algorithm table-driven" + " " + cmp_opt, "crc_tbl_mod", expected_crc):
+                if not self.__compile_and_check_res("--algorithm table-driven" + " " + cmp_opt, None, "crc_tbl_mod", expected_crc):
                     return False
 
-                if not self.__compile_and_check_res("--algorithm table-driven --table-idx-width=2" + " " + cmp_opt, "crc_tb2_mod", expected_crc):
+                if not self.__compile_and_check_res("--algorithm table-driven --table-idx-width=2" + " " + cmp_opt, None, "crc_tb2_mod", expected_crc):
                     return False
 
-                if not self.__compile_and_check_res("--algorithm table-driven --table-idx-width=4" + " " + cmp_opt, "crc_tb4_mod", expected_crc):
+                if not self.__compile_and_check_res("--algorithm table-driven --table-idx-width=4" + " " + cmp_opt, None, "crc_tb4_mod", expected_crc):
                     return False
         return True
 
@@ -442,12 +446,13 @@ class CrcTests(object):
         if self.verbose:
             print("Running __test_compiled_special_cases()...")
         if self.use_algo_table_driven:
-            if not self.__compile_and_check_res("--model=crc-5 --reflect-in=0 --algorithm table-driven --table-idx-width=8", "crc_tbl_special", 0x01):
+            if not self.__compile_and_check_res("--model=crc-5 --reflect-in=0 --algorithm table-driven --table-idx-width=8", None, "crc_tbl_special", 0x01):
                 return False
-            if not self.__compile_and_check_res("--model=crc-5 --reflect-in=0 --algorithm table-driven --table-idx-width=4", "crc_tbl_special", 0x01):
+            if not self.__compile_and_check_res("--model=crc-5 --reflect-in=0 --algorithm table-driven --table-idx-width=4", None, "crc_tbl_special", 0x01):
                 return False
-            if not self.__compile_and_check_res("--model=crc-5 --reflect-in=0 --algorithm table-driven --table-idx-width=2", "crc_tbl_special", 0x01):
+            if not self.__compile_and_check_res("--model=crc-5 --reflect-in=0 --algorithm table-driven --table-idx-width=2", None, "crc_tbl_special", 0x01):
                 return False
+        return True
 
 
     def __test_variable_width(self):
@@ -472,39 +477,39 @@ class CrcTests(object):
             args = "--width %(width)s --poly 0x%(poly)x --xor-in 0x%(xor_in)x --reflect-in %(reflect_in)s --xor-out 0x%(xor_out)x --reflect-out %(reflect_out)s" % mw
 
             check = self.__get_crc(mw)
-            if check == None:
+            if check is None:
                 return False
 
             if self.use_algo_bit_by_bit:
-                if self.crc_bin_bbb_c99 != None:
+                if self.crc_bin_bbb_c99 is not None:
                     if not self.__check_command(self.crc_bin_bbb_c99 + " " + args, check):
                         return False
 
-                if not self.__compile_and_check_res("--algorithm bit-by-bit" + " " + args, "crc_bbb_arg", check):
+                if not self.__compile_and_check_res("--algorithm bit-by-bit" + " " + args, None, "crc_bbb_arg", check):
                     return False
 
             if self.use_algo_bit_by_bit_fast:
-                if self.crc_bin_bbf_c99 != None:
+                if self.crc_bin_bbf_c99 is not None:
                     if not self.__check_command(self.crc_bin_bbf_c99 + " " + args, check):
                         return False
 
-                if not self.__compile_and_check_res("--algorithm bit-by-bit-fast" + " " + args, "crc_bbf_arg", check):
+                if not self.__compile_and_check_res("--algorithm bit-by-bit-fast" + " " + args, None, "crc_bbf_arg", check):
                     return False
 
             if self.use_algo_bitwise_expression:
-                if self.crc_bin_bwe_c99 != None:
+                if self.crc_bin_bwe_c99 is not None:
                     if not self.__check_command(self.crc_bin_bwe_c99 + " " + args, check):
                         return False
 
-                if not self.__compile_and_check_res("--algorithm bitwise-expression" + " " + args, "crc_bwe_arg", check):
+                if not self.__compile_and_check_res("--algorithm bitwise-expression" + " " + args, None, "crc_bwe_arg", check):
                     return False
 
             if self.use_algo_table_driven:
-                if self.crc_bin_tbl_c99 != None:
+                if self.crc_bin_tbl_c99 is not None:
                     if not self.__check_command(self.crc_bin_tbl_c99 + " " + args, check):
                         return False
 
-                if not self.__compile_and_check_res("--algorithm table-driven" + " " + args, "crc_tbl_arg", check):
+                if not self.__compile_and_check_res("--algorithm table-driven" + " " + args, None, "crc_tbl_arg", check):
                     return False
         return True
 
@@ -525,40 +530,40 @@ class CrcTests(object):
             'xor_out':       ["", "--xor-out 0x0"],
             'check':         0x31c3,
         }
-        cmp_param = {}
-        arg_param = {}
+        cmp_args = {}
+        run_args = {}
         for b_width in range(2):
-            cmp_param["width"] = m["width"][b_width]
-            arg_param["width"] = m["width"][1 - b_width]
+            cmp_args["width"] = m["width"][b_width]
+            run_args["width"] = m["width"][1 - b_width]
             for b_poly in range(2):
-                cmp_param["poly"] = m["poly"][b_poly]
-                arg_param["poly"] = m["poly"][1 - b_poly]
+                cmp_args["poly"] = m["poly"][b_poly]
+                run_args["poly"] = m["poly"][1 - b_poly]
                 for b_ref_in in range(2):
-                    cmp_param["reflect_in"] = m["reflect_in"][b_ref_in]
-                    arg_param["reflect_in"] = m["reflect_in"][1 - b_ref_in]
+                    cmp_args["reflect_in"] = m["reflect_in"][b_ref_in]
+                    run_args["reflect_in"] = m["reflect_in"][1 - b_ref_in]
                     for b_xor_in in range(2):
-                        cmp_param["xor_in"] = m["xor_in"][b_xor_in]
-                        arg_param["xor_in"] = m["xor_in"][1 - b_xor_in]
+                        cmp_args["xor_in"] = m["xor_in"][b_xor_in]
+                        run_args["xor_in"] = m["xor_in"][1 - b_xor_in]
                         for b_ref_out in range(2):
-                            cmp_param["reflect_out"] = m["reflect_out"][b_ref_out]
-                            arg_param["reflect_out"] = m["reflect_out"][1 - b_ref_out]
+                            cmp_args["reflect_out"] = m["reflect_out"][b_ref_out]
+                            run_args["reflect_out"] = m["reflect_out"][1 - b_ref_out]
                             for b_xor_out in range(2):
-                                cmp_param["xor_out"] = m["xor_out"][b_xor_out]
-                                arg_param["xor_out"] = m["xor_out"][1 - b_xor_out]
+                                cmp_args["xor_out"] = m["xor_out"][b_xor_out]
+                                run_args["xor_out"] = m["xor_out"][1 - b_xor_out]
 
-                                cmp_opt = "%(width)s %(poly)s %(reflect_in)s %(xor_in)s %(reflect_out)s %(xor_out)s" %  cmp_param
-                                arg_opt = "%(width)s %(poly)s %(reflect_in)s %(xor_in)s %(reflect_out)s %(xor_out)s" %  arg_param
+                                cmp_opt = "%(width)s %(poly)s %(reflect_in)s %(xor_in)s %(reflect_out)s %(xor_out)s" %  cmp_args
+                                run_opt = "%(width)s %(poly)s %(reflect_in)s %(xor_in)s %(reflect_out)s %(xor_out)s" %  run_args
 
                                 if self.use_algo_bit_by_bit:
-                                    if not self.__compile_and_check_res("--algorithm bit-by-bit" + " " + cmp_opt, "crc_bbb_arg", m["check"]):
+                                    if not self.__compile_and_check_res("--algorithm bit-by-bit" + " " + cmp_opt, run_opt, "crc_bbb_arg", m["check"]):
                                         return False
 
                                 if self.use_algo_bit_by_bit_fast:
-                                    if not self.__compile_and_check_res("--algorithm bit-by-bit-fast" + " " + cmp_opt, "crc_bbf_arg", m["check"]):
+                                    if not self.__compile_and_check_res("--algorithm bit-by-bit-fast" + " " + cmp_opt, run_opt, "crc_bbf_arg", m["check"]):
                                         return False
 
                                 if self.use_algo_table_driven:
-                                    if not self.__compile_and_check_res("--algorithm table-driven" + " " + cmp_opt, "crc_tbl_arg", m["check"]):
+                                    if not self.__compile_and_check_res("--algorithm table-driven" + " " + cmp_opt, run_opt, "crc_tbl_arg", m["check"]):
                                         return False
         return True
 
@@ -577,7 +582,7 @@ class CrcTests(object):
                             args="--width %d --poly 0x%x --reflect-in %s --reflect-out %s --xor-in 0x%x --xor-out 0x0" % (width, poly, refin, refout, init)
                             cmd_str = self.pycrc_bin + " " + args
                             ret = self.__run_command(cmd_str)
-                            if ret == None:
+                            if ret is None:
                                 return False
                             ret = int(ret, 16)
                             if not self.__check_bin(args, ret, width > 32):
