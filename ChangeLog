@@ -1,6 +1,13 @@
 2013-12-23  Thomas Pircher   <tehpeh@gmx.net>
 
     * crc_symtable.py:
+    The table-driven code for polynomials of width < 8 using a table index
+    width < 8 was producing a wrong checksum.
+    Thanks to Radosław Gancarz.
+
+2013-12-23  Thomas Pircher   <tehpeh@gmx.net>
+
+    * crc_symtable.py:
     Small cleanups.
 
     * test/test.py:

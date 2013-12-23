@@ -1358,20 +1358,18 @@ $if ($crc_xor_out == Undefined) {:
         else:
             shr = "%d" % (self.opt.Width - self.opt.TableIdxWidth)
 
-        reg_shift = "$if ($crc_shift != 0) {:($cfg_table_idx_width - $cfg_shift):} $else {:$cfg_table_idx_width:}"
-
         if self.opt.TableIdxWidth == 8:
             crc_lookup = '$if ($crc_algorithm == "table-driven") {:crc_table[tbl_idx]:}' + \
                          '$elif ($crc_algorithm == "bitwise-expression") {:$crc_bitwise_expression_function(tbl_idx):}'
             loop_core += loop_indent + "tbl_idx = ((crc >> " + shr + ") ^ *data) & $crc_table_mask;" + '\n' + \
-                            loop_indent + "crc = (" + crc_lookup + " ^ (crc << " + reg_shift + ")) & $cfg_mask_shifted;" + '\n'
+                            loop_indent + "crc = (" + crc_lookup + " ^ (crc << $cfg_table_idx_width)) & $cfg_mask_shifted;" + '\n'
         else:
             crc_lookup = '$if ($crc_algorithm == "table-driven") {:crc_table[tbl_idx & $crc_table_mask]:}' + \
                          '$elif ($crc_algorithm == "bitwise-expression") {:$crc_bitwise_expression_function(tbl_idx & $crc_table_mask):}'
             for i in range (8 // self.opt.TableIdxWidth):
                 str_idx = "%s" % (8 - (i + 1) * self.opt.TableIdxWidth)
                 loop_core += loop_indent + "tbl_idx = (crc >> " + shr + ") ^ (*data >> " + str_idx + ");" + '\n' + \
-                                loop_indent + "crc = " + crc_lookup + " ^ (crc << " + reg_shift + ");" + '\n'
+                                loop_indent + "crc = " + crc_lookup + " ^ (crc << $cfg_table_idx_width);" + '\n'
         return loop_core
 
 
