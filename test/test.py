@@ -16,14 +16,14 @@ from crc_algorithms import Crc
 ###############################################################################
 class Options(object):
     """
-    The options parsing and validationg class
+    The options parsing and validating class
     """
 
 
     # Class constructor
     ###############################################################################
     def __init__(self):
-        self.AllAlgorithms          = set(["bit-by-bit", "bit-by-bit-fast", "bitwise-expression", "table-driven"])
+        self.AllAlgorithms          = set(["bit-by-bit", "bbb", "bit-by-bit-fast", "bbf", "bitwise-expression", "bwe", "table-driven", "tbl"])
         self.Compile                = False
         self.RandomParameters       = False
         self.CompileMixedArgs       = False
@@ -38,8 +38,7 @@ class Options(object):
         """
         Parses and validates the options given as arguments
         """
-        usage = """\
-%prog [OPTIONS]"""
+        usage = """%prog [OPTIONS]"""
 
         models = CrcModels()
         model_list = ", ".join(models.getList())
@@ -336,6 +335,21 @@ class CrcTests(object):
             return None
         return crc
 
+    # __compile_and_check_res
+    ###############################################################################
+    def __compile_and_check_res(self, cmp_opt, name, expected_crc):
+        """
+        Compile a model and run it.
+        """
+        filename = self.__make_bin(cmp_opt, name)
+        if filename == None:
+            return False
+        ret = self.__check_command(filename, expected_crc)
+        self.__del_files([filename, filename+".h", filename+".c"])
+        if not ret:
+            return False
+        return True
+
     # __test_models
     ###############################################################################
     def __test_models(self):
@@ -377,7 +391,6 @@ class CrcTests(object):
             print("")
         return True
 
-
     # __test_compiled_models
     ###############################################################################
     def __test_compiled_models(self):
@@ -394,39 +407,25 @@ class CrcTests(object):
             cmp_opt = "--model %(name)s" % m
 
             if self.use_algo_bit_by_bit:
-                filename = self.__make_bin("--algorithm bit-by-bit" + " " + cmp_opt, "crc_bbb_mod")
-                if filename == None:
-                    return False
-                ret = self.__check_command(filename, expected_crc)
-                self.__del_files([filename, filename+".h", filename+".c"])
-                if not ret:
+                if not self.__compile_and_check_res("--algorithm bit-by-bit" + " " + cmp_opt, "crc_bbb_mod", expected_crc):
                     return False
 
             if self.use_algo_bit_by_bit_fast:
-                filename = self.__make_bin("--algorithm bit-by-bit-fast" + " " + cmp_opt, "crc_bbf_mod")
-                if filename == None:
-                    return False
-                ret = self.__check_command(filename, expected_crc)
-                self.__del_files([filename, filename+".h", filename+".c"])
-                if not ret:
+                if not self.__compile_and_check_res("--algorithm bit-by-bit-fast" + " " + cmp_opt, "crc_bbf_mod", expected_crc):
                     return False
 
             if self.use_algo_bitwise_expression:
-                filename = self.__make_bin("--algorithm bitwise-expression" + " " + cmp_opt, "crc_bwe_mod")
-                if filename == None:
-                    return False
-                ret = self.__check_command(filename, expected_crc)
-                self.__del_files([filename, filename+".h", filename+".c"])
-                if not ret:
+                if not self.__compile_and_check_res("--algorithm bitwise-expression" + " " + cmp_opt, "crc_bwe_mod", expected_crc):
                     return False
 
             if self.use_algo_table_driven:
-                filename = self.__make_bin("--algorithm table-driven" + " " + cmp_opt, "crc_tbl_mod")
-                if filename == None:
+                if not self.__compile_and_check_res("--algorithm table-driven" + " " + cmp_opt, "crc_tbl_mod", expected_crc):
                     return False
-                ret = self.__check_command(filename, expected_crc)
-                self.__del_files([filename, filename+".h", filename+".c"])
-                if not ret:
+
+                if not self.__compile_and_check_res("--algorithm table-driven --table-idx-width=2" + " " + cmp_opt, "crc_tb2_mod", expected_crc):
+                    return False
+
+                if not self.__compile_and_check_res("--algorithm table-driven --table-idx-width=4" + " " + cmp_opt, "crc_tb4_mod", expected_crc):
                     return False
         return True
 
@@ -497,30 +496,15 @@ class CrcTests(object):
                                 arg_opt = "%(width)s %(poly)s %(reflect_in)s %(xor_in)s %(reflect_out)s %(xor_out)s" %  arg_param
 
                                 if self.use_algo_bit_by_bit:
-                                    filename = self.__make_bin("--algorithm bit-by-bit" + " " + cmp_opt, "crc_bbb_arg")
-                                    if filename == None:
-                                        return False
-                                    ret = self.__check_command(filename + " " + arg_opt, m["check"])
-                                    self.__del_files([filename, filename+".h", filename+".c"])
-                                    if not ret:
+                                    if not self.__compile_and_check_res("--algorithm bit-by-bit" + " " + cmp_opt, "crc_bbb_arg", m["check"]):
                                         return False
 
                                 if self.use_algo_bit_by_bit_fast:
-                                    filename = self.__make_bin("--algorithm bit-by-bit-fast" + " " + cmp_opt, "crc_bbf_arg")
-                                    if filename == None:
-                                        return False
-                                    ret = self.__check_command(filename + " " + arg_opt, m["check"])
-                                    self.__del_files([filename, filename+".h", filename+".c"])
-                                    if not ret:
+                                    if not self.__compile_and_check_res("--algorithm bit-by-bit-fast" + " " + cmp_opt, "crc_bbf_arg", m["check"]):
                                         return False
 
                                 if self.use_algo_table_driven:
-                                    filename = self.__make_bin("--algorithm table-driven" + " " + cmp_opt, "crc_tbl_arg")
-                                    if filename == None:
-                                        return False
-                                    ret = self.__check_command(filename + " " + arg_opt, m["check"])
-                                    self.__del_files([filename, filename+".h", filename+".c"])
-                                    if not ret:
+                                    if not self.__compile_and_check_res("--algorithm table-driven" + " " + cmp_opt, "crc_tbl_arg", m["check"]):
                                         return False
         return True
 
@@ -557,12 +541,7 @@ class CrcTests(object):
                     if not self.__check_command(self.crc_bin_bbb_c99 + " " + args, check):
                         return False
 
-                filename = self.__make_bin("--algorithm bit-by-bit" + " " + args, "crc_bbb_arg")
-                if filename == None:
-                    return False
-                ret = self.__check_command(filename, check)
-                self.__del_files([filename, filename+".h", filename+".c"])
-                if not ret:
+                if not self.__compile_and_check_res("--algorithm bit-by-bit" + " " + args, "crc_bbb_arg", check):
                     return False
 
             if self.use_algo_bit_by_bit_fast:
@@ -570,12 +549,7 @@ class CrcTests(object):
                     if not self.__check_command(self.crc_bin_bbf_c99 + " " + args, check):
                         return False
 
-                filename = self.__make_bin("--algorithm bit-by-bit-fast" + " " + args, "crc_bbf_arg")
-                if filename == None:
-                    return False
-                ret = self.__check_command(filename, check)
-                self.__del_files([filename, filename+".h", filename+".c"])
-                if not ret:
+                if not self.__compile_and_check_res("--algorithm bit-by-bit-fast" + " " + args, "crc_bbf_arg", check):
                     return False
 
             if self.use_algo_bitwise_expression:
@@ -583,12 +557,7 @@ class CrcTests(object):
                     if not self.__check_command(self.crc_bin_bwe_c99 + " " + args, check):
                         return False
 
-                filename = self.__make_bin("--algorithm bitwise-expression" + " " + args, "crc_bwe_arg")
-                if filename == None:
-                    return False
-                ret = self.__check_command(filename, check)
-                self.__del_files([filename, filename+".h", filename+".c"])
-                if not ret:
+                if not self.__compile_and_check_res("--algorithm bitwise-expression" + " " + args, "crc_bwe_arg", check):
                     return False
 
             if self.use_algo_table_driven:
@@ -596,12 +565,7 @@ class CrcTests(object):
                     if not self.__check_command(self.crc_bin_tbl_c99 + " " + args, check):
                         return False
 
-                filename = self.__make_bin("--algorithm table-driven" + " " + args, "crc_tbl_arg")
-                if filename == None:
-                    return False
-                ret = self.__check_command(filename, check)
-                self.__del_files([filename, filename+".h", filename+".c"])
-                if not ret:
+                if not self.__compile_and_check_res("--algorithm table-driven" + " " + args, "crc_tbl_arg", check):
                     return False
         return True
 
@@ -612,10 +576,10 @@ class CrcTests(object):
         """
         Run all tests
         """
-        self.use_algo_bit_by_bit = "bit-by-bit" in opt.Algorithm
-        self.use_algo_bit_by_bit_fast = "bit-by-bit-fast" in opt.Algorithm
-        self.use_algo_bitwise_expression = "bitwise-expression" in opt.Algorithm
-        self.use_algo_table_driven = "table-driven" in opt.Algorithm
+        self.use_algo_bit_by_bit = "bit-by-bit" in opt.Algorithm or "bbb" in opt.Algorithm
+        self.use_algo_bit_by_bit_fast = "bit-by-bit-fast" in opt.Algorithm or "bbf" in opt.Algorithm
+        self.use_algo_bitwise_expression = "bitwise-expression" in opt.Algorithm or "bwe" in opt.Algorithm
+        self.use_algo_table_driven = "table-driven" in opt.Algorithm or "tbl" in opt.Algorithm
         self.verbose = opt.Verbose
 
         if opt.Python3:

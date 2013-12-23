@@ -1163,9 +1163,9 @@ $if ($crc_xor_out == Undefined) {:
         if value == None:
             return "Undefined"
         if width == None:
-            return "0x%xu" % value
+            return "0x%x" % value
         width = (width + 3) // 4
-        hex_str = "0x%%0%dxu" % width
+        hex_str = "0x%%0%dx" % width
         return hex_str % value
 
 

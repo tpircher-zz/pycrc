@@ -562,7 +562,7 @@ typedef struct {
     crc_t xor_out;
 
     // internal parameters
-    crc_t msb_mask;             // initialise as (crc_t)1UL &lt;&lt; (cfg-&gt;width - 1)
+    crc_t msb_mask;             // initialise as (crc_t)1u &lt;&lt; (cfg-&gt;width - 1)
     crc_t crc_mask;             // initialise as (cfg-&gt;msb_mask - 1) | cfg-&gt;msb_mask
     unsigned int crc_shift;     // initialise as cfg-&gt;width &lt; 8 ? 8 - cfg-&gt;width : 0
 } crc_cfg_t;
