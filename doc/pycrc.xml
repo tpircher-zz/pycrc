@@ -403,7 +403,7 @@
                         The most significant bit of the word is moved to the least significant position,
                         the second-most significant bit is moved to the second-least significant position
                         and so on.
-                        The reflected value of 0xa3 (10100010b) is 0x45 (01000101b), for example.
+                        The reflected value of 0xa2 (10100010b) is 0x45 (01000101b), for example.
                         </para>
                         <para>
                         Some CRC algorithms can be implemented more efficiently in a bit reversed version,
