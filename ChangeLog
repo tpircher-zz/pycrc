@@ -1,3 +1,21 @@
+2014-12-04  Thomas Pircher   <tehpeh@gmx.net>
+
+    * crc_symtable.py:
+    Smaller code cleanups.
+
+    * doc/pyxrx.xml:
+    Stated more clearly that the bitwise expression algorithm is experimental.
+
+2014-07-18  Thomas Pircher   <tehpeh@gmx.net>
+
+    * doc/pyxrx.xml:
+    Fixed a typo in the documentation.
+    The description previously stated:
+        The reflected value of 0xa3 (10100010b) is 0x45 (01000101b)
+    but this should be:
+        The reflected value of 0xa2 (10100010b) is 0x45 (01000101b)
+    Thanks to Andreas Nebenfuehr for reporting the mistake.
+
 2013-12-23  Thomas Pircher   <tehpeh@gmx.net>
 
     * crc_symtable.py:

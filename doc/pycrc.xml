@@ -5,7 +5,7 @@
 <!ENTITY project_version    "0.8">
 <!ENTITY project_homepage   "http://www.tty1.net/pycrc/">
 <!ENTITY project_models     "http://www.tty1.net/pycrc/crc-models_en.html">
-<!ENTITY date               "2013-07-25">
+<!ENTITY date               "2014-12-04">
 <!ENTITY author_firstname   "Thomas">
 <!ENTITY author_surname     "Pircher">
 <!ENTITY author_email       "tehpeh@gmx.net">
@@ -106,9 +106,14 @@
                         calculates the CRC byte-wise using bit-wise expressions (such as binary and, not, xor,
                         bit-shifts etc).
                         This algorithm uses the same approach as the <replaceable>&table-driven;</replaceable>
-                        variant, but uses a logical operations instead of a look-up table. It is slightly
+                        variant, but uses a logical operations instead of a look-up table.
+                        <!--
+                        It is slightly
                         slower than the <replaceable>&table-driven;</replaceable> algorithm, but without the
                         overhead of a look-up table.
+                        -->
+                        This is an experimental feature and currently is producing the slowest and biggest code
+                        among all algorithms. Don't use in prodcution code.
                     </para>
                     <para>
                         This is an experimental feature and will in most cases result in a slower and bigger

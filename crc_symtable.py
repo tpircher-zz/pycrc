@@ -1,6 +1,6 @@
 #  pycrc -- parameterisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2013  Thomas Pircher  <tehpeh@gmx.net>
+#  Copyright (c) 2006-2014  Thomas Pircher  <tehpeh@gmx.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to
@@ -73,6 +73,16 @@ class SymbolTable:
         The class constructor.
         """
         self.opt = opt
+
+        if self.opt.Algorithm in set([self.opt.Algo_Table_Driven, self.opt.Algo_Bitwise_Expression]) \
+                and (self.opt.Width == None or self.opt.Width < 8):
+            if self.opt.Width == None:
+                self.tbl_shift = None
+            else:
+                self.tbl_shift = 8 - self.opt.Width
+        else:
+            self.tbl_shift = 0
+
         self.table = {}
         self.table["nop"] = ""
         self.table["datetime"] = time.asctime()
@@ -95,14 +105,10 @@ class SymbolTable:
         self.table["crc_table_mask"] = self.__pretty_hex(self.opt.TableWidth - 1, 8)
         self.table["crc_mask"] = self.__pretty_hex(self.opt.Mask, self.opt.Width)
         self.table["crc_msb_mask"] = self.__pretty_hex(self.opt.MSB_Mask, self.opt.Width)
-        if self.opt.Algorithm in set([self.opt.Algo_Table_Driven, self.opt.Algo_Bitwise_Expression]) \
-                and (self.opt.Width == None or self.opt.Width < 8):
-            if self.opt.Width == None:
-                self.table["crc_shift"] = self.__pretty_str(None)
-            else:
-                self.table["crc_shift"] = self.__pretty_str(8 - self.opt.Width)
+        if self.tbl_shift == None:
+            self.table["crc_shift"] = self.__pretty_str(None)
         else:
-            self.table["crc_shift"] = self.__pretty_str(0)
+            self.table["crc_shift"] = self.__pretty_str(self.tbl_shift)
 
         self.table["cfg_width"] = "$if ($crc_width != Undefined) {:$crc_width:} $else {:cfg->width:}"
         self.table["cfg_poly"] = "$if ($crc_poly != Undefined) {:$crc_poly:} $else {:cfg->poly:}"
@@ -285,6 +291,9 @@ extern "C" {
 
 /**
  * The definition of the used algorithm.
+ *
+ * This is not used anywhere in the generated code, but it may be used by the
+ * application code to call algoritm-specific code, is desired.
  *****************************************************************************/
 $if ($crc_algorithm == "bit-by-bit") {:
 #define CRC_ALGO_BIT_BY_BIT 1
@@ -1314,7 +1323,7 @@ $if ($crc_xor_out == Undefined) {:
                 reflect_in = self.opt.ReflectIn,
                 xor_in = 0, reflect_out = False, xor_out = 0,       # set unimportant variables to known values
                 table_idx_width = self.opt.TableIdxWidth)
-        tbl = crc.gen_table()
+        crc_tbl = crc.gen_table()
         if self.opt.Width >= 32:
             values_per_line = 4
         elif self.opt.Width >= 16:
@@ -1326,12 +1335,13 @@ $if ($crc_xor_out == Undefined) {:
         for i in range(self.opt.TableWidth):
             if i % values_per_line == 0:
                 out += " " * 4
+            tbl_val = self.__pretty_hex(crc_tbl[i], format_width)
             if i == (self.opt.TableWidth - 1):
-                out += "%s" % self.__pretty_hex(tbl[i], format_width)
+                out += "%s" % tbl_val
             elif i % values_per_line == (values_per_line - 1):
-                out += "%s,\n" % self.__pretty_hex(tbl[i], format_width)
+                out += "%s,\n" % tbl_val
             else:
-                out += "%s, " % self.__pretty_hex(tbl[i], format_width)
+                out += "%s, " % tbl_val
         return out
 
 
@@ -1339,7 +1349,7 @@ $if ($crc_xor_out == Undefined) {:
     ###############################################################################
     def __get_table_core_algorithm_nonreflected(self):
         """
-        Return the core loop of the table-driven algorithm, non-reflected variant
+        Return the core loop of the table-driven algorithm, non-reflected variant.
         """
         if self.opt.Algorithm not in set([self.opt.Algo_Table_Driven, self.opt.Algo_Bitwise_Expression]):
             return ""
