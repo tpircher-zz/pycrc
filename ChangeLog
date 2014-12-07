@@ -2,7 +2,7 @@
 # Version 0.8.2, 2014-12-04
 #
 
-2014-12-04  Thomas Pircher   <tehpeh@gmx.net>
+2014-12-04  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_symtable.py:
     Smaller code cleanups.
@@ -10,7 +10,7 @@
     * doc/pyxrx.xml:
     Stated more clearly that the bitwise expression algorithm is experimental.
 
-2014-07-18  Thomas Pircher   <tehpeh@gmx.net>
+2014-07-18  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * doc/pyxrx.xml:
     Fixed a typo in the documentation.
@@ -20,14 +20,14 @@
         The reflected value of 0xa2 (10100010b) is 0x45 (01000101b)
     Thanks to Andreas Nebenfuehr for reporting the mistake.
 
-2013-12-23  Thomas Pircher   <tehpeh@gmx.net>
+2013-12-23  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_symtable.py:
     The table-driven code for polynomials of width < 8 using a table index
     width < 8 was producing a wrong checksum.
     Thanks to Radosław Gancarz.
 
-2013-12-23  Thomas Pircher   <tehpeh@gmx.net>
+2013-12-23  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_symtable.py:
     Small cleanups.
@@ -37,7 +37,7 @@
     Added a tests for special cases. For now, added crc-5 with non-inverted
     input. This test is currently failing.
 
-2013-12-20  Thomas Pircher   <tehpeh@gmx.net>
+2013-12-20  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_symtable.py:
     * test/test.py:
@@ -48,7 +48,7 @@
     For C99, the uint_fastN_t data types are used or long long, if the Width is
     unknown.
 
-2013-07-25  Thomas Pircher   <tehpeh@gmx.net>
+2013-07-25  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_opt.py:
     Removed warning about even polynomials. As Lars Pötter rightly pointed out,
@@ -61,12 +61,12 @@
 # Version 0.8.1, 2013-05-17
 #
 
-2013-04-19  Thomas Pircher   <tehpeh@gmx.net>
+2013-04-19  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * qm.py:
     Updated qm.py from https://github.com/tpircher/quine-mccluskey.
 
-2013-03-31  Thomas Pircher   <tehpeh@gmx.net>
+2013-03-31  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * README.md:
     Esplicitly stated that the output of pycrc is not considered a substantial
@@ -76,13 +76,13 @@
     Re-organised the symbol table: grouped the code by functionality, not by
     algorithm.
 
-2013-02-25  Thomas Pircher   <tehpeh@gmx.net>
+2013-02-25  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * pycrc.py:
     * crc_algorithms.py:
     The input to the CRC routines can now be bytes or strings.
 
-2013-02-19  Thomas Pircher   <tehpeh@gmx.net>
+2013-02-19  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * pycrc.py:
     Fixed a bug in the handling of hexstrings in Python3.
@@ -91,7 +91,7 @@
     * test/test.py:
     Added --check-hexstring to the tests.
 
-2013-02-19  Thomas Pircher   <tehpeh@gmx.net>
+2013-02-19  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * doc/pycrc.xml:
     Minor formatting change in the manpage.
@@ -102,7 +102,7 @@
     * test/check_files.sh:
     Added the files generated with the bwe algorithm to check_files.sh.
 
-2013-01-12  Thomas Pircher   <tehpeh@gmx.net>
+2013-01-12  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_models.py:
     Remove obsolete and unused 'direct' parameter.
@@ -118,7 +118,7 @@
 # Version 0.8, 2013-01-04
 #
 
-2013-01-04  Thomas Pircher   <tehpeh@gmx.net>
+2013-01-04  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * pycrc.py:
     * crc_parser.py:
@@ -137,13 +137,13 @@
     At the moment the generated code is bigger and slower than any other
     algorithm, so use at your own risk.
 
-2013-01-02  Thomas Pircher   <tehpeh@gmx.net>
+2013-01-02  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_opt.py:
     * doc/pycrc.xml:
     Now it is possible to specify the --include option multiple times.
 
-2013-01-02  Thomas Pircher   <tehpeh@gmx.net>
+2013-01-02  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * doc/pycrc.xml:
     Completely revisited and reworked the documentation.
@@ -151,7 +151,7 @@
     * crc_opt.py:
     Updated the command line help screen with more useful command descriptions.
 
-2013-01-01  Thomas Pircher   <tehpeh@gmx.net>
+2013-01-01  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * all *.py files:
     Removed the -*- coding: Latin-1 -*- string.
@@ -160,13 +160,13 @@
     * COPYING:
     Updated the copyright year to 2013.
 
-2012-11-25  Thomas Pircher   <tehpeh@gmx.net>
+2012-11-25  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_opt.py:
     * doc/pycrc.xml:
     Renamed abbreviations to bbb, bbf, tbl.
 
-2012-11-18  Thomas Pircher   <tehpeh@gmx.net>
+2012-11-18  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_opt.py:
     It is possible now to abbreviate the algorithms (bbb for bit-by-bit,
@@ -178,7 +178,7 @@
     Documented the possibility to abbreviate the algorithms. Minor
     improvements.
 
-2012-11-17  Thomas Pircher   <tehpeh@gmx.net>
+2012-11-17  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * README.md:
     Added a note to README.md that version 0.7.10 of pycrc is the last one
@@ -187,7 +187,7 @@
     * doc/pycrc.xml:
     Updated a link to the list of CRC models.
 
-2012-10-22  Thomas Pircher   <tehpeh@gmx.net>
+2012-10-22  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * README.md:
     Renamed from README.
@@ -199,7 +199,7 @@
 # Version 0.7.11, 2012-10-20
 #
 
-2012-02-26  Thomas Pircher   <tehpeh@gmx.net>
+2012-02-26  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_symtable.py:
     * pycrc.py:
@@ -208,7 +208,7 @@
     * test/test.py:
     Added a test for compiled standard models.
 
-2012-02-26  Thomas Pircher   <tehpeh@gmx.net>
+2012-02-26  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_models.py:
     Fixed a wrong "check" value of the crc-64-jones model.
@@ -224,7 +224,7 @@
 # Version 0.7.10, 2012-02-13
 #
 
-2012-02-08  Thomas Pircher   <tehpeh@gmx.net>
+2012-02-08  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_symtable.py:
     Bad-looking C code generated; make sure the bit-by-bit(fast) code does not
@@ -233,7 +233,7 @@
     * crc_symtable.py:
     Some small code clean-up: use set() when appropriate.
 
-2011-12-19  Thomas Pircher   <tehpeh@gmx.net>
+2011-12-19  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_models.py:
     * doc/pycrc.xml:
@@ -241,7 +241,7 @@
     Taken from Greg Cook's Catalogue of parametrised CRC algorithms:
     http://regregex.bbcmicro.net/crc-catalogue.htm
 
-2011-12-14  Thomas Pircher   <tehpeh@gmx.net>
+2011-12-14  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * doc/pycrc.xml:
     Fixed a mistake in the man page that still used the old model name
@@ -251,14 +251,14 @@
 # Version 0.7.9, 2011-12-08
 #
 
-2011-12-08  Thomas Pircher   <tehpeh@gmx.net>
+2011-12-08  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_symtable.py:
     Fixed a bug in the generated C89 code that included stdint.h.
     Thanks to Frank (ftheile).
     Closes issue 3454356.
 
-2011-11-08  Thomas Pircher   <tehpeh@gmx.net>
+2011-11-08  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_symtable.py:
     Fixed a bug in the generated C89 code when using a 64 bit CRC.
@@ -270,7 +270,7 @@
 # Version 0.7.8, 2011-07-10
 #
 
-2011-07-10  Thomas Pircher   <tehpeh@gmx.net>
+2011-07-10  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_symtable.py:
     When generating C code for the C89 or ANSI standard, don't include <stdint.h>.
@@ -289,13 +289,13 @@
 # Version 0.7.7, 2011-02-11
 #
 
-2011-02-11  Thomas Pircher   <tehpeh@gmx.net>
+2011-02-11  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * all files:
     Updated the copyright year.
     Fixed some coding style issues found by pylint and pychecker.
 
-2010-12-13  Thomas Pircher   <tehpeh@gmx.net>
+2010-12-13  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_opt.py:
     Substituted the deprecated function atoi() with int(). Closes issue 3136566.
@@ -308,17 +308,17 @@
 # Version 0.7.6, 2010-10-21
 #
 
-2010-10-21  Thomas Pircher   <tehpeh@gmx.net>
+2010-10-21  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_symtable.py:
     Fixed a minor bug in the command line parsing of the generated main function.
 
-2010-08-07  Thomas Pircher   <tehpeh@gmx.net>
+2010-08-07  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_symtable.py, crc_parser.py, crc_lexer.py:
     Rewritten macro parser from scratch. Simplified the macro language.
 
-2010-08-03  Thomas Pircher   <tehpeh@gmx.net>
+2010-08-03  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_symtable.py: changed a simple division (/) to a integer division (//)
     for Python3 compatibility.
@@ -327,7 +327,7 @@
 # Version 0.7.5, 2010-03-28
 #
 
-2010-03-27  Thomas Pircher   <tehpeh@gmx.net>
+2010-03-27  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_symtable.py:
     C/C++ code can now be generated for the table-driven algorithm with widths
@@ -339,7 +339,7 @@
                    structure, that must be initialised manually when the width
                    was undefined during C/C++ code generation.
 
-2010-03-27  Thomas Pircher   <tehpeh@gmx.net>
+2010-03-27  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_opt.py, crc_algorithms.py:
     Python implementation of the table-driven algorithm can handle widths less
@@ -347,12 +347,12 @@
     * crc_symtable.py:
     Suppressed warnings of unused cfg structure on partially defined models.
 
-2010-03-26  Thomas Pircher   <tehpeh@gmx.net>
+2010-03-26  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * pycrc.py, crc_opt.py, crc_algorithms.py, crc_symtable.py:
     Removed half-baken and confusing --direct option.
 
-2010-02-10  Thomas Pircher   <tehpeh@gmx.net>
+2010-02-10  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * pycrc.py, crc_opt.py: minor code cleanup.
 
@@ -360,21 +360,21 @@
 # Version 0.7.4, 2010-01-24
 #
 
-2010-01-24  Thomas Pircher   <tehpeh@gmx.net>
+2010-01-24  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_models.py: changed the xor-in value of the crc-64-jones model.
     * crc_models.py: Set xmodem parameters equal to the zmodem parameters.
 
-2009-12-29  Thomas Pircher   <tehpeh@gmx.net>
+2009-12-29  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * pycrc.py, crc_opt.py, crc_parser: uniform error messages.
     * crc_opt.py: added a warning for even polynomials.
 
-2009-11-12  Thomas Pircher   <tehpeh@gmx.net>
+2009-11-12  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_models.py: added crc-16-modbus. Closes issue 2896611.
 
-2009-11-07  Thomas Pircher   <tehpeh@gmx.net>
+2009-11-07  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_opt.py: Fix for unused variable argv.
     Closes issue 2893224. Thanks to Marko von Oppen.
@@ -383,11 +383,11 @@
 # Version 0.7.3, 2009-10-25
 #
 
-2009-10-25  Thomas Pircher   <tehpeh@gmx.net>
+2009-10-25  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_models.py: renamed crc-32mpeg to crc-32-mpeg.
 
-2009-10-19  Thomas Pircher   <tehpeh@gmx.net>
+2009-10-19  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_models.py: added crc-64-jones CRC model. Thanks to Waterspirit.
 
@@ -395,7 +395,7 @@
 # Version 0.7.2, 2009-09-30
 #
 
-2009-09-30  Thomas Pircher   <tehpeh@gmx.net>
+2009-09-30  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * pycrc.py: fixed a bug that caused the result of the Python table-driven
     code not being evaluated at all.
@@ -405,7 +405,7 @@
 # Version 0.7.1, 2009-04-05
 #
 
-2009-03-26  Thomas Pircher   <tehpeh@gmx.net>
+2009-03-26  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* crc_models.py: added crc-32mpeg. Thanks to Thomas Edwards.
 
@@ -413,23 +413,23 @@
 # Version 0.7, 2009-02-27
 #
 
-2009-02-15  Thomas Pircher   <tehpeh@gmx.net>
+2009-02-15  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* crc_algorithms.py: code tidy-up.
 	* crc_algorithms.py, crc_opt.py: added --direct option.
 	* crc_symtable.py: added --direct option for the generated code.
 
-2009-02-03  Thomas Pircher   <tehpeh@gmx.net>
+2009-02-03  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* crc_opt.py: added --check-hexstring option. Closes issue 2545183.
 	Thanks to Arnim Littek.
 
-2009-01-31  Thomas Pircher   <tehpeh@gmx.net>
+2009-01-31  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* crc_opt.py: added a check for extra arguments on the command line.
 	Closes issue 2545185. Thanks to Arnim Littek.
 
-2008-12-24  Thomas Pircher   <tehpeh@gmx.net>
+2008-12-24  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* doc/pycrc.xml: Added one more example.
 
@@ -437,7 +437,7 @@
 # Version 0.6.7, 2008-12-11
 #
 
-2008-12-11  Thomas Pircher   <tehpeh@gmx.net>
+2008-12-11  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* all files: run Python's 2to3 script on the files.
 	* all files: check the code on a x64 platform.
@@ -448,12 +448,12 @@
 # Version 0.6.6, 2008-06-05
 #
 
-2008-06-05  Thomas Pircher   <tehpeh@gmx.net>
+2008-06-05  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* crc_symtable.py: fixed a bug in the print_params function. Closes issue
 	1985197. Thanks to Artur Lipowski.
 
-2008-03-03  Thomas Pircher   <tehpeh@gmx.net>
+2008-03-03  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* pycrc.xml: new license: Creative Commons Attribution-Share Alike 3.0
 	Unported License.
@@ -462,32 +462,32 @@
 # Version 0.6.5, 2008-03-03
 #
 
-2008-03-02  Thomas Pircher   <tehpeh@gmx.net>
+2008-03-02  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* crc_models.py: added dallas-1-wire 8 bit CRC.
 
-2008-02-07  Thomas Pircher   <tehpeh@gmx.net>
+2008-02-07  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* crc_symtable.py: fixed a problem with the generated code for
 	bit-by-bit-fast algorithms. Thanks to Hans Bacher.
 
-2007-12-19  Thomas Pircher   <tehpeh@gmx.net>
+2007-12-19  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* crc_models.py: added r-crc-16 model (DECT (cordless digital standard)
 	packets A-field according to ETSI EN 300 175-3 v2.1.1).
 	Thanks to "raimondo".
 
-2007-12-10  Thomas Pircher   <tehpeh@gmx.net>
+2007-12-10  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* crc_symtable.py: added extern "C" declaration to the generated C header
 	file. Thanks to Nathan Royer.
 
-2007-12-10  Thomas Pircher   <tehpeh@gmx.net>
+2007-12-10  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* crc_algorithms.py: changed the API to take the CRC model direct as
 	parameter. Deleted the need for an obscure "opt" object.
 
-2007-12-09  Thomas Pircher   <tehpeh@gmx.net>
+2007-12-09  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* crc_opt.py: added --crc-type and --include-file options.
 	* crc_models.py: added new file to handle CRC models
@@ -496,7 +496,7 @@
 # Version 0.6.4, 2007-12-05
 #
 
-2007-12-05  Thomas Pircher   <tehpeh@gmx.net>
+2007-12-05  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* crc_symtable.py: fixed a bug in the code generator for the table-driven
 	algorithm. Thanks to Tom McDermott. Closes issue 1843774
@@ -505,12 +505,12 @@
 # Version 0.6.3, 2007-10-13
 #
 
-2007-10-13  Thomas Pircher   <tehpeh@gmx.net>
+2007-10-13  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* crc_symtable.py: fixed some portability problems in the generated code.
 	Thanks to Helmut Bauer. Closes issue 1812894
 
-2007-09-10  Thomas Pircher   <tehpeh@gmx.net>
+2007-09-10  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* crc_opt.py: added new models: crc-5, crc-15, crc-16-usb, crc-24, crc-64.
 	The new models are taken from Ray Burr's CrcMoose.
@@ -522,18 +522,18 @@
 # Version 0.6.2, 2007-08-25
 #
 
-2007-08-25  Thomas Pircher   <tehpeh@gmx.net>
+2007-08-25  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* crc_opt.py: the parameter to --check-string was ignored. Closes issue
 	1781637
 	* pycrc.py: the parameter to --check-string was ignored. Closes issue
 	1781637
 
-2007-08-18  Thomas Pircher   <tehpeh@gmx.net>
+2007-08-18  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* crc_symtable.py: simplified the table-driven code. Closes issue 1727128
 
-2007-08-18  Thomas Pircher   <tehpeh@gmx.net>
+2007-08-18  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* crc_parser.py: changed the macro language syntax to a better format
 	* crc_lexer.py: changed the macro language syntax to a better format
@@ -545,7 +545,7 @@
 # Version 0.6.1, 2007-08-12
 #
 
-2007-08-12  Thomas Pircher   <tehpeh@gmx.net>
+2007-08-12  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* test/test.sh: Added test for C89 compilation
 	* test/main.c: Added a test case to loop over the input bytes one by one
@@ -555,17 +555,17 @@
 	* crc_symtable.py: Changes related to 919107: Code generator includes
 	reflect() function even if not needed
 
-2007-07-22  Thomas Pircher   <tehpeh@gmx.net>
+2007-07-22  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* crc_symtable.py: Fixed a typo in the C89 source code generator.
 	Thanks to Helmut Bauer
 
-2007-06-10  Thomas Pircher   <tehpeh@gmx.net>
+2007-06-10  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* all files: Tidied up the documentation
 	* all files: Code cleanup
 
-2007-05-15  Thomas Pircher   <tehpeh@gmx.net>
+2007-05-15  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* crc_opt.py: Deleted obsolete options
 
@@ -573,31 +573,31 @@
 # Version 0.6, 2007-05-21
 #
 
-2007-05-15  Thomas Pircher   <tehpeh@gmx.net>
+2007-05-15  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* crc_opt.py: Added the --std option to generate C89 (ANSI) compliant code
 	* crc_symtable.py: Reduced the size of the symbol table by re-arranging
 	items
 
-2007-05-13  Thomas Pircher   <tehpeh@gmx.net>
+2007-05-13  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* test/test.sh: Added a new check to the test script which validate all
 	possible combination of undefined parameters
 	* crc_code_gen.py: Made the generated main function cope with command line
 	arguments
 
-2007-05-12  Thomas Pircher   <tehpeh@gmx.net>
+2007-05-12  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* pycrc.py: Added the --generate table option
 	* pycrc.py: Added a template engine for the code generation. Split up
 	pycrc.py into smaller modules
 
-2007-04-11  Thomas Pircher   <tehpeh@gmx.net>
+2007-04-11  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* pycrc.py: Added obsolete options again tor legacy reasons.
 	Added a better handling of the --model parameter.
 
-2007-04-07  Thomas Pircher   <tehpeh@gmx.net>
+2007-04-07  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* pycrc.py: Changed licence to the MIT licence. This makes the additional
 	clause for generated source code obsolete.
@@ -610,7 +610,7 @@
 # Version 0.5, 2007-03-25
 #
 
-2007-03-25  Thomas Pircher   <tehpeh@gmx.net>
+2007-03-25  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* pycrc.py: Fixed bug 1686404: unhandled exception when called with
 	both options --table_idx_width and --check_file
@@ -621,11 +621,11 @@
 # Version 0.4, 2007-01-26
 #
 
-2007-01-27  Thomas Pircher   <tehpeh@gmx.net>
+2007-01-27  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* pycrc.py: Eliminated needless documentation of not generated functions
 
-2007-01-23  Thomas Pircher   <tehpeh@gmx.net>
+2007-01-23  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* pycrc.py: Added more parameter sets (now supported: crc-8, crc-16, citt,
 	kermit, x-25, xmodem, zmodem, crc-32, crc-32c, posix, jam, xfer) from
@@ -634,7 +634,7 @@
 	Documented the new parameter sets
 	* test/test.sh: added some new tests, disabled the random loop
 
-2007-01-21  Thomas Pircher   <tehpeh@gmx.net>
+2007-01-21  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* pycrc.py: Added Doxygen documentation strings to the functions.
 	Added the --symbol_prefix option
@@ -643,7 +643,7 @@
 	* doc/pycrc.xml: Corrected many typos and bad phrasing (still a lot to do)
 	Documented the --symbol_prefix option	                 
 
-2007-01-17  Thomas Pircher   <tehpeh@gmx.net>
+2007-01-17  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* test/test.sh: Added a non-regression test on the generated C source
 
@@ -651,6 +651,6 @@
 # Version 0.3, 2007-01-14
 #
 
-2007-01-14  Thomas Pircher   <tehpeh@gmx.net>
+2007-01-14  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
 	* pycrc.py: first public release pycrc v0.3

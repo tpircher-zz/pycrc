@@ -2,7 +2,7 @@
 
 #  qm.py -- A Quine McCluskey Python implementation
 #
-#  Copyright (c) 2006-2013  Thomas Pircher  <tehpeh@gmx.net>
+#  Copyright (c) 2006-2013  Thomas Pircher  <tehpeh-pycrc@tty1.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to
