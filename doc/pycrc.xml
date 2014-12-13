@@ -3,8 +3,8 @@
                     "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
 <!ENTITY project_name       "pycrc">
 <!ENTITY project_version    "0.8">
-<!ENTITY project_homepage   "http://www.tty1.net/pycrc/">
-<!ENTITY project_models     "http://www.tty1.net/pycrc/crc-models_en.html">
+<!ENTITY project_homepage   "https://www.tty1.net/pycrc/">
+<!ENTITY project_models     "https://www.tty1.net/pycrc/crc-models_en.html">
 <!ENTITY date               "2014-12-04">
 <!ENTITY author_firstname   "Thomas">
 <!ENTITY author_surname     "Pircher">

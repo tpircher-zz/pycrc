@@ -6,7 +6,7 @@
                 | .__/ \__, |\___|_|  \___|
                 |_|    |___/
 
-                http://www.tty1.net/pycrc/
+                https://www.tty1.net/pycrc/
 
 
 pycrc is a free, easy to use Cyclic Redundancy Check (CRC) calculator and
@@ -45,9 +45,9 @@ Getting help
 ============
 
 If you are new to pycrc and want to generate C code, start with
-[the tutorial](http://www.tty1.net/pycrc/tutorial_en.html).
+[the tutorial](https://www.tty1.net/pycrc/tutorial_en.html).
 
-The [pycrc manual page](http://www.tty1.net/pycrc/pycrc.html) explains the command
+The [pycrc manual page](https://www.tty1.net/pycrc/pycrc.html) explains the command
 line options in some detail and also gives some more examples how to use pycrc.
 
 If you have questions about using pycrc which is not answered in a satisfactory
@@ -57,11 +57,11 @@ way by the documentation, please send a mail to the pycrc user mailing list
 Due to excessive spamming a subscription is required to post on the list.
 
 If you have found a bug in pycrc, please take the time and file it to the
-[bug tracker](http://sourceforge.net/p/pycrc/bugs/) or record a
-[feature request](http://sourceforge.net/p/pycrc/feature-requests/).
+[bug tracker](https://sourceforge.net/p/pycrc/bugs/) or record a
+[feature request](https://sourceforge.net/p/pycrc/feature-requests/).
 Thanks for your collaboration.
 
-Also see the [frequently asked questions](http://www.tty1.net/pycrc/faq.html).
+Also see the [frequently asked questions](https://www.tty1.net/pycrc/faq.html).
 
 
 
@@ -70,9 +70,9 @@ Feedback
 
 If you like pycrc, let me know and drop me a note. If you don't like pycrc let
 me know what you don't like and why. In both cases, I would really appreciate
-some [feed back](http://sourceforge.net/projects/pycrc/reviews/).
+some [feed back](https://sourceforge.net/projects/pycrc/reviews/).
 If you want some idea how to say thanks for this software, please have a look
-[here](http://www.tty1.net/say-thanks_en.html).
+[here](https://www.tty1.net/say-thanks_en.html).
 
 
 
