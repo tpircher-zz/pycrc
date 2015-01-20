@@ -1,3 +1,11 @@
+2015-01-20  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_symtable.py:
+    Changed the signature of the crc_update() function: the data argument is
+    now a pointer to void to improve compatibility with C++.
+    Thanks to Kamil Szczygieł.
+    This closes GitHub issue #4.
+
 #
 # Version 0.8.2, 2014-12-04
 #

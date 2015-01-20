@@ -1,6 +1,6 @@
 #  pycrc -- parameterisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2014  Thomas Pircher  <tehpeh-pycrc@tty1.net>
+#  Copyright (c) 2006-2015  Thomas Pircher  <tehpeh-pycrc@tty1.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to
@@ -507,6 +507,7 @@ $crc_table_driven_func_gen
 $crc_update_doc
 $crc_update_function_def$nop
 {
+    const unsigned char *d = (const unsigned char *)data;
 $if ($crc_algorithm == "bit-by-bit") {:
     unsigned int i;
     $c_bool bit;
@@ -515,14 +516,14 @@ $if ($crc_algorithm == "bit-by-bit") {:
     while (data_len--) {
 $if ($crc_reflect_in == Undefined) {:
         if ($cfg_reflect_in) {
-            c = $crc_reflect_function(*data++, 8);
+            c = $crc_reflect_function(*d++, 8);
         } else {
-            c = *data++;
+            c = *d++;
         }
 :} $elif ($crc_reflect_in == True) {:
-        c = $crc_reflect_function(*data++, 8);
+        c = $crc_reflect_function(*d++, 8);
 :} $else {:
-        c = *data++;
+        c = *d++;
 :}
         for (i = 0; i < 8; i++) {
             bit = $if ($c_std == C89) {:!!(crc & $cfg_msb_mask):} $else {:crc & $cfg_msb_mask:};
@@ -542,12 +543,12 @@ $if ($crc_reflect_in == Undefined) {:
     while (data_len--) {
 $if ($crc_reflect_in == Undefined) {:
         if ($cfg_reflect_in) {
-            c = $crc_reflect_function(*data++, 8);
+            c = $crc_reflect_function(*d++, 8);
         } else {
-            c = *data++;
+            c = *d++;
         }
 :} $else {:
-        c = *data++;
+        c = *d++;
 :}
 $if ($crc_reflect_in == True) {:
         for (i = 0x01; i & 0xff; i <<= 1){::}
@@ -573,12 +574,12 @@ $if ($crc_reflect_in == Undefined) {:
     if (cfg->reflect_in) {
         while (data_len--) {
 $crc_table_core_algorithm_reflected
-            data++;
+            d++;
         }
     } else {
         while (data_len--) {
 $crc_table_core_algorithm_nonreflected
-            data++;
+            d++;
         }
     }
 :} $else {:
@@ -588,7 +589,7 @@ $crc_table_core_algorithm_reflected
 :} $elif ($crc_reflect_in == False) {:
 $crc_table_core_algorithm_nonreflected
 :}
-        data++;
+        d++;
     }
 :}
     return crc & $cfg_mask_shifted;
@@ -792,9 +793,9 @@ $if ($simple_crc_update_def != True) {:
         elif id == "crc_update_function_def":
             return  """\
 $if ($simple_crc_update_def != True) {:
-$crc_t $crc_update_function(const $cfg_t *cfg, $crc_t crc, const unsigned char *data, size_t data_len)\
+$crc_t $crc_update_function(const $cfg_t *cfg, $crc_t crc, const void *data, size_t data_len)\
 :} $else {:
-$crc_t $crc_update_function($crc_t crc, const unsigned char *data, size_t data_len)\
+$crc_t $crc_update_function($crc_t crc, const void *data, size_t data_len)\
 :}\
 """
 
@@ -961,7 +962,7 @@ $if ($crc_algorithm == "table-driven" and $constant_crc_table != True) {:
     $crc_table_gen_function(&cfg);
 :}
     crc = $crc_init_function($if ($constant_crc_init != True) {:&cfg:});
-    crc = $crc_update_function($if ($simple_crc_update_def != True) {:&cfg, :}crc, (unsigned char *)str, strlen(str));
+    crc = $crc_update_function($if ($simple_crc_update_def != True) {:&cfg, :}crc, (void *)str, strlen(str));
     crc = $crc_finalize_function($if ($simple_crc_finalize_def != True) {:&cfg, :}crc);
 
     if (verbose) {
@@ -1371,14 +1372,14 @@ $if ($crc_xor_out == Undefined) {:
         if self.opt.TableIdxWidth == 8:
             crc_lookup = '$if ($crc_algorithm == "table-driven") {:crc_table[tbl_idx]:}' + \
                          '$elif ($crc_algorithm == "bitwise-expression") {:$crc_bitwise_expression_function(tbl_idx):}'
-            loop_core += loop_indent + "tbl_idx = ((crc >> " + shr + ") ^ *data) & $crc_table_mask;" + '\n' + \
+            loop_core += loop_indent + "tbl_idx = ((crc >> " + shr + ") ^ *d) & $crc_table_mask;" + '\n' + \
                             loop_indent + "crc = (" + crc_lookup + " ^ (crc << $cfg_table_idx_width)) & $cfg_mask_shifted;" + '\n'
         else:
             crc_lookup = '$if ($crc_algorithm == "table-driven") {:crc_table[tbl_idx & $crc_table_mask]:}' + \
                          '$elif ($crc_algorithm == "bitwise-expression") {:$crc_bitwise_expression_function(tbl_idx & $crc_table_mask):}'
             for i in range (8 // self.opt.TableIdxWidth):
                 str_idx = "%s" % (8 - (i + 1) * self.opt.TableIdxWidth)
-                loop_core += loop_indent + "tbl_idx = (crc >> " + shr + ") ^ (*data >> " + str_idx + ");" + '\n' + \
+                loop_core += loop_indent + "tbl_idx = (crc >> " + shr + ") ^ (*d >> " + str_idx + ");" + '\n' + \
                                 loop_indent + "crc = " + crc_lookup + " ^ (crc << $cfg_table_idx_width);" + '\n'
         return loop_core
 
@@ -1403,14 +1404,14 @@ $if ($crc_xor_out == Undefined) {:
         if self.opt.TableIdxWidth == 8:
             crc_lookup = '$if ($crc_algorithm == "table-driven") {:crc_table[tbl_idx]:}' + \
                          '$elif ($crc_algorithm == "bitwise-expression") {:$crc_bitwise_expression_function(tbl_idx):}'
-            loop_core += loop_indent + "tbl_idx = (" + crc_shifted + " ^ *data) & $crc_table_mask;" + '\n' + \
+            loop_core += loop_indent + "tbl_idx = (" + crc_shifted + " ^ *d) & $crc_table_mask;" + '\n' + \
                             loop_indent + "crc = (" + crc_lookup + " ^ (crc >> $cfg_table_idx_width)) & $cfg_mask_shifted;" + '\n'
         else:
             crc_lookup = '$if ($crc_algorithm == "table-driven") {:crc_table[tbl_idx & $crc_table_mask]:}' + \
                          '$elif ($crc_algorithm == "bitwise-expression") {:$crc_bitwise_expression_function(tbl_idx & $crc_table_mask):}'
             for i in range (8 // self.opt.TableIdxWidth):
                 str_idx = "%d" % i
-                loop_core += loop_indent + "tbl_idx = " + crc_shifted + " ^ (*data >> (" + str_idx + " * $cfg_table_idx_width));" + '\n' + \
+                loop_core += loop_indent + "tbl_idx = " + crc_shifted + " ^ (*d >> (" + str_idx + " * $cfg_table_idx_width));" + '\n' + \
                                 loop_indent + "crc = " + crc_lookup + " ^ (crc >> $cfg_table_idx_width);" + '\n'
         return loop_core
 
