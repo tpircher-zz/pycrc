@@ -1,3 +1,9 @@
+2015-01-21  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * README.md:
+    The issue tracker on GitHub https://github.com/tpircher/pycrc/issues
+    is now advertised as the preferred issue tracker.
+
 2015-01-20  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_symtable.py:
