@@ -5,7 +5,7 @@
 
 from optparse import OptionParser, Option, OptionValueError
 from copy import copy
-import os, sys, commands
+import os, sys
 import tempfile
 sys.path.append("..")
 from crc_models import CrcModels
@@ -24,7 +24,6 @@ class Options(object):
         self.CompileMixedArgs       = False
         self.VariableWidth          = False
         self.Verbose                = False
-        self.Python3                = False
         self.Algorithm = copy(self.AllAlgorithms)
 
     def parse(self, argv = None):
@@ -40,9 +39,6 @@ class Options(object):
         parser.add_option("-v", "--verbose",
                         action="store_true", dest="verbose", default=self.Verbose,
                         help="print information about the model")
-        parser.add_option("-3", "--python3",
-                        action="store_true", dest="python3", default=self.Python3,
-                        help="use Python3.x")
         parser.add_option("-c", "--compile",
                         action="store_true", dest="compile", default=self.Compile,
                         help="test compiled version")
@@ -65,7 +61,6 @@ class Options(object):
         (options, args) = parser.parse_args(argv)
 
         self.Verbose = options.verbose
-        self.Python3 = options.python3
         self.Compile = options.all or options.compile or options.random_parameters
         self.RandomParameters = options.all or options.random_parameters
         self.CompileMixedArgs = options.all or options.compile_mixed_args
@@ -97,6 +92,7 @@ class CrcTests(object):
         self.use_algo_table_driven = True
         self.use_algo_bitwise_expression = True
         self.verbose = False
+        self.python3 = sys.version_info[0] >= 3
         self.tmpdir = tempfile.mkdtemp(prefix="pycrc.")
         self.check_file = None
         self.crc_bin_bbb_c89 = None
@@ -149,6 +145,14 @@ class CrcTests(object):
                 print("error: can't delete %s", f)
                 pass
 
+    def __getstatusoutput(self, cmd_str):
+        if self.python3:
+            import subprocess
+            return subprocess.getstatusoutput(cmd_str)
+        else:
+            import commands
+            return commands.getstatusoutput(cmd_str)
+
     def __make_src(self, args, basename, cstd):
         """
         Generate the *.h and *.c source files for a test.
@@ -157,7 +161,7 @@ class CrcTests(object):
         cmd_str = self.pycrc_bin + " %s --std %s --generate h -o %s.h" % (args, cstd, gen_src)
         if self.verbose:
             print(cmd_str)
-        ret = commands.getstatusoutput(cmd_str)
+        ret = self.__getstatusoutput(cmd_str)
         if ret[0] != 0:
             print("error: the following command returned error: %s" % cmd_str)
             print(ret[1])
@@ -167,7 +171,7 @@ class CrcTests(object):
         cmd_str = self.pycrc_bin + " %s --std %s --generate c-main -o %s.c" % (args, cstd, gen_src)
         if self.verbose:
             print(cmd_str)
-        ret = commands.getstatusoutput(cmd_str)
+        ret = self.__getstatusoutput(cmd_str)
         if ret[0] != 0:
             print("error: the following command returned error: %s" % cmd_str)
             print(ret[1])
@@ -182,7 +186,7 @@ class CrcTests(object):
         cmd_str = "gcc -W -Wall -pedantic -Werror -std=%s -o %s %s.c" % (cstd, binfile, binfile)
         if self.verbose:
             print(cmd_str)
-        ret = commands.getstatusoutput(cmd_str)
+        ret = self.__getstatusoutput(cmd_str)
         if len(ret) > 1 and len(ret[1]) > 0:
             print(ret[1])
         if ret[0] != 0:
@@ -210,7 +214,10 @@ class CrcTests(object):
             print("Setting up files...")
         self.check_file = "%s/check.txt" % self.tmpdir
         f = open(self.check_file, "wb")
-        f.write("123456789")
+        if self.python3:
+            f.write(bytes("123456789", "utf-8"))
+        else:
+            f.write("123456789")
         f.close()
 
         if opt.Compile:
@@ -266,11 +273,10 @@ class CrcTests(object):
         """
         if self.verbose:
             print(cmd_str)
-        ret = commands.getstatusoutput(cmd_str)
+        ret = self.__getstatusoutput(cmd_str)
         if ret[0] != 0:
             print("error: the following command returned error: %s" % cmd_str)
             print(ret[1])
-            print(ret[2])
             return None
         return ret[1]
 
@@ -369,6 +375,7 @@ class CrcTests(object):
         if self.verbose:
             print("Running __test_models()...")
         check_str = "123456789"
+        check_bytes = bytearray(check_str, 'utf-8')
         models = CrcModels()
         for m in models.models:
             expected_crc = m["check"]
@@ -385,7 +392,7 @@ class CrcTests(object):
             if not self.__check_command(cmd_str, expected_crc):
                 return False
 
-            cmd_str = self.pycrc_bin + " %s --check-hexstring %s" % (ext_args, "".join(["%02x" % ord(c) for c in check_str]))
+            cmd_str = self.pycrc_bin + " %s --check-hexstring %s" % (ext_args, "".join(["%02x" % c for c in check_bytes]))
             if not self.__check_command(cmd_str, expected_crc):
                 return False
 
@@ -600,7 +607,7 @@ class CrcTests(object):
         self.use_algo_table_driven = "table-driven" in opt.Algorithm or "tbl" in opt.Algorithm
         self.verbose = opt.Verbose
 
-        if opt.Python3:
+        if self.python3:
             self.pycrc_bin = "python3 ../pycrc.py"
         else:
             self.pycrc_bin = "python ../pycrc.py"

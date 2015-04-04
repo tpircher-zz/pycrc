@@ -173,7 +173,7 @@
                 <option>--check-string=</option><replaceable>STRING</replaceable>
             </term>
             <listitem>
-                <para>calculate the checksum of a string (default: <quote><replaceable>123456789</replaceable></quote>).</para>
+                <para>calculate the checksum of a string (default: <quote><replaceable>123456789</replaceable></quote>). If the string contains non-ASCII characters then it will be UTF-8 decoded.</para>
             </listitem>
         </varlistentry>
         <varlistentry>
@@ -189,7 +189,7 @@
                 <option>--check-file=</option><replaceable>FILE</replaceable>
             </term>
             <listitem>
-                <para>calculate the checksum of a file.</para>
+                <para>calculate the checksum of a file. If the file contains non-ASCII characters then it will be UTF-8 decoded.</para>
             </listitem>
         </varlistentry>
         <varlistentry>

@@ -128,7 +128,7 @@ def check_hexstring(opt):
     if len(opt.CheckString) % 2 != 0:
         opt.CheckString = "0" + opt.CheckString
     if sys.version_info >= (3,0):
-        opt.CheckString = bytes(opt.CheckString, 'UTF-8')
+        opt.CheckString = bytes(opt.CheckString, 'utf-8')
     try:
         check_str = binascii.unhexlify(opt.CheckString)
     except TypeError:
@@ -141,14 +141,15 @@ def check_hexstring(opt):
 
 # function crc_file_update
 ###############################################################################
-def crc_file_update(alg, register, check_byte_str):
+def crc_file_update(alg, register, check_bytes):
     """
     Update the CRC using the bit-by-bit-fast CRC algorithm.
     """
-    for octet in check_byte_str:
-        if not isinstance(octet, int):
-            # Python 2.x compatibility
-            octet = ord(octet)
+    # If the input data is a string, convert to bytes.
+    if isinstance(check_bytes, str):
+        check_bytes = bytearray(check_bytes, 'utf-8')
+
+    for octet in check_bytes:
         if alg.ReflectIn:
             octet = alg.reflect(octet, 8)
         for j in range(8):
@@ -188,10 +189,10 @@ def check_file(opt):
     else:
         register = alg.reflect(opt.XorIn, opt.Width)
     # Read bytes from the file.
-    check_byte_str = in_file.read()
-    while check_byte_str:
-        register = crc_file_update(alg, register, check_byte_str)
-        check_byte_str = in_file.read()
+    check_bytes = in_file.read(1024)
+    while check_bytes:
+        register = crc_file_update(alg, register, check_bytes)
+        check_bytes = in_file.read(1024)
     in_file.close()
 
     if opt.ReflectOut:

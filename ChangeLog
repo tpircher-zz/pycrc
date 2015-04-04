@@ -1,3 +1,13 @@
+2015-04-04  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * pycrc.py:
+    * crc_algorithms.py:
+    * test/test.py:
+    The preferred format for the input data for the Python API is not byte
+    array. But if a string is supplied it is decoded as UTF-8 string.
+    Alternative formats are not supported and must be passed to the functions
+    as byte earrays.
+
 2015-01-21  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * README.md:
