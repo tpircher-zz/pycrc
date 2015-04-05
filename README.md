@@ -52,8 +52,7 @@ command line options in some detail and also gives some more examples how to
 use pycrc.
 
 If you have questions about using pycrc which is not answered in a satisfactory
-way by the documentation, please send a mail to the pycrc user mailing list
-<pycrc-users@lists.sourceforge.net>. Subscribe to the mailing list
+way by the documentation, please send a mail to the
 [pycrc users list](https://lists.sourceforge.net/lists/listinfo/pycrc-users).
 Due to excessive spamming a subscription is required to post on the list.
 
