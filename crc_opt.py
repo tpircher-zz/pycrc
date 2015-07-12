@@ -1,6 +1,6 @@
 #  pycrc -- parameterisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2013  Thomas Pircher  <tehpeh-pycrc@tty1.net>
+#  Copyright (c) 2006-2015  Thomas Pircher  <tehpeh-pycrc@tty1.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to
@@ -54,7 +54,6 @@ class Options(object):
     Algo_None               = 0x00
     Algo_Bit_by_Bit         = 0x01
     Algo_Bit_by_Bit_Fast    = 0x02
-    Algo_Bitwise_Expression = 0x04
     Algo_Table_Driven       = 0x08
 
     Action_Check_String     = 0x01
@@ -139,7 +138,7 @@ of the following parameters:
                         help="choose the C dialect of the generated code from {C89, ANSI, C99}", metavar="STD")
         parser.add_option("--algorithm",
                         action="store", type="string", dest="algorithm", default="all",
-                        help="choose an algorithm from {bit-by-bit, bbb, bit-by-bit-fast, bbf, bitwise-expression, bwe, table-driven, tbl, all}", metavar="ALGO")
+                        help="choose an algorithm from {bit-by-bit, bbb, bit-by-bit-fast, bbf, table-driven, tbl, all}", metavar="ALGO")
         parser.add_option("--model",
                         action="callback", callback=self.model_cb, type="string", dest="model", default=None,
                         help="choose a parameter set from {%s}" % model_list, metavar="MODEL")
@@ -204,11 +203,9 @@ of the following parameters:
             self.XorOut = options.xor_out
         else:
             undefined_params.append("--xor-out")
+
         if options.table_idx_width != None:
-            if options.table_idx_width == 1 or \
-                    options.table_idx_width == 2 or \
-                    options.table_idx_width == 4 or \
-                    options.table_idx_width == 8:
+            if options.table_idx_width in set((1, 2, 4, 8)):
                 self.TableIdxWidth = options.table_idx_width
                 self.TableWidth = 1 << options.table_idx_width
             else:
@@ -247,19 +244,11 @@ of the following parameters:
                 self.Algorithm      |= self.Algo_Bit_by_Bit
             if alg in set(["bit-by-bit-fast", "bbf", "all"]):
                 self.Algorithm      |= self.Algo_Bit_by_Bit_Fast
-            if alg in set(["bitwise-expression", "bwe", "all"]):
-                self.Algorithm      |= self.Algo_Bitwise_Expression
             if alg in set(["table-driven", "tbl", "all"]):
                 self.Algorithm      |= self.Algo_Table_Driven
             if self.Algorithm == 0:
                 sys.stderr.write("%s: error: unknown algorithm %s\n" % (sys.argv[0], options.algorithm))
                 sys.exit(1)
-        if self.Algorithm & self.Algo_Bitwise_Expression and self.UndefinedCrcParameters:
-            if self.Algorithm == self.Algo_Bitwise_Expression:
-                sys.stderr.write("Error: algorithm %s not applicable with undefined parameters\n" % options.algorithm)
-                sys.exit(1)
-            else:
-                self.Algorithm &= ~(self.Algo_Bitwise_Expression)
 
         if options.c_std != None:
             std = options.c_std.upper()
@@ -282,17 +271,14 @@ of the following parameters:
         if options.check_string != None:
             self.Action         = self.Action_Check_String
             self.CheckString    = options.check_string
-            self.Algorithm &= ~(self.Algo_Bitwise_Expression)
             op_count += 1
         if options.check_hexstring != None:
             self.Action         = self.Action_Check_Hex_String
             self.CheckString    = options.check_hexstring
-            self.Algorithm &= ~(self.Algo_Bitwise_Expression)
             op_count += 1
         if options.check_file != None:
             self.Action         = self.Action_Check_File
             self.CheckFile      = options.check_file
-            self.Algorithm &= ~(self.Algo_Bitwise_Expression)
             op_count += 1
         if options.generate != None:
             arg = options.generate.lower()
@@ -314,7 +300,7 @@ of the following parameters:
                     sys.stderr.write("%s: error: the --generate table option is incompatible with the --algorithm option\n" % sys.argv[0])
                     sys.exit(1)
                 self.Algorithm = self.Algo_Table_Driven
-            elif self.Algorithm not in set([self.Algo_Bit_by_Bit, self.Algo_Bit_by_Bit_Fast, self.Algo_Bitwise_Expression, self.Algo_Table_Driven]):
+            elif self.Algorithm not in set([self.Algo_Bit_by_Bit, self.Algo_Bit_by_Bit_Fast, self.Algo_Table_Driven]):
                 sys.stderr.write("%s: error: select an algorithm to be used in the generated file\n" % sys.argv[0])
                 sys.exit(1)
         else:
@@ -326,11 +312,6 @@ of the following parameters:
             self.Action = self.Action_Check_String
         if op_count > 1:
             sys.stderr.write("%s: error: too many actions scecified\n" % sys.argv[0])
-            sys.exit(1)
-
-        if (self.Algorithm == self.Algo_Bitwise_Expression) and \
-            (self.Action == self.Action_Check_String or self.Action == self.Action_Check_Hex_String or self.Action == self.Action_Check_File):
-            sys.stderr.write("Error: algorithm %s is only applicable to generate source code\n" % options.algorithm)
             sys.exit(1)
 
         if len(args) != 0:

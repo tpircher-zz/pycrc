@@ -18,7 +18,7 @@ class Options(object):
     """
 
     def __init__(self):
-        self.AllAlgorithms          = set(["bit-by-bit", "bbb", "bit-by-bit-fast", "bbf", "bitwise-expression", "bwe", "table-driven", "tbl"])
+        self.AllAlgorithms          = set(["bit-by-bit", "bbb", "bit-by-bit-fast", "bbf", "table-driven", "tbl"])
         self.Compile                = False
         self.RandomParameters       = False
         self.CompileMixedArgs       = False
@@ -32,8 +32,6 @@ class Options(object):
         """
         usage = """%prog [OPTIONS]"""
 
-        models = CrcModels()
-        model_list = ", ".join(models.getList())
         algorithms = ", ".join(sorted(list(self.AllAlgorithms)) + ["all"])
         parser = OptionParser(usage=usage)
         parser.add_option("-v", "--verbose",
@@ -90,7 +88,6 @@ class CrcTests(object):
         self.use_algo_bit_by_bit = True
         self.use_algo_bit_by_bit_fast = True
         self.use_algo_table_driven = True
-        self.use_algo_bitwise_expression = True
         self.verbose = False
         self.python3 = sys.version_info[0] >= 3
         self.tmpdir = tempfile.mkdtemp(prefix="pycrc.")
@@ -295,7 +292,11 @@ class CrcTests(object):
         """
         Check all precompiled binaries.
         """
-        for binary in [self.crc_bin_bbb_c89, self.crc_bin_bbb_c99, self.crc_bin_bbf_c89, self.crc_bin_bbf_c99, self.crc_bin_tbl_c89, self.crc_bin_tbl_c99, self.crc_bin_tbl_idx2, self.crc_bin_tbl_idx4]:
+        for binary in [
+                self.crc_bin_bbb_c89, self.crc_bin_bbb_c99,
+                self.crc_bin_bbf_c89, self.crc_bin_bbf_c99,
+                self.crc_bin_tbl_c89, self.crc_bin_tbl_c99,
+                self.crc_bin_tbl_idx2, self.crc_bin_tbl_idx4]:
             if binary is not None:
                 # Don't test width > 32 for C89, as I don't know how to ask for an data type > 32 bits.
                 if binary[-3:] == "c89" and long_data_type:
@@ -429,18 +430,14 @@ class CrcTests(object):
                 if not self.__compile_and_check_res("--algorithm bit-by-bit-fast" + " " + cmp_opt, None, "crc_bbf_mod", expected_crc):
                     return False
 
-            if self.use_algo_bitwise_expression:
-                if not self.__compile_and_check_res("--algorithm bitwise-expression" + " " + cmp_opt, None, "crc_bwe_mod", expected_crc):
-                    return False
-
             if self.use_algo_table_driven:
                 if not self.__compile_and_check_res("--algorithm table-driven" + " " + cmp_opt, None, "crc_tbl_mod", expected_crc):
                     return False
 
-                if not self.__compile_and_check_res("--algorithm table-driven --table-idx-width=2" + " " + cmp_opt, None, "crc_tb2_mod", expected_crc):
+                if not self.__compile_and_check_res("--algorithm table-driven --table-idx-width=2" + " " + cmp_opt, None, "crc_tix2_mod", expected_crc):
                     return False
 
-                if not self.__compile_and_check_res("--algorithm table-driven --table-idx-width=4" + " " + cmp_opt, None, "crc_tb4_mod", expected_crc):
+                if not self.__compile_and_check_res("--algorithm table-driven --table-idx-width=4" + " " + cmp_opt, None, "crc_tix4_mod", expected_crc):
                     return False
         return True
 
@@ -501,14 +498,6 @@ class CrcTests(object):
                         return False
 
                 if not self.__compile_and_check_res("--algorithm bit-by-bit-fast" + " " + args, None, "crc_bbf_arg", check):
-                    return False
-
-            if self.use_algo_bitwise_expression:
-                if self.crc_bin_bwe_c99 is not None:
-                    if not self.__check_command(self.crc_bin_bwe_c99 + " " + args, check):
-                        return False
-
-                if not self.__compile_and_check_res("--algorithm bitwise-expression" + " " + args, None, "crc_bwe_arg", check):
                     return False
 
             if self.use_algo_table_driven:
@@ -603,7 +592,6 @@ class CrcTests(object):
         """
         self.use_algo_bit_by_bit = "bit-by-bit" in opt.Algorithm or "bbb" in opt.Algorithm
         self.use_algo_bit_by_bit_fast = "bit-by-bit-fast" in opt.Algorithm or "bbf" in opt.Algorithm
-        self.use_algo_bitwise_expression = "bitwise-expression" in opt.Algorithm or "bwe" in opt.Algorithm
         self.use_algo_table_driven = "table-driven" in opt.Algorithm or "tbl" in opt.Algorithm
         self.verbose = opt.Verbose
 

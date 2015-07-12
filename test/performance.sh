@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
 PYCRC=`dirname $0`/../pycrc.py
 
-function cleanup {
+cleanup() {
     rm -f a.out performance.c crc_bbb.[ch] crc_bbf.[ch] crc_tb[l4].[ch] crc_bw[e4].[ch]
 }
 
@@ -22,22 +22,14 @@ $PYCRC --model crc-32 --symbol-prefix crc_${prefix}_ --generate c -o crc_$prefix
 prefix=tb4
 $PYCRC --model crc-32 --symbol-prefix crc_${prefix}_ --generate h -o crc_$prefix.h --algo table-driven --table-idx-width 4
 $PYCRC --model crc-32 --symbol-prefix crc_${prefix}_ --generate c -o crc_$prefix.c --algo table-driven --table-idx-width 4
-prefix=bwe
-$PYCRC --model crc-32 --symbol-prefix crc_${prefix}_ --generate h -o crc_$prefix.h --algo bitwise-expression
-$PYCRC --model crc-32 --symbol-prefix crc_${prefix}_ --generate c -o crc_$prefix.c --algo bitwise-expression
-prefix=bw4
-$PYCRC --model crc-32 --symbol-prefix crc_${prefix}_ --generate h -o crc_$prefix.h --algo bitwise-expression --table-idx-width 4
-$PYCRC --model crc-32 --symbol-prefix crc_${prefix}_ --generate c -o crc_$prefix.c --algo bitwise-expression --table-idx-width 4
 
 
-function print_main {
+print_main() {
 cat <<EOF
 #include "crc_bbb.h"
 #include "crc_bbf.h"
 #include "crc_tbl.h"
 #include "crc_tb4.h"
-#include "crc_bwe.h"
-#include "crc_bw4.h"
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -45,7 +37,7 @@ cat <<EOF
 #include <sys/times.h>
 #include <unistd.h>
 
-#define NUM_RUNS    (256*256)
+#define NUM_RUNS    (16*256*256)
 
 unsigned char buf[1024];
 
@@ -53,8 +45,6 @@ void test_bbb(unsigned char *buf, size_t buf_len, size_t num_runs, clock_t clock
 void test_bbf(unsigned char *buf, size_t buf_len, size_t num_runs, clock_t clock_per_sec);
 void test_tbl(unsigned char *buf, size_t buf_len, size_t num_runs, clock_t clock_per_sec);
 void test_tb4(unsigned char *buf, size_t buf_len, size_t num_runs, clock_t clock_per_sec);
-void test_bwe(unsigned char *buf, size_t buf_len, size_t num_runs, clock_t clock_per_sec);
-void test_bw4(unsigned char *buf, size_t buf_len, size_t num_runs, clock_t clock_per_sec);
 
 /**
  * Print results.
@@ -67,11 +57,11 @@ void test_bw4(unsigned char *buf, size_t buf_len, size_t num_runs, clock_t clock
  * \param   t_sys system time
  * \return  void
  *****************************************************************************/
-void show_times(const char *dsc, unsigned int crc, size_t buflen, size_t num_runs, double t_user, double t_sys)
+void show_times(const char *dsc, unsigned int crc, size_t buflen, size_t num_runs, double t_user)
 {
+    double mbps = (((double)buflen) * num_runs)/(1024*1024*t_user);
     printf("%s of %ld bytes (%ld * %ld): 0x%08x\n", dsc, (long)buflen*num_runs, (long)buflen, (long)num_runs, crc);
-    printf("%13s: %7.3f s\n", "user time", t_user);
-    printf("%13s: %7.3f s\n", "system time", t_sys);
+    printf("%13s: %7.3f s %13s: %7.3f MiB/s\n", "user time", t_user, "throughput", mbps);
     printf("\n");
 }
 
@@ -104,18 +94,12 @@ int main(void)
     // table-driven idx4
     test_tb4(buf, sizeof(buf), NUM_RUNS, clock_per_sec);
 
-    // bitwise-expression
-    test_bwe(buf, sizeof(buf), NUM_RUNS, clock_per_sec);
-
-    // table-driven idx4
-    test_bw4(buf, sizeof(buf), NUM_RUNS, clock_per_sec);
-
     return 0;
 }
 EOF
 }
 
-function print_routine {
+print_routine() {
     algo=$1
     prefix=$2
     cat <<EOF
@@ -127,7 +111,7 @@ function print_routine {
 void test_${prefix}(unsigned char *buf, size_t buf_len, size_t num_runs, clock_t clock_per_sec)
 {
     crc_${prefix}_t crc;
-    unsigned int i, j;
+    unsigned int i;
     struct tms tm1, tm2;
 
     times(&tm1);
@@ -138,21 +122,7 @@ void test_${prefix}(unsigned char *buf, size_t buf_len, size_t num_runs, clock_t
     crc = crc_${prefix}_finalize(crc);
     times(&tm2);
     show_times("CRC32, $algo, block-wise", crc, buf_len, num_runs,
-            ((double)(tm2.tms_utime - tm1.tms_utime) / (double)clock_per_sec),
-            ((double)(tm2.tms_stime - tm1.tms_stime) / (double)clock_per_sec));
-
-    times(&tm1);
-    crc = crc_${prefix}_init();
-    for (i = 0; i < num_runs; i++) {
-        for (j = 0; j < buf_len; j++) {
-            crc = crc_${prefix}_update(crc, &buf[j], 1);
-        }
-    }
-    crc = crc_${prefix}_finalize(crc);
-    times(&tm2);
-    show_times("CRC32, $algo, byte-wise", crc, buf_len, num_runs,
-            ((double)(tm2.tms_utime - tm1.tms_utime) / (double)clock_per_sec),
-            ((double)(tm2.tms_stime - tm1.tms_stime) / (double)clock_per_sec));
+            ((double)(tm2.tms_utime - tm1.tms_utime) / (double)clock_per_sec));
 }
 
 EOF
@@ -163,8 +133,6 @@ print_routine "bit-by-bit" bbb >> performance.c
 print_routine "bit-by-bit-fast" bbf >> performance.c
 print_routine "table-driven" tbl >> performance.c
 print_routine "table-driven idx4" tb4 >> performance.c
-print_routine "bitwise-expression" bwe >> performance.c
-print_routine "bitwise-expression idx4" bw4 >> performance.c
 
-gcc -W -Wall -O3 crc_bbb.c crc_bbf.c crc_tbl.c crc_tb4.c crc_bwe.c crc_bw4.c performance.c
+gcc -W -Wall -O3 crc_bbb.c crc_bbf.c crc_tbl.c crc_tb4.c performance.c
 ./a.out

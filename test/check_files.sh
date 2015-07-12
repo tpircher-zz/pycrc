@@ -62,7 +62,7 @@ populate() {
     mkdir -p "$outdir"
     models=`awk 'BEGIN { FS="'"'"'" } $2 == "name" && $3 ~ /^: */ { print $4 }' ../crc_models.py`
     for m in $models; do
-        for algo in "bit-by-bit" "bit-by-bit-fast" "bitwise-expression" "table-driven"; do
+        for algo in "bit-by-bit" "bit-by-bit-fast" "table-driven"; do
             $PYCRC --model $m --algorithm $algo --generate h -o "${outdir}/${m}_${algo}.h"
             $PYCRC --model $m --algorithm $algo --generate c -o "${outdir}/${m}_${algo}.c"
             sed -i -e 's/Generated on ... ... .. ..:..:.. ....,/Generated on XXX XXX XX XX:XX:XX XXXX,/; s/by pycrc v[0-9.]*/by pycrc vXXX/;' "${outdir}/${m}_${algo}.h"
