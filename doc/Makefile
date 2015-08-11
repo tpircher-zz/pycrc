@@ -1,7 +1,7 @@
 XSLTPROC		= xsltproc
 XSLTPARAM		= --nonet --novalid
-HTML_STYLESHEET	= /usr/share/xml/docbook/stylesheet/nwalsh/html/docbook.xsl
-MAN_STYLESHEET	= /usr/share/xml/docbook/stylesheet/nwalsh/manpages/docbook.xsl
+HTML_STYLESHEET	= /usr/share/xml/docbook/stylesheet/docbook-xsl-ns/xhtml5/docbook.xsl
+MAN_STYLESHEET	= /usr/share/xml/docbook/stylesheet/docbook-xsl-ns/manpages/docbook.xsl
 
 source      = pycrc.xml
 targets		= $(source:.xml=.html) $(source:.xml=.1)

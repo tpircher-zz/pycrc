@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
-                    "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V5.0//EN"
+                    "http://www.oasis-open.org/docbook/xml/5.0/docbook.dtd" [
 <!ENTITY project_name       "pycrc">
 <!ENTITY project_version    "0.8">
 <!ENTITY project_homepage   "https://www.tty1.net/pycrc/">
@@ -24,7 +24,7 @@
 <!ENTITY check          "Check">
 ]>
 
-<refentry id="&project_name;">
+<refentry xmlns="http://docbook.org/ns/docbook" version="5.0" id="&project_name;">
 
     <refentryinfo>
         <title>&project_name;</title>
