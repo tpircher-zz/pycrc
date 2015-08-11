@@ -51,11 +51,6 @@ The [pycrc manual page](https://www.tty1.net/pycrc/pycrc.html) explains the
 command line options in some detail and also gives some more examples how to
 use pycrc.
 
-If you have questions about using pycrc which is not answered in a satisfactory
-way by the documentation, please send a mail to the
-[pycrc users list](https://lists.sourceforge.net/lists/listinfo/pycrc-users).
-Due to excessive spamming a subscription is required to post on the list.
-
 If you have found a bug in pycrc or want to request a feature please take the
 time and submit it to the
 [issue tracker](https://github.com/tpircher/pycrc/issues).
