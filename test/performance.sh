@@ -9,19 +9,20 @@ cleanup() {
 
 trap cleanup 0 1 2 3 15
 
+model=crc-32
 
 prefix=bbb
-$PYCRC --model crc-32 --symbol-prefix crc_${prefix}_ --generate c -o crc_$prefix.c --algo bit-by-bit
-$PYCRC --model crc-32 --symbol-prefix crc_${prefix}_ --generate h -o crc_$prefix.h --algo bit-by-bit
+$PYCRC --model $model --symbol-prefix crc_${prefix}_ --generate c -o crc_$prefix.c --algo bit-by-bit
+$PYCRC --model $model --symbol-prefix crc_${prefix}_ --generate h -o crc_$prefix.h --algo bit-by-bit
 prefix=bbf
-$PYCRC --model crc-32 --symbol-prefix crc_${prefix}_ --generate h -o crc_$prefix.h --algo bit-by-bit-fast
-$PYCRC --model crc-32 --symbol-prefix crc_${prefix}_ --generate c -o crc_$prefix.c --algo bit-by-bit-fast
+$PYCRC --model $model --symbol-prefix crc_${prefix}_ --generate h -o crc_$prefix.h --algo bit-by-bit-fast
+$PYCRC --model $model --symbol-prefix crc_${prefix}_ --generate c -o crc_$prefix.c --algo bit-by-bit-fast
 prefix=tbl
-$PYCRC --model crc-32 --symbol-prefix crc_${prefix}_ --generate h -o crc_$prefix.h --algo table-driven
-$PYCRC --model crc-32 --symbol-prefix crc_${prefix}_ --generate c -o crc_$prefix.c --algo table-driven
+$PYCRC --model $model --symbol-prefix crc_${prefix}_ --generate h -o crc_$prefix.h --algo table-driven
+$PYCRC --model $model --symbol-prefix crc_${prefix}_ --generate c -o crc_$prefix.c --algo table-driven
 prefix=tb4
-$PYCRC --model crc-32 --symbol-prefix crc_${prefix}_ --generate h -o crc_$prefix.h --algo table-driven --table-idx-width 4
-$PYCRC --model crc-32 --symbol-prefix crc_${prefix}_ --generate c -o crc_$prefix.c --algo table-driven --table-idx-width 4
+$PYCRC --model $model --symbol-prefix crc_${prefix}_ --generate h -o crc_$prefix.h --algo table-driven --table-idx-width 4
+$PYCRC --model $model --symbol-prefix crc_${prefix}_ --generate c -o crc_$prefix.c --algo table-driven --table-idx-width 4
 
 
 print_main() {
@@ -37,7 +38,7 @@ cat <<EOF
 #include <sys/times.h>
 #include <unistd.h>
 
-#define NUM_RUNS    (16*256*256)
+#define NUM_RUNS    (128*256*256)
 
 unsigned char buf[1024];
 
@@ -50,17 +51,16 @@ void test_tb4(unsigned char *buf, size_t buf_len, size_t num_runs, clock_t clock
  * Print results.
  *
  * \param   dsc Description of the test
- * \param   crc Resulting CRC
  * \param   buflen Length of one buffer
  * \param   num_runs Number of runs over that buffer
  * \param   t_user user time
  * \param   t_sys system time
  * \return  void
  *****************************************************************************/
-void show_times(const char *dsc, unsigned int crc, size_t buflen, size_t num_runs, double t_user)
+void show_times(const char *dsc, size_t buflen, size_t num_runs, double t_user)
 {
     double mbps = (((double)buflen) * num_runs)/(1024*1024*t_user);
-    printf("%s of %ld bytes (%ld * %ld): 0x%08x\n", dsc, (long)buflen*num_runs, (long)buflen, (long)num_runs, crc);
+    printf("%s of %ld bytes (%ld * %ld)\n", dsc, (long)buflen*num_runs, (long)buflen, (long)num_runs);
     printf("%13s: %7.3f s %13s: %7.3f MiB/s\n", "user time", t_user, "throughput", mbps);
     printf("\n");
 }
@@ -83,16 +83,16 @@ int main(void)
     clock_per_sec = sysconf(_SC_CLK_TCK);
 
     // bit-by-bit
-    test_bbb(buf, sizeof(buf), NUM_RUNS, clock_per_sec);
+    test_bbb(buf, sizeof(buf), NUM_RUNS / 8, clock_per_sec);
 
     // bit-by-bit-fast
-    test_bbf(buf, sizeof(buf), NUM_RUNS, clock_per_sec);
+    test_bbf(buf, sizeof(buf), NUM_RUNS / 8, clock_per_sec);
 
     // table-driven
     test_tbl(buf, sizeof(buf), NUM_RUNS, clock_per_sec);
 
     // table-driven idx4
-    test_tb4(buf, sizeof(buf), NUM_RUNS, clock_per_sec);
+    test_tb4(buf, sizeof(buf), NUM_RUNS / 2, clock_per_sec);
 
     return 0;
 }
@@ -121,7 +121,7 @@ void test_${prefix}(unsigned char *buf, size_t buf_len, size_t num_runs, clock_t
     }
     crc = crc_${prefix}_finalize(crc);
     times(&tm2);
-    show_times("CRC32, $algo, block-wise", crc, buf_len, num_runs,
+    show_times("$model, $algo, block-wise", buf_len, num_runs,
             ((double)(tm2.tms_utime - tm1.tms_utime) / (double)clock_per_sec));
 }
 

@@ -1332,16 +1332,27 @@ $if ($crc_xor_out == Undefined) {:
         else:
             shr = "%d" % (self.opt.Width - self.opt.TableIdxWidth)
 
+        if shr != "0":
+            crc_shifted_right = "(crc >> %s)" % shr
+        else:
+            crc_shifted_right = "crc"
+
+        if self.opt.Width != None and self.opt.TableIdxWidth != None and self.opt.Width <= self.opt.TableIdxWidth:
+            crc_xor_expr = ""
+        else:
+            crc_xor_expr = " ^ (crc << $cfg_table_idx_width)"
+
         if self.opt.TableIdxWidth == 8:
             crc_lookup = 'crc_table[tbl_idx]'
-            loop_core += loop_indent + "tbl_idx = ((crc >> " + shr + ") ^ *d) & $crc_table_mask;" + '\n' + \
-                            loop_indent + "crc = (" + crc_lookup + " ^ (crc << $cfg_table_idx_width)) & $cfg_mask_shifted;" + '\n'
+            loop_core += loop_indent + "tbl_idx = (" + crc_shifted_right + " ^ *d)" \
+                            "$if ($crc_width > 8) {: & $crc_table_mask:};" + '\n' + \
+                            loop_indent + "crc = (" + crc_lookup + crc_xor_expr + ") & $cfg_mask_shifted;" + '\n'
         else:
             crc_lookup = 'crc_table[tbl_idx & $crc_table_mask]'
             for i in range (8 // self.opt.TableIdxWidth):
                 str_idx = "%s" % (8 - (i + 1) * self.opt.TableIdxWidth)
-                loop_core += loop_indent + "tbl_idx = (crc >> " + shr + ") ^ (*d >> " + str_idx + ");" + '\n' + \
-                                loop_indent + "crc = " + crc_lookup + " ^ (crc << $cfg_table_idx_width);" + '\n'
+                loop_core += loop_indent + "tbl_idx = " + crc_shifted_right + " ^ (*d >> " + str_idx + ");" + '\n' + \
+                                loop_indent + "crc = " + crc_lookup + crc_xor_expr + ";" + '\n'
         return loop_core
 
 
@@ -1360,16 +1371,21 @@ $if ($crc_xor_out == Undefined) {:
             loop_indent = " " * 12
         else:
             loop_indent = " " * 8
-        crc_shifted = "$if ($crc_shift != 0) {:(crc >> $cfg_shift):} $else {:crc:}"
+        crc_shifted_right = "$if ($crc_shift != 0) {:(crc >> $cfg_shift):} $else {:crc:}"
+        if self.opt.Width != None and self.opt.TableIdxWidth != None and self.opt.Width <= self.opt.TableIdxWidth:
+            crc_xor_expr = ""
+        else:
+            crc_xor_expr = " ^ (crc >> $cfg_table_idx_width)"
 
         if self.opt.TableIdxWidth == 8:
             crc_lookup = 'crc_table[tbl_idx]'
-            loop_core += loop_indent + "tbl_idx = (" + crc_shifted + " ^ *d) & $crc_table_mask;" + '\n' + \
-                            loop_indent + "crc = (" + crc_lookup + " ^ (crc >> $cfg_table_idx_width)) & $cfg_mask_shifted;" + '\n'
+            loop_core += loop_indent + "tbl_idx = (" + crc_shifted_right + " ^ *d)" \
+                            "$if ($crc_width > 8) {: & $crc_table_mask:};" + '\n' + \
+                            loop_indent + "crc = (" + crc_lookup + crc_xor_expr + ") & $cfg_mask_shifted;" + '\n'
         else:
             crc_lookup = 'crc_table[tbl_idx & $crc_table_mask]'
             for i in range (8 // self.opt.TableIdxWidth):
                 str_idx = "%d" % i
-                loop_core += loop_indent + "tbl_idx = " + crc_shifted + " ^ (*d >> (" + str_idx + " * $cfg_table_idx_width));" + '\n' + \
-                                loop_indent + "crc = " + crc_lookup + " ^ (crc >> $cfg_table_idx_width);" + '\n'
+                loop_core += loop_indent + "tbl_idx = " + crc_shifted_right + " ^ (*d >> (" + str_idx + " * $cfg_table_idx_width));" + '\n' + \
+                                loop_indent + "crc = " + crc_lookup + crc_xor_expr + ";" + '\n'
         return loop_core
