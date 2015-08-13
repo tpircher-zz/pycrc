@@ -1,0 +1,7 @@
+Thomas Pircher: main developer.
+
+Matthias Urlichs: removed the unused 'direct' parameter and added a fix not to
+    recurse into main() when an unknown algorithm is selected.
+
+Danjel McGougan: whose Universal Crc project was highly influential in the
+    implementation of widths < 8 in the table-driven algorithm.

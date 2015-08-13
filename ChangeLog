@@ -1,4 +1,24 @@
-2015-05-15  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+2015-08-12  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_symtable.py:
+    * test/performance.sh:
+    Applied some minor optimisations to the generated table-driven code.
+
+    * AUTHORS:
+    Belatedly added an authors file. If I have forgotten to mention someone
+    please don't hesitate to send a mail.
+
+2015-08-11  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * doc/pycrc.xml:
+    * doc/Makefile:
+    Upgraded documentation to DocBook 5.
+
+    * README.md:
+    Removed sourceforge mailing list from README.md in an effort to move pycrc
+    away from sourceforge.
+
+2015-07-12  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_opt.py:
     * crc_symtable.py:
