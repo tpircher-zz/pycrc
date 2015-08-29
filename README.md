@@ -1,16 +1,16 @@
 
 
-                 _ __  _   _  ___ _ __ ___
-                | '_ \| | | |/ __| '__/ __|
-                | |_) | |_| | (__| | | (__
-                | .__/ \__, |\___|_|  \___|
-                |_|    |___/
+                         _ __  _   _  ___ _ __ ___
+                        | '_ \| | | |/ __| '__/ __|
+                        | |_) | |_| | (__| | | (__
+                        | .__/ \__, |\___|_|  \___|
+                        |_|    |___/
 
-                https://www.tty1.net/pycrc/
+                             https://pycrc.org
 
 
-pycrc is a free, easy to use Cyclic Redundancy Check (CRC) calculator and
-C source code generator.
+pycrc is a free, easy to use Cyclic Redundancy Check (CRC) calculator and C
+source code generator.
 
 
 
@@ -45,18 +45,17 @@ Getting help
 ============
 
 If you are new to pycrc and want to generate C code, start with
-[the tutorial](https://www.tty1.net/pycrc/tutorial_en.html).
+[the tutorial](https://pycrc.org/tutorial.html).
 
-The [pycrc manual page](https://www.tty1.net/pycrc/pycrc.html) explains the
-command line options in some detail and also gives some more examples how to
-use pycrc.
+The [pycrc manual page](https://pycrc.org/pycrc.html) explains the command line
+options in some detail and also gives some more examples how to use pycrc.
 
 If you have found a bug in pycrc or want to request a feature please take the
 time and submit it to the
 [issue tracker](https://github.com/tpircher/pycrc/issues).
 Thanks for your help.
 
-Also see the [frequently asked questions](https://www.tty1.net/pycrc/faq.html).
+Also see the [frequently asked questions](https://pycrc.org/faq.html).
 
 
 
