@@ -1,3 +1,8 @@
+2015-08-31  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_opt.py:
+    Version 0.8.3
+
 2015-08-29  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * README.md:
@@ -60,9 +65,10 @@
     Thanks to Kamil Szczygieł.
     This closes GitHub issue #4.
 
-#
-# Version 0.8.2, 2014-12-04
-#
+2014-12-04  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_opt.py:
+    Version 0.8.2
 
 2014-12-04  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
@@ -119,9 +125,10 @@
     * doc/pycrc.xml:
     Added a caveat emptor about even polinomials.
 
-#
-# Version 0.8.1, 2013-05-17
-#
+2013-05-17  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_opt.py:
+    Version 0.8.1
 
 2013-04-19  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
@@ -176,9 +183,10 @@
     Merge pull request #2 from smurfix/master.
     Thanks to Matthias Urlichs.
 
-#
-# Version 0.8, 2013-01-04
-#
+2013-01-04  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_opt.py:
+    Version 0.8
 
 2013-01-04  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
@@ -257,9 +265,10 @@
     * doc/pycrc.xml:
     Updated link to the Catalogue of parametrised CRC algorithms.
 
-#
-# Version 0.7.11, 2012-10-20
-#
+2012-10-20  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_opt.py:
+    Version 0.7.11
 
 2012-02-26  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
@@ -282,9 +291,10 @@
     * test/test.py:
     Deleted test.sh shell script and replaced it with test.py.
 
-#
-# Version 0.7.10, 2012-02-13
-#
+2012-02-13  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_opt.py:
+    Version 0.7.10
 
 2012-02-08  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
@@ -309,9 +319,10 @@
     Fixed a mistake in the man page that still used the old model name
     crc-32mpeg instead of crc-32-mpeg.  Thanks to Marek Erban.
 
-#
-# Version 0.7.9, 2011-12-08
-#
+2011-12-08  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_opt.py:
+    Version 0.7.9
 
 2011-12-08  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
@@ -328,9 +339,10 @@
     * pycrc.py:
     Using the --verbose option made pycrc quit without error message.
 
-#
-# Version 0.7.8, 2011-07-10
-#
+2011-07-10  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_opt.py:
+    Version 0.7.8
 
 2011-07-10  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
@@ -347,9 +359,10 @@
     * crc_symtable.py:
     Removed unused variable "this_option_optind" in the generated option parser.
 
-#
-# Version 0.7.7, 2011-02-11
-#
+2011-02-11  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_opt.py:
+    Version 0.7.7
 
 2011-02-11  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
@@ -366,9 +379,10 @@
     * doc/pycrc.xml:
     Updated the documentation using Windows-style calls to the Python interpreter.
 
-#
-# Version 0.7.6, 2010-10-21
-#
+2010-10-21  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_opt.py:
+    Version 0.7.6
 
 2010-10-21  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
@@ -388,9 +402,10 @@
     Changed a simple division (/) to a integer division (//) for Python3
     compatibility.
 
-#
-# Version 0.7.5, 2010-03-28
-#
+2010-03-28  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_opt.py:
+    Version 0.7.5
 
 2010-03-27  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
@@ -428,9 +443,10 @@
     * crc_opt.py:
     Minor code cleanup.
 
-#
-# Version 0.7.4, 2010-01-24
-#
+2010-01-24  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_opt.py:
+    Version 0.7.4
 
 2010-01-24  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
@@ -461,9 +477,10 @@
     Fix for unused variable argv.
     Closes issue 2893224. Thanks to Marko von Oppen.
 
-#
-# Version 0.7.3, 2009-10-25
-#
+2009-10-25  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_opt.py:
+    Version 0.7.3
 
 2009-10-25  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
@@ -475,9 +492,10 @@
     * crc_models.py:
     Added crc-64-jones CRC model. Thanks to Waterspirit.
 
-#
-# Version 0.7.2, 2009-09-30
-#
+2009-09-30  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_opt.py:
+    Version 0.7.2
 
 2009-09-30  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
@@ -486,18 +504,20 @@
     being evaluated at all.
     Closes issue 2870630. Thanks to Ildar Muslukhov.
 
-#
-# Version 0.7.1, 2009-04-05
-#
+2009-04-05  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_opt.py:
+    Version 0.7.1
 
 2009-03-26  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_models.py:
     Added crc-32mpeg. Thanks to Thomas Edwards.
 
-#
-# Version 0.7, 2009-02-27
-#
+2009-02-27  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_opt.py:
+    Version 0.7
 
 2009-02-15  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
@@ -528,9 +548,10 @@
     * doc/pycrc.xml:
     Added one more example.
 
-#
-# Version 0.6.7, 2008-12-11
-#
+2008-12-11  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_opt.py:
+    Version 0.6.7
 
 2008-12-11  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
@@ -539,9 +560,10 @@
     * crc_opt.py:
     Fixed a bug that raised an exception when an unknown model was selected.
 
-#
-# Version 0.6.6, 2008-06-05
-#
+2008-06-05  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_opt.py:
+    Version 0.6.6
 
 2008-06-05  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
@@ -554,9 +576,10 @@
     * pycrc.xml:
     New license: Creative Commons Attribution-Share Alike 3.0 Unported License.
 
-#
-# Version 0.6.5, 2008-03-03
-#
+2008-03-03  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_opt.py:
+    Version 0.6.5
 
 2008-03-02  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
@@ -596,9 +619,10 @@
     * crc_models.py:
     Added new file to handle CRC models.
 
-#
-# Version 0.6.4, 2007-12-05
-#
+2007-12-05  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_opt.py:
+    Version 0.6.4
 
 2007-12-05  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
@@ -606,9 +630,10 @@
     fixed a bug in the code generator for the table-driven
     algorithm. Thanks to Tom McDermott. Closes issue 1843774
 
-#
-# Version 0.6.3, 2007-10-13
-#
+2007-10-13  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_opt.py:
+    Version 0.6.3
 
 2007-10-13  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
@@ -629,9 +654,10 @@
     Removed unnecessary restriction on the width when using the bit-by-bit-fast
     algorithm. Closes issue 1794344.
 
-#
-# Version 0.6.2, 2007-08-25
-#
+2007-08-25  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_opt.py:
+    Version 0.6.2
 
 2007-08-25  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
@@ -659,9 +685,10 @@
     * all files:
     Documented the usage of the crc_* modules.
 
-#
-# Version 0.6.1, 2007-08-12
-#
+2007-08-12  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_opt.py:
+    Version 0.6.1
 
 2007-08-12  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
@@ -697,9 +724,10 @@
     * crc_opt.py:
     Deleted obsolete options.
 
-#
-# Version 0.6, 2007-05-21
-#
+2007-05-21  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_opt.py:
+    Version 0.6
 
 2007-05-15  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
@@ -743,9 +771,10 @@
     Added the option --generate which obsoletes the old options --generate_c
     --generate_h etc.
 
-#
-# Version 0.5, 2007-03-25
-#
+2007-03-25  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_opt.py:
+    Version 0.5
 
 2007-03-25  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
@@ -759,9 +788,10 @@
     * pycrc.py:
     Corrected typos in the documentation.
 
-#
-# Version 0.4, 2007-01-26
-#
+2007-01-26  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_opt.py:
+    Version 0.4
 
 2007-01-27  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
@@ -798,9 +828,10 @@
     * test/test.sh:
     Added a non-regression test on the generated C source.
 
-#
-# Version 0.3, 2007-01-14
-#
+2007-01-14  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_opt.py:
+    Version 0.3
 
 2007-01-14  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 

@@ -46,9 +46,9 @@ class Options(object):
 
     # Program details
     ProgramName    = "pycrc"
-    Version        = "0.8.2"
+    Version        = "0.8.3"
     VersionStr     = "%s v%s" % (ProgramName, Version)
-    WebAddress     = "https://www.tty1.net/pycrc/"
+    WebAddress     = "https://pycrc.org"
 
     # Bitmap of the algorithms
     Algo_None               = 0x00
