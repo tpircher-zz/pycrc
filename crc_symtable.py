@@ -32,8 +32,9 @@ use as follows:
     sym = SymbolTable(opt)
 
     str = " ....  "
-    terminal = sym.getTerminal(str)
+    terminal = sym.get_terminal(str)
 """
+#pylint: disable=too-many-lines
 
 from crc_algorithms import Crc
 import time
@@ -43,12 +44,14 @@ import os
 # Class SymbolLookupError
 ###############################################################################
 class SymbolLookupError(Exception):
-    """The exception class for the sumbol table.
+    """
+    The exception class for the symbol table.
     """
 
     # Class constructor
     ###############################################################################
     def __init__(self, reason):
+        Exception.__init__(self)
         self.reason = reason
 
     # function __str__
@@ -59,10 +62,11 @@ class SymbolLookupError(Exception):
 
 # Class SymbolTable
 ###############################################################################
-class SymbolTable:
+class SymbolTable(object):
     """
     The symbol table class.
     """
+    # pylint: disable=too-few-public-methods
 
 
     # Class constructor
@@ -71,39 +75,41 @@ class SymbolTable:
         """
         The class constructor.
         """
+        # pylint: disable=line-too-long, too-many-statements
+
         self.opt = opt
 
-        if self.opt.Algorithm == self.opt.Algo_Table_Driven \
-                and (self.opt.Width == None or self.opt.Width < 8):
-            if self.opt.Width == None:
+        if self.opt.algorithm == self.opt.algo_table_driven \
+                and (self.opt.width == None or self.opt.width < 8):
+            if self.opt.width == None:
                 self.tbl_shift = None
             else:
-                self.tbl_shift = 8 - self.opt.Width
+                self.tbl_shift = 8 - self.opt.width
         else:
             self.tbl_shift = 0
 
         self.table = {}
         self.table["nop"] = ""
         self.table["datetime"] = time.asctime()
-        self.table["program_version"] = self.opt.VersionStr
-        self.table["program_url"] = self.opt.WebAddress
-        if self.opt.OutputFile == None:
+        self.table["program_version"] = self.opt.version_str
+        self.table["program_url"] = self.opt.web_address
+        if self.opt.output_file == None:
             self.table["filename"] = "pycrc_stdout"
         else:
-            self.table["filename"] = os.path.basename(self.opt.OutputFile)
-        self.table["header_filename"] = self.__pretty_header_filename(self.opt.OutputFile)
+            self.table["filename"] = os.path.basename(self.opt.output_file)
+        self.table["header_filename"] = self.__pretty_header_filename(self.opt.output_file)
 
-        self.table["crc_width"] = self.__pretty_str(self.opt.Width)
-        self.table["crc_poly"] = self.__pretty_hex(self.opt.Poly, self.opt.Width)
-        self.table["crc_reflect_in"] = self.__pretty_bool(self.opt.ReflectIn)
-        self.table["crc_xor_in"] = self.__pretty_hex(self.opt.XorIn, self.opt.Width)
-        self.table["crc_reflect_out"] = self.__pretty_bool(self.opt.ReflectOut)
-        self.table["crc_xor_out"] = self.__pretty_hex(self.opt.XorOut, self.opt.Width)
-        self.table["crc_table_idx_width"] = str(self.opt.TableIdxWidth)
-        self.table["crc_table_width"] = str(1 << self.opt.TableIdxWidth)
-        self.table["crc_table_mask"] = self.__pretty_hex(self.opt.TableWidth - 1, 8)
-        self.table["crc_mask"] = self.__pretty_hex(self.opt.Mask, self.opt.Width)
-        self.table["crc_msb_mask"] = self.__pretty_hex(self.opt.MSB_Mask, self.opt.Width)
+        self.table["crc_width"] = self.__pretty_str(self.opt.width)
+        self.table["crc_poly"] = self.__pretty_hex(self.opt.poly, self.opt.width)
+        self.table["crc_reflect_in"] = self.__pretty_bool(self.opt.reflect_in)
+        self.table["crc_xor_in"] = self.__pretty_hex(self.opt.xor_in, self.opt.width)
+        self.table["crc_reflect_out"] = self.__pretty_bool(self.opt.reflect_out)
+        self.table["crc_xor_out"] = self.__pretty_hex(self.opt.xor_out, self.opt.width)
+        self.table["crc_table_idx_width"] = str(self.opt.tbl_idx_width)
+        self.table["crc_table_width"] = str(1 << self.opt.tbl_idx_width)
+        self.table["crc_table_mask"] = self.__pretty_hex(self.opt.tbl_width - 1, 8)
+        self.table["crc_mask"] = self.__pretty_hex(self.opt.mask, self.opt.width)
+        self.table["crc_msb_mask"] = self.__pretty_hex(self.opt.msb_mask, self.opt.width)
         if self.tbl_shift == None:
             self.table["crc_shift"] = self.__pretty_str(None)
         else:
@@ -124,9 +130,9 @@ class SymbolTable:
         self.table["cfg_msb_mask_shifted"] = "$if ($crc_shift != 0) {:($cfg_msb_mask << $cfg_shift):} $else {:$cfg_msb_mask:}"
         self.table["cfg_shift"] = "$if ($crc_shift != Undefined) {:$crc_shift:} $else {:cfg->crc_shift:}"
 
-        self.table["undefined_parameters"] = self.__pretty_bool(self.opt.UndefinedCrcParameters)
-        self.table["use_cfg_t"] = self.__pretty_bool(self.opt.UndefinedCrcParameters)
-        self.table["c_std"] = self.opt.CStd
+        self.table["undefined_parameters"] = self.__pretty_bool(self.opt.undefined_crc_parameters)
+        self.table["use_cfg_t"] = self.__pretty_bool(self.opt.undefined_crc_parameters)
+        self.table["c_std"] = self.opt.c_std
         self.table["c_bool"] = "$if ($c_std == C89) {:int:} $else {:bool:}"
         self.table["c_true"] = "$if ($c_std == C89) {:1:} $else {:true:}"
         self.table["c_false"] = "$if ($c_std == C89) {:0:} $else {:false:}"
@@ -134,122 +140,124 @@ class SymbolTable:
         self.table["underlying_crc_t"] = self.__get_underlying_crc_t()
         self.table["include_files"] = self.__get_include_files()
 
-        self.table["crc_prefix"] = self.opt.SymbolPrefix
-        self.table["crc_t"] = self.opt.SymbolPrefix + "t"
-        self.table["cfg_t"] = self.opt.SymbolPrefix + "cfg_t"
-        self.table["crc_reflect_function"] = self.opt.SymbolPrefix + "reflect"
-        self.table["crc_table_gen_function"] = self.opt.SymbolPrefix + "table_gen"
-        self.table["crc_init_function"] = self.opt.SymbolPrefix + "init"
-        self.table["crc_update_function"] = self.opt.SymbolPrefix + "update"
-        self.table["crc_finalize_function"] = self.opt.SymbolPrefix + "finalize"
+        self.table["crc_prefix"] = self.opt.symbol_prefix
+        self.table["crc_t"] = self.opt.symbol_prefix + "t"
+        self.table["cfg_t"] = self.opt.symbol_prefix + "cfg_t"
+        self.table["crc_reflect_function"] = self.opt.symbol_prefix + "reflect"
+        self.table["crc_table_gen_function"] = self.opt.symbol_prefix + "table_gen"
+        self.table["crc_init_function"] = self.opt.symbol_prefix + "init"
+        self.table["crc_update_function"] = self.opt.symbol_prefix + "update"
+        self.table["crc_finalize_function"] = self.opt.symbol_prefix + "finalize"
 
 
-    # function getTerminal
+    # function get_terminal
     ###############################################################################
-    def getTerminal(self, id):
+    def get_terminal(self, name):
         """
         Return the expanded terminal, if it exists or None otherwise.
         """
-        if id != None:
-            if id == "":
+        if name != None:
+            if name == "":
                 return ""
-            if id in self.table:
-                return self.table[id]
-            key = self.__getTerminal(id)
+            if name in self.table:
+                return self.table[name]
+            key = self.__get_terminal(name)
             if key != None:
-                self.table[id] = key
+                self.table[name] = key
                 return key
-        raise SymbolLookupError
+        raise SymbolLookupError('Unknown terminal "{0:s}"'.format(name))
 
 
-    # function __getTerminal
+    # function __get_terminal
     ###############################################################################
-    def __getTerminal(self, id):
+    def __get_terminal(self, name):
         """
         Return the expanded terminal, if it exists or None otherwise.
         """
-        if id == "constant_crc_init":
+        # pylint: disable=line-too-long, too-many-return-statements, too-many-branches, too-many-statements
+
+        if name == "constant_crc_init":
             if self.__get_init_value() == None:
                 return  self.__pretty_bool(False)
             else:
                 return   self.__pretty_bool(True)
 
-        if id == "constant_crc_table":
-            if self.opt.Width != None and self.opt.Poly != None and self.opt.ReflectIn != None:
+        if name == "constant_crc_table":
+            if self.opt.width != None and self.opt.poly != None and self.opt.reflect_in != None:
                 return  self.__pretty_bool(True)
             else:
                 return   self.__pretty_bool(False)
 
-        elif id == "simple_crc_update_def":
-            if self.opt.Algorithm in set([self.opt.Algo_Bit_by_Bit, self.opt.Algo_Bit_by_Bit_Fast]):
-                if self.opt.Width != None and self.opt.Poly != None and self.opt.ReflectIn != None:
+        elif name == "simple_crc_update_def":
+            if self.opt.algorithm in set([self.opt.algo_bit_by_bit, self.opt.algo_bit_by_bit_fast]):
+                if self.opt.width != None and self.opt.poly != None and self.opt.reflect_in != None:
                     return  self.__pretty_bool(True)
-            elif self.opt.Algorithm == self.opt.Algo_Table_Driven:
-                if self.opt.Width != None and self.opt.ReflectIn != None:
-                    return  self.__pretty_bool(True)
-            return  self.__pretty_bool(False)
-
-        elif id == "inline_crc_finalize":
-            if self.opt.Algorithm in set([self.opt.Algo_Bit_by_Bit_Fast, self.opt.Algo_Table_Driven]) and \
-                    (self.opt.Width != None and self.opt.ReflectIn != None and self.opt.ReflectOut != None and self.opt.XorOut != None):
-                return  self.__pretty_bool(True)
-            else:
-                return  self.__pretty_bool(False)
-
-        elif id == "simple_crc_finalize_def":
-            if self.opt.Algorithm == self.opt.Algo_Bit_by_Bit:
-                if self.opt.Width != None and self.opt.Poly != None and self.opt.ReflectOut != None and self.opt.XorOut != None:
-                    return  self.__pretty_bool(True)
-            elif self.opt.Algorithm == self.opt.Algo_Bit_by_Bit_Fast:
-                if self.opt.Width != None and self.opt.ReflectOut != None and self.opt.XorOut != None:
-                    return  self.__pretty_bool(True)
-            elif self.opt.Algorithm == self.opt.Algo_Table_Driven:
-                if self.opt.Width != None and self.opt.ReflectIn != None and self.opt.ReflectOut != None and self.opt.XorOut != None:
+            elif self.opt.algorithm == self.opt.algo_table_driven:
+                if self.opt.width != None and self.opt.reflect_in != None:
                     return  self.__pretty_bool(True)
             return  self.__pretty_bool(False)
 
-        elif id == "use_reflect_func":
-            if self.opt.ReflectOut == False and self.opt.ReflectIn == False:
+        elif name == "inline_crc_finalize":
+            if self.opt.algorithm in set([self.opt.algo_bit_by_bit_fast, self.opt.algo_table_driven]) and \
+                    (self.opt.width != None and self.opt.reflect_in != None and self.opt.reflect_out != None and self.opt.xor_out != None):
+                return  self.__pretty_bool(True)
+            else:
+                return  self.__pretty_bool(False)
+
+        elif name == "simple_crc_finalize_def":
+            if self.opt.algorithm == self.opt.algo_bit_by_bit:
+                if self.opt.width != None and self.opt.poly != None and self.opt.reflect_out != None and self.opt.xor_out != None:
+                    return  self.__pretty_bool(True)
+            elif self.opt.algorithm == self.opt.algo_bit_by_bit_fast:
+                if self.opt.width != None and self.opt.reflect_out != None and self.opt.xor_out != None:
+                    return  self.__pretty_bool(True)
+            elif self.opt.algorithm == self.opt.algo_table_driven:
+                if self.opt.width != None and self.opt.reflect_in != None and self.opt.reflect_out != None and self.opt.xor_out != None:
+                    return  self.__pretty_bool(True)
+            return  self.__pretty_bool(False)
+
+        elif name == "use_reflect_func":
+            if self.opt.reflect_out == False and self.opt.reflect_in == False:
                 return  self.__pretty_bool(False)
             else:
                 return  self.__pretty_bool(True)
 
-        elif id == "static_reflect_func":
-            if self.opt.Algorithm == self.opt.Algo_Table_Driven:
+        elif name == "static_reflect_func":
+            if self.opt.algorithm == self.opt.algo_table_driven:
                 return  self.__pretty_bool(False)
-            elif self.opt.ReflectOut != None and self.opt.Algorithm == self.opt.Algo_Bit_by_Bit_Fast:
+            elif self.opt.reflect_out != None and self.opt.algorithm == self.opt.algo_bit_by_bit_fast:
                 return  self.__pretty_bool(False)
             else:
                 return  self.__pretty_bool(True)
 
-        elif id == "crc_algorithm":
-            if self.opt.Algorithm == self.opt.Algo_Bit_by_Bit:
+        elif name == "crc_algorithm":
+            if self.opt.algorithm == self.opt.algo_bit_by_bit:
                 return  "bit-by-bit"
-            elif self.opt.Algorithm == self.opt.Algo_Bit_by_Bit_Fast:
+            elif self.opt.algorithm == self.opt.algo_bit_by_bit_fast:
                 return  "bit-by-bit-fast"
-            elif self.opt.Algorithm == self.opt.Algo_Table_Driven:
+            elif self.opt.algorithm == self.opt.algo_table_driven:
                 return  "table-driven"
             else:
                 return  "UNDEFINED"
 
-        elif id == "crc_table_init":
+        elif name == "crc_table_init":
             return  self.__get_table_init()
-        elif id == "crc_table_core_algorithm_nonreflected":
-            return  self.__get_table_core_algorithm_nonreflected()
-        elif id == "crc_table_core_algorithm_reflected":
-            return  self.__get_table_core_algorithm_reflected()
+        elif name == "crc_table_core_algorithm_nonreflected":
+            return  self.__get_tbl_core_nonreflected()
+        elif name == "crc_table_core_algorithm_reflected":
+            return  self.__get_tbl_core_reflected()
 
-        elif id == "header_protection":
+        elif name == "header_protection":
             return  self.__pretty_hdrprotection()
 
-        elif id == "crc_init_value":
+        elif name == "crc_init_value":
             ret = self.__get_init_value()
             if ret == None:
                 return  ""
             else:
                 return  ret
 
-        elif id == "crc_final_value":
+        elif name == "crc_final_value":
             return  """\
 $if ($crc_algorithm == "table-driven") {:
 $if ($crc_reflect_in == $crc_reflect_out) {:
@@ -261,7 +269,7 @@ $crc_reflect_function(crc, $crc_width) ^ $crc_xor_out\
 :} $else {:
 crc ^ $crc_xor_out\
 :}"""
-        elif id == "h_template":
+        elif name == "h_template":
             return  """\
 $source_header
 #ifndef $header_protection
@@ -396,7 +404,7 @@ $crc_finalize_function_def;
 #endif      /* $header_protection */
 """
 
-        elif id == "source_header":
+        elif name == "source_header":
             return  """\
 /**
  * \\file $filename
@@ -415,7 +423,7 @@ $crc_finalize_function_def;
  *****************************************************************************/\
 """
 
-        elif id == "crc_reflect_doc":
+        elif name == "crc_reflect_doc":
             return  """\
 /**
  * Reflect all bits of a \\a data word of \\a data_len bytes.
@@ -426,12 +434,12 @@ $crc_finalize_function_def;
  *****************************************************************************/\
 """
 
-        elif id == "crc_reflect_function_def":
+        elif name == "crc_reflect_function_def":
             return  """\
 $crc_t $crc_reflect_function($crc_t data, size_t data_len)\
 """
 
-        elif id == "crc_reflect_function_gen":
+        elif name == "crc_reflect_function_gen":
             return  """\
 $if ($use_reflect_func == True) {:
 $if ($crc_reflect_in == Undefined or $crc_reflect_in == True or $crc_reflect_out == Undefined or $crc_reflect_out == True) {:
@@ -453,7 +461,7 @@ $crc_reflect_function_def$nop
 :}
 :}"""
 
-        elif id == "crc_init_function_gen":
+        elif name == "crc_init_function_gen":
             return  """\
 $if ($constant_crc_init == False) {:
 $crc_init_doc
@@ -492,7 +500,7 @@ $if ($crc_reflect_in == Undefined) {:
 
 :}"""
 
-        elif id == "crc_update_function_gen":
+        elif name == "crc_update_function_gen":
             return  """\
 $crc_table_driven_func_gen
 $crc_update_doc
@@ -590,7 +598,7 @@ $crc_table_core_algorithm_nonreflected
 
 """
 
-        elif id == "crc_finalize_function_gen":
+        elif name == "crc_finalize_function_gen":
             return  """\
 $if ($inline_crc_finalize != True) {:
 $crc_finalize_doc
@@ -647,7 +655,7 @@ $if ($crc_reflect_in == Undefined and $crc_reflect_out == Undefined) {:
 
 :}"""
 
-        elif id == "crc_table_driven_func_gen":
+        elif name == "crc_table_driven_func_gen":
             return  """\
 $if ($crc_algorithm == "table-driven" and $constant_crc_table != True) {:
 $crc_table_gen_doc
@@ -702,7 +710,7 @@ $if ($crc_shift != 0) {:
 
 :}"""
 
-        elif id == "crc_table_gen_doc":
+        elif name == "crc_table_gen_doc":
             return  """\
 /**
  * Populate the private static crc table.
@@ -712,12 +720,12 @@ $if ($crc_shift != 0) {:
  *****************************************************************************/\
 """
 
-        elif id == "crc_table_gen_function_def":
+        elif name == "crc_table_gen_function_def":
             return  """\
 void $crc_table_gen_function(const $cfg_t *cfg)\
 """
 
-        elif id == "crc_init_doc":
+        elif name == "crc_init_doc":
             return  """\
 /**
  * Calculate the initial crc value.
@@ -729,7 +737,7 @@ $if ($use_cfg_t == True) {:
  *****************************************************************************/\
 """
 
-        elif id == "crc_init_function_def":
+        elif name == "crc_init_function_def":
             return  """\
 $if ($constant_crc_init == False) {:
 $crc_t $crc_init_function(const $cfg_t *cfg)\
@@ -738,7 +746,7 @@ $crc_t $crc_init_function(void)\
 :}\
 """
 
-        elif id == "crc_update_doc":
+        elif name == "crc_update_doc":
             return  """\
 /**
  * Update the crc value with new data.
@@ -753,7 +761,7 @@ $if ($simple_crc_update_def != True) {:
  *****************************************************************************/\
 """
 
-        elif id == "crc_update_function_def":
+        elif name == "crc_update_function_def":
             return  """\
 $if ($simple_crc_update_def != True) {:
 $crc_t $crc_update_function(const $cfg_t *cfg, $crc_t crc, const void *data, size_t data_len)\
@@ -762,7 +770,7 @@ $crc_t $crc_update_function($crc_t crc, const void *data, size_t data_len)\
 :}\
 """
 
-        elif id == "crc_finalize_doc":
+        elif name == "crc_finalize_doc":
             return  """\
 /**
  * Calculate the final crc value.
@@ -775,7 +783,7 @@ $if ($simple_crc_finalize_def != True) {:
  *****************************************************************************/\
 """
 
-        elif id == "crc_finalize_function_def":
+        elif name == "crc_finalize_function_def":
             return  """\
 $if ($simple_crc_finalize_def != True) {:
 $crc_t $crc_finalize_function(const $cfg_t *cfg, $crc_t crc)\
@@ -784,7 +792,7 @@ $crc_t $crc_finalize_function($crc_t crc)\
 :}\
 """
 
-        elif id == "c_template":
+        elif name == "c_template":
             return  """\
 $source_header
 $if ($include_files != Undefined) {:
@@ -810,7 +818,7 @@ $crc_update_function_gen\
 $crc_finalize_function_gen\
 """
 
-        elif id == "c_table_gen":
+        elif name == "c_table_gen":
             return  """\
 $if ($crc_algorithm == "table-driven") {:
 /**
@@ -829,7 +837,7 @@ $crc_table_init
 
 :}"""
 
-        elif id == "main_template":
+        elif name == "main_template":
             return  """\
 $if ($include_files != Undefined) {:
 $include_files
@@ -940,7 +948,7 @@ $if ($c_std == C89) {:
 }
 """
 
-        elif id == "getopt_template":
+        elif name == "getopt_template":
             return  """\
 $if ($crc_reflect_in == Undefined or $crc_reflect_out == Undefined) {:
 static $c_bool atob(const char *str);
@@ -1122,6 +1130,8 @@ $if ($crc_xor_out == Undefined) {:
         """
         Return a value of width bits as a pretty string.
         """
+        # pylint: disable=no-self-use
+
         if value == None:
             return "Undefined"
         return str(value)
@@ -1129,17 +1139,19 @@ $if ($crc_xor_out == Undefined) {:
 
     # function __pretty_hex
     ###############################################################################
-    def __pretty_hex(self, value, width = None):
+    def __pretty_hex(self, value, width=None):
         """
         Return a value of width bits as a pretty hexadecimal formatted string.
         """
+        # pylint: disable=no-self-use
+
         if value == None:
             return "Undefined"
         if width == None:
-            return "0x%x" % value
+            return "{0:#x}".format(value)
         width = (width + 3) // 4
-        hex_str = "0x%%0%dx" % width
-        return hex_str % value
+        hex_str = "0x{{0:0{0:d}x}}".format(width)
+        return hex_str.format(value)
 
 
     # function __pretty_bool
@@ -1148,6 +1160,8 @@ $if ($crc_xor_out == Undefined) {:
         """
         Return a boolen value of width bits as a pretty formatted string.
         """
+        # pylint: disable=no-self-use
+
         if value == None:
             return "Undefined"
         if value:
@@ -1159,6 +1173,11 @@ $if ($crc_xor_out == Undefined) {:
     # function __pretty_header_filename
     ###############################################################################
     def __pretty_header_filename(self, filename):
+        """
+        Return the sanitized filename of a header file.
+        """
+        # pylint: disable=no-self-use
+
         if filename == None:
             return "pycrc_stdout.h"
         filename = os.path.basename(filename)
@@ -1174,10 +1193,10 @@ $if ($crc_xor_out == Undefined) {:
         """
         Return the name of a C header protection (e.g. __CRC_IMPLEMENTATION_H__).
         """
-        if self.opt.OutputFile == None:
+        if self.opt.output_file == None:
             filename = "pycrc_stdout"
         else:
-            filename = os.path.basename(self.opt.OutputFile)
+            filename = os.path.basename(self.opt.output_file)
         out_str = "".join([s.upper() if s.isalnum() else "_" for s in filename])
         return "__" + out_str + "__"
 
@@ -1188,29 +1207,31 @@ $if ($crc_xor_out == Undefined) {:
         """
         Return the C type of the crc_t typedef.
         """
-        if self.opt.CrcType != None:
-            return self.opt.CrcType
-        if self.opt.CStd == "C89":
-            if self.opt.Width == None:
+        # pylint: disable=too-many-return-statements, too-many-branches
+
+        if self.opt.crc_type != None:
+            return self.opt.crc_type
+        if self.opt.c_std == "C89":
+            if self.opt.width == None:
                 return "unsigned long int"
-            if self.opt.Width <= 8:
+            if self.opt.width <= 8:
                 return "unsigned char"
-            elif self.opt.Width <= 16:
+            elif self.opt.width <= 16:
                 return "unsigned int"
             else:
                 return "unsigned long int"
         else:   # C99
-            if self.opt.Width == None:
+            if self.opt.width == None:
                 return "unsigned long long int"
-            if self.opt.Width <= 8:
+            if self.opt.width <= 8:
                 return "uint_fast8_t"
-            elif self.opt.Width <= 16:
+            elif self.opt.width <= 16:
                 return "uint_fast16_t"
-            elif self.opt.Width <= 32:
+            elif self.opt.width <= 32:
                 return "uint_fast32_t"
-            elif self.opt.Width <= 64:
+            elif self.opt.width <= 64:
                 return "uint_fast64_t"
-            elif self.opt.Width <= 128:
+            elif self.opt.width <= 128:
                 return "uint_fast128_t"
             else:
                 return "uintmax_t"
@@ -1222,14 +1243,14 @@ $if ($crc_xor_out == Undefined) {:
         """
         Return an additional include instructions, if specified.
         """
-        if self.opt.IncludeFiles == None or len(self.opt.IncludeFiles) == 0:
+        if self.opt.include_files == None or len(self.opt.include_files) == 0:
             return None
         ret = []
-        for include_file in self.opt.IncludeFiles:
+        for include_file in self.opt.include_files:
             if include_file[0] == '"' or include_file[0] == '<':
-                ret.append('#include %s' % include_file)
+                ret.append('#include {0}'.format(include_file))
             else:
-                ret.append('#include "%s"' % include_file)
+                ret.append('#include "{0}"'.format(include_file))
         return '\n'.join(ret)
 
 
@@ -1237,40 +1258,43 @@ $if ($crc_xor_out == Undefined) {:
     ###############################################################################
     def __get_init_value(self):
         """
-        Return the init value of a C implementation, according to the selected algorithm and
-        to the given options.
-        If no default option is given for a given parameter, value in the cfg_t structure must be used.
+        Return the init value of a C implementation, according to the selected
+        algorithm and to the given options.
+        If no default option is given for a given parameter, value in the cfg_t
+        structure must be used.
         """
-        if self.opt.Algorithm == self.opt.Algo_Bit_by_Bit:
-            if self.opt.XorIn == None or self.opt.Width == None or self.opt.Poly == None:
+        if self.opt.algorithm == self.opt.algo_bit_by_bit:
+            if self.opt.xor_in == None or self.opt.width == None or self.opt.poly == None:
                 return None
-            crc = Crc(width = self.opt.Width, poly = self.opt.Poly,
-                    reflect_in = self.opt.ReflectIn, xor_in = self.opt.XorIn,
-                    reflect_out = self.opt.ReflectOut, xor_out = self.opt.XorOut,
-                    table_idx_width = self.opt.TableIdxWidth)
-            init = crc.NonDirectInit
-        elif self.opt.Algorithm == self.opt.Algo_Bit_by_Bit_Fast:
-            if self.opt.XorIn == None:
+            crc = Crc(
+                width=self.opt.width, poly=self.opt.poly,
+                reflect_in=self.opt.reflect_in, xor_in=self.opt.xor_in,
+                reflect_out=self.opt.reflect_out, xor_out=self.opt.xor_out,
+                table_idx_width=self.opt.tbl_idx_width)
+            init = crc.nondirect_init
+        elif self.opt.algorithm == self.opt.algo_bit_by_bit_fast:
+            if self.opt.xor_in == None:
                 return None
-            init = self.opt.XorIn
-        elif self.opt.Algorithm == self.opt.Algo_Table_Driven:
-            if self.opt.ReflectIn == None or self.opt.XorIn == None or self.opt.Width == None:
+            init = self.opt.xor_in
+        elif self.opt.algorithm == self.opt.algo_table_driven:
+            if self.opt.reflect_in == None or self.opt.xor_in == None or self.opt.width == None:
                 return None
-            if self.opt.Poly == None:
+            if self.opt.poly == None:
                 poly = 0
             else:
-                poly = self.opt.Poly
-            crc = Crc(width = self.opt.Width, poly = poly,
-                    reflect_in = self.opt.ReflectIn, xor_in = self.opt.XorIn,
-                    reflect_out = self.opt.ReflectOut, xor_out = self.opt.XorOut,
-                    table_idx_width = self.opt.TableIdxWidth)
-            if self.opt.ReflectIn:
-                init = crc.reflect(crc.DirectInit, self.opt.Width)
+                poly = self.opt.poly
+            crc = Crc(
+                width=self.opt.width, poly=poly,
+                reflect_in=self.opt.reflect_in, xor_in=self.opt.xor_in,
+                reflect_out=self.opt.reflect_out, xor_out=self.opt.xor_out,
+                table_idx_width=self.opt.tbl_idx_width)
+            if self.opt.reflect_in:
+                init = crc.reflect(crc.direct_init, self.opt.width)
             else:
-                init = crc.DirectInit
+                init = crc.direct_init
         else:
             init = 0
-        return self.__pretty_hex(init, self.opt.Width)
+        return self.__pretty_hex(init, self.opt.width)
 
 
     # function __get_table_init
@@ -1279,113 +1303,122 @@ $if ($crc_xor_out == Undefined) {:
         """
         Return the precalculated CRC table for the table_driven implementation.
         """
-        if self.opt.Algorithm != self.opt.Algo_Table_Driven:
+        if self.opt.algorithm != self.opt.algo_table_driven:
             return "0"
-        if self.opt.Width == None or self.opt.Poly == None or self.opt.ReflectIn == None:
+        if self.opt.width == None or self.opt.poly == None or self.opt.reflect_in == None:
             return "0"
-        crc = Crc(width = self.opt.Width, poly = self.opt.Poly,
-                reflect_in = self.opt.ReflectIn,
-                xor_in = 0, reflect_out = False, xor_out = 0,       # set unimportant variables to known values
-                table_idx_width = self.opt.TableIdxWidth)
+        crc = Crc(
+            width=self.opt.width, poly=self.opt.poly,
+            reflect_in=self.opt.reflect_in,
+            xor_in=0, reflect_out=False, xor_out=0,     # set unimportant variables to known values
+            table_idx_width=self.opt.tbl_idx_width)
         crc_tbl = crc.gen_table()
-        if self.opt.Width >= 32:
+        if self.opt.width >= 32:
             values_per_line = 4
-        elif self.opt.Width >= 16:
+        elif self.opt.width >= 16:
             values_per_line = 8
         else:
             values_per_line = 16
-        format_width = max(self.opt.Width, 8)
-        out  = ""
-        for i in range(self.opt.TableWidth):
+        format_width = max(self.opt.width, 8)
+        out = ""
+        for i in range(self.opt.tbl_width):
             if i % values_per_line == 0:
                 out += " " * 4
             tbl_val = self.__pretty_hex(crc_tbl[i], format_width)
-            if i == (self.opt.TableWidth - 1):
-                out += "%s" % tbl_val
+            if i == (self.opt.tbl_width - 1):
+                out += "{0:s}".format(tbl_val)
             elif i % values_per_line == (values_per_line - 1):
-                out += "%s,\n" % tbl_val
+                out += "{0:s},\n".format(tbl_val)
             else:
-                out += "%s, " % tbl_val
+                out += "{0:s}, ".format(tbl_val)
         return out
 
 
-    # function __get_table_core_algorithm_nonreflected
+    # function __get_tbl_core_nonreflected
     ###############################################################################
-    def __get_table_core_algorithm_nonreflected(self):
+    def __get_tbl_core_nonreflected(self):
         """
         Return the core loop of the table-driven algorithm, non-reflected variant.
         """
-        if self.opt.Algorithm != self.opt.Algo_Table_Driven:
+        # pylint: disable=too-many-branches
+
+        if self.opt.algorithm != self.opt.algo_table_driven:
             return ""
 
         loop_core = ""
         loop_indent = ""
-        if self.opt.UndefinedCrcParameters:
+        if self.opt.undefined_crc_parameters:
             loop_indent = " " * 12
         else:
             loop_indent = " " * 8
 
-        if self.opt.Width == None:
+        if self.opt.width == None:
             shr = "($cfg_width - $cfg_table_idx_width + $cfg_shift)"
-        elif self.opt.Width < 8:
-            shr = "%d" % (self.opt.Width - self.opt.TableIdxWidth + 8 - self.opt.Width)
+        elif self.opt.width < 8:
+            shr = "{0:d}".format(self.opt.width - self.opt.tbl_idx_width + 8 - self.opt.width)
         else:
-            shr = "%d" % (self.opt.Width - self.opt.TableIdxWidth)
+            shr = "{0:d}".format(self.opt.width - self.opt.tbl_idx_width)
 
         if shr != "0":
-            crc_shifted_right = "(crc >> %s)" % shr
+            crc_shifted_right = "(crc >> {0})".format(shr)
         else:
             crc_shifted_right = "crc"
 
-        if self.opt.Width != None and self.opt.TableIdxWidth != None and self.opt.Width <= self.opt.TableIdxWidth:
+        if self.opt.width != None and self.opt.tbl_idx_width != None and \
+                self.opt.width <= self.opt.tbl_idx_width:
             crc_xor_expr = ""
         else:
             crc_xor_expr = " ^ (crc << $cfg_table_idx_width)"
 
-        if self.opt.TableIdxWidth == 8:
+        if self.opt.tbl_idx_width == 8:
             crc_lookup = 'crc_table[tbl_idx]'
             loop_core += loop_indent + "tbl_idx = (" + crc_shifted_right + " ^ *d)" \
                             "$if ($crc_width > 8) {: & $crc_table_mask:};" + '\n' + \
-                            loop_indent + "crc = (" + crc_lookup + crc_xor_expr + ") & $cfg_mask_shifted;" + '\n'
+                            loop_indent + "crc = (" + crc_lookup + crc_xor_expr + ") & " + \
+                            "$cfg_mask_shifted;" + '\n'
         else:
             crc_lookup = 'crc_table[tbl_idx & $crc_table_mask]'
-            for i in range (8 // self.opt.TableIdxWidth):
-                str_idx = "%s" % (8 - (i + 1) * self.opt.TableIdxWidth)
-                loop_core += loop_indent + "tbl_idx = " + crc_shifted_right + " ^ (*d >> " + str_idx + ");" + '\n' + \
-                                loop_indent + "crc = " + crc_lookup + crc_xor_expr + ";" + '\n'
+            for i in range(8 // self.opt.tbl_idx_width):
+                str_idx = "{0:d}".format(8 - (i + 1) * self.opt.tbl_idx_width)
+                loop_core += loop_indent + "tbl_idx = " + crc_shifted_right + \
+                             " ^ (*d >> " + str_idx + ");" + '\n' + \
+                             loop_indent + "crc = " + crc_lookup + crc_xor_expr + ";" + '\n'
         return loop_core
 
 
-    # function __get_table_core_algorithm_reflected
+    # function __get_tbl_core_reflected
     ###############################################################################
-    def __get_table_core_algorithm_reflected(self):
+    def __get_tbl_core_reflected(self):
         """
         Return the core loop of the table-driven algorithm, reflected variant.
         """
-        if self.opt.Algorithm != self.opt.Algo_Table_Driven:
+        if self.opt.algorithm != self.opt.algo_table_driven:
             return ""
 
         loop_core = ""
         loop_indent = ""
-        if self.opt.UndefinedCrcParameters:
+        if self.opt.undefined_crc_parameters:
             loop_indent = " " * 12
         else:
             loop_indent = " " * 8
         crc_shifted_right = "$if ($crc_shift != 0) {:(crc >> $cfg_shift):} $else {:crc:}"
-        if self.opt.Width != None and self.opt.TableIdxWidth != None and self.opt.Width <= self.opt.TableIdxWidth:
+        if self.opt.width != None and self.opt.tbl_idx_width != None and \
+                self.opt.width <= self.opt.tbl_idx_width:
             crc_xor_expr = ""
         else:
             crc_xor_expr = " ^ (crc >> $cfg_table_idx_width)"
 
-        if self.opt.TableIdxWidth == 8:
+        if self.opt.tbl_idx_width == 8:
             crc_lookup = 'crc_table[tbl_idx]'
             loop_core += loop_indent + "tbl_idx = (" + crc_shifted_right + " ^ *d)" \
                             "$if ($crc_width > 8) {: & $crc_table_mask:};" + '\n' + \
-                            loop_indent + "crc = (" + crc_lookup + crc_xor_expr + ") & $cfg_mask_shifted;" + '\n'
+                            loop_indent + "crc = (" + crc_lookup + crc_xor_expr + ") & " + \
+                            "$cfg_mask_shifted;" + '\n'
         else:
             crc_lookup = 'crc_table[tbl_idx & $crc_table_mask]'
-            for i in range (8 // self.opt.TableIdxWidth):
-                str_idx = "%d" % i
-                loop_core += loop_indent + "tbl_idx = " + crc_shifted_right + " ^ (*d >> (" + str_idx + " * $cfg_table_idx_width));" + '\n' + \
-                                loop_indent + "crc = " + crc_lookup + crc_xor_expr + ";" + '\n'
+            for i in range(8 // self.opt.tbl_idx_width):
+                str_idx = "{0:d}".format(i)
+                loop_core += loop_indent + "tbl_idx = " + crc_shifted_right + \
+                             " ^ (*d >> (" + str_idx + " * $cfg_table_idx_width));" + '\n' + \
+                             loop_indent + "crc = " + crc_lookup + crc_xor_expr + ";" + '\n'
         return loop_core

@@ -23,8 +23,8 @@ class Options(object):
         self.RandomParameters       = False
         self.CompileMixedArgs       = False
         self.VariableWidth          = False
-        self.Verbose                = False
-        self.Algorithm = copy(self.AllAlgorithms)
+        self.verbose                = False
+        self.algorithm = copy(self.AllAlgorithms)
 
     def parse(self, argv = None):
         """
@@ -35,7 +35,7 @@ class Options(object):
         algorithms = ", ".join(sorted(list(self.AllAlgorithms)) + ["all"])
         parser = OptionParser(usage=usage)
         parser.add_option("-v", "--verbose",
-                        action="store_true", dest="verbose", default=self.Verbose,
+                        action="store_true", dest="verbose", default=self.verbose,
                         help="print information about the model")
         parser.add_option("-c", "--compile",
                         action="store_true", dest="compile", default=self.Compile,
@@ -58,7 +58,7 @@ class Options(object):
 
         (options, args) = parser.parse_args(argv)
 
-        self.Verbose = options.verbose
+        self.verbose = options.verbose
         self.Compile = options.all or options.compile or options.random_parameters
         self.RandomParameters = options.all or options.random_parameters
         self.CompileMixedArgs = options.all or options.compile_mixed_args
@@ -67,9 +67,9 @@ class Options(object):
         if options.algorithm is not None:
             alg = options.algorithm.lower()
             if alg in self.AllAlgorithms:
-                self.Algorithm = set([alg])
+                self.algorithm = set([alg])
             elif alg == "all":
-                self.Algorithm = copy(self.AllAlgorithms)
+                self.algorithm = copy(self.AllAlgorithms)
             else:
                 sys.stderr.write("unknown algorithm: %s\n" % alg)
                 sys.exit(1)
@@ -466,7 +466,7 @@ class CrcTests(object):
         if self.verbose:
             print("Running __test_variable_width()...")
         models = CrcModels()
-        m = models.getParams("crc-64-jones")
+        m = models.get_params("crc-64-jones")
 
         for width in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 23, 24, 25, 31, 32, 33, 63, 64]:
             mask = (1 << width) - 1
@@ -590,10 +590,10 @@ class CrcTests(object):
         """
         Run all tests
         """
-        self.use_algo_bit_by_bit = "bit-by-bit" in opt.Algorithm or "bbb" in opt.Algorithm
-        self.use_algo_bit_by_bit_fast = "bit-by-bit-fast" in opt.Algorithm or "bbf" in opt.Algorithm
-        self.use_algo_table_driven = "table-driven" in opt.Algorithm or "tbl" in opt.Algorithm
-        self.verbose = opt.Verbose
+        self.use_algo_bit_by_bit = "bit-by-bit" in opt.algorithm or "bbb" in opt.algorithm
+        self.use_algo_bit_by_bit_fast = "bit-by-bit-fast" in opt.algorithm or "bbf" in opt.algorithm
+        self.use_algo_table_driven = "table-driven" in opt.algorithm or "tbl" in opt.algorithm
+        self.verbose = opt.verbose
 
         if self.python3:
             self.pycrc_bin = "python3 ../pycrc.py"

@@ -1,6 +1,6 @@
 #  pycrc -- parameterisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2013  Thomas Pircher  <tehpeh-pycrc@tty1.net>
+#  Copyright (c) 2006-2015  Thomas Pircher  <tehpeh-pycrc@tty1.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to
@@ -44,7 +44,7 @@ import sys
 
 # Class ParseError
 ###############################################################################
-class ParseError(Exception):
+class ParseError(SymbolLookupError):
     """
     The exception class for the parser.
     """
@@ -52,12 +52,7 @@ class ParseError(Exception):
     # Class constructor
     ###############################################################################
     def __init__(self, reason):
-        self.reason = reason
-
-    # function __str__
-    ###############################################################################
-    def __str__(self):
-        return self.reason
+        SymbolLookupError.__init__(self, reason)
 
 
 # Class MacroParser
@@ -66,8 +61,9 @@ class MacroParser(object):
     """
     The macro language parser and code generator class.
     """
+    # pylint: disable=too-few-public-methods
+
     re_is_int = re.compile("^[-+]?[0-9]+$")
-    #re_is_hex = re.compile("^(0[xX])?[0-9a-fA-F]+$")
     re_is_hex = re.compile("^0[xX][0-9a-fA-F]+$")
 
 
@@ -88,29 +84,29 @@ class MacroParser(object):
     #               | data '{:' data ':}'
     #               | data if_block
     #               ;
-    # 
+    #
     # if_block:     IF '(' exp_or ')' '{:' data ':}' elif_blocks else_block
     #               ;
-    # 
+    #
     # elif_blocks:    /* empty */
     #               | elif_blocks ELIF '(' exp_or ')' '{:' data ':}'
     #               ;
-    # 
+    #
     # else_block:     /* empty */
     #               | ELSE '{:' data ':}'
     #               ;
-    # 
+    #
     # exp_or:         exp_and
     #               | exp_or TOK_OR exp_and
     #               ;
-    # 
+    #
     # exp_and:        term
     #               | exp_and TOK_AND exp_comparison
     #               ;
-    # 
+    #
     # exp_comparison: term TOK_COMPARISON term
     #               ;
-    # 
+    #
     # term:           LITERAL
     #               | IDENTIFIER
     #               | '(' exp_or ')'
@@ -122,11 +118,13 @@ class MacroParser(object):
         """
         self.lex.set_str(in_str)
         self.out_str = ""
-        self._parse_data(do_print = True)
+        self._parse_data(do_print=True)
 
         tok = self.lex.peek()
-        if tok != self.lex.tok_EOF:
-            raise ParseError("%s: error: misaligned closing block '%s'" % (sys.argv[0], self.lex.text))
+        if tok != self.lex.tok_eof:
+            raise ParseError(
+                "{0:s}: error: misaligned closing block '{1:s}'"
+                .format(sys.argv[0], self.lex.text))
 
 
     # function _parse_data
@@ -136,7 +134,7 @@ class MacroParser(object):
         Private top-level parsing function.
         """
         tok = self.lex.peek()
-        while tok != self.lex.tok_EOF:
+        while tok != self.lex.tok_eof:
             if tok == self.lex.tok_gibberish:
                 self._parse_gibberish(do_print)
             elif tok == self.lex.tok_block_open:
@@ -148,7 +146,8 @@ class MacroParser(object):
             elif tok == self.lex.tok_block_close:
                 return
             else:
-                raise ParseError("%s: error: wrong token '%s'" % (sys.argv[0], self.lex.text))
+                raise ParseError(
+                    "{0:s}: error: wrong token '{1:s}'".format(sys.argv[0], self.lex.text))
             tok = self.lex.peek()
 
 
@@ -171,9 +170,11 @@ class MacroParser(object):
         Parse an identifier.
         """
         try:
-            sym_value = self.sym.getTerminal(self.lex.text)
+            sym_value = self.sym.get_terminal(self.lex.text)
         except SymbolLookupError:
-            raise ParseError("%s: error: unknown terminal '%s'" % (sys.argv[0], self.lex.text))
+            raise ParseError(
+                "{0:s}: error: unknown terminal '{1:s}'"
+                .format(sys.argv[0], self.lex.text))
         self.lex.advance()
         if do_print:
             self.lex.prepend(sym_value)
@@ -221,7 +222,9 @@ class MacroParser(object):
         # expect an open parenthesis
         tok = self.lex.peek()
         if tok != self.lex.tok_par_open:
-            raise ParseError("%s: error: open parenthesis expected: '%s'" % (sys.argv[0], self.lex.text))
+            raise ParseError(
+                "{0:s}: error: open parenthesis expected: '{1:s}'"
+                .format(sys.argv[0], self.lex.text))
         self.lex.advance()
 
         # parse the boolean expression
@@ -230,7 +233,9 @@ class MacroParser(object):
         # expect a closed parenthesis
         tok = self.lex.peek()
         if tok != self.lex.tok_par_close:
-            raise ParseError("%s: error: closed parenthesis expected: '%s'" % (sys.argv[0], self.lex.text))
+            raise ParseError(
+                "{0:s}: error: closed parenthesis expected: '{1:s}'"
+                .format(sys.argv[0], self.lex.text))
         self.lex.advance()
 
         # get rid of eventual spaces, and switch back to gibberish.
@@ -242,7 +247,7 @@ class MacroParser(object):
 
         # get rid of eventual spaces
         # but only if followed by $if, $else or $elif
-        self.lex.delete_spaces(skip_unconditional = False)
+        self.lex.delete_spaces(skip_unconditional=False)
 
         return exp_res
 
@@ -256,8 +261,10 @@ class MacroParser(object):
         # expect an open block
         tok = self.lex.peek()
         if tok != self.lex.tok_block_open:
-            raise ParseError("%s: error: open block expected: '%s'" % (sys.argv[0], self.lex.text))
-        self.lex.advance(skip_nl = True)
+            raise ParseError(
+                "{0:s}: error: open block expected: '{1:s}'"
+                .format(sys.argv[0], self.lex.text))
+        self.lex.advance(skip_nl=True)
 
         # more data follows...
         self._parse_data(do_print)
@@ -265,8 +272,10 @@ class MacroParser(object):
         # expect a closed block
         tok = self.lex.peek()
         if tok != self.lex.tok_block_close:
-            raise ParseError("%s: error: closed block expected: '%s'" % (sys.argv[0], self.lex.text))
-        self.lex.advance(skip_nl = True)
+            raise ParseError(
+                "{0:s}: error: closed block expected: '{1:s}'"
+                .format(sys.argv[0], self.lex.text))
+        self.lex.advance(skip_nl=True)
 
 
     # function _parse_exp_or
@@ -328,7 +337,9 @@ class MacroParser(object):
         # expect a comparison
         tok = self.lex.peek()
         if tok != self.lex.tok_op:
-            raise ParseError("%s: error: operator expected: '%s'" % (sys.argv[0], self.lex.text))
+            raise ParseError(
+                "{0:s}: error: operator expected: '{1:s}'"
+                .format(sys.argv[0], self.lex.text))
         operator = self.lex.text
         self.lex.advance()
 
@@ -356,7 +367,9 @@ class MacroParser(object):
         elif operator == ">":
             ret = lhs > rhs
         else:
-            raise ParseError("%s: error: unknow operator: '%s'" % (sys.argv[0], self.lex.text))
+            raise ParseError(
+                "{0:s}: error: unknow operator: '{1:s}'"
+                .format(sys.argv[0], self.lex.text))
         return ret
 
 
@@ -371,9 +384,11 @@ class MacroParser(object):
         # identifier
         if tok == self.lex.tok_identifier:
             try:
-                ret = self.sym.getTerminal(self.lex.text)
+                ret = self.sym.get_terminal(self.lex.text)
             except SymbolLookupError:
-                raise ParseError("%s: error: unknown terminal '%s'" % (sys.argv[0], self.lex.text))
+                raise ParseError(
+                    "{0:s}: error: unknown terminal '{1:s}'"
+                    .format(sys.argv[0], self.lex.text))
             if ret == None:
                 ret = "Undefined"
         # string
@@ -388,7 +403,9 @@ class MacroParser(object):
             ret = self._parse_exp_or()
             tok = self.lex.peek()
             if tok != self.lex.tok_par_close:
-                raise ParseError("%s: error: closed parenthesis expected: '%s'" % (sys.argv[0], self.lex.text))
+                raise ParseError(
+                    "{0:s}: error: closed parenthesis expected: '{1:s}'"
+                    .format(sys.argv[0], self.lex.text))
         self.lex.advance()
         return ret
 
@@ -402,12 +419,12 @@ class MacroParser(object):
         ret = None
 
         if in_str != None:
-            m = self.re_is_int.match(in_str)
-            if m != None:
+            match = self.re_is_int.match(in_str)
+            if match != None:
                 ret = int(in_str)
 
-            m = self.re_is_hex.match(in_str)
-            if m != None:
+            match = self.re_is_hex.match(in_str)
+            if match != None:
                 ret = int(in_str, 16)
 
         return ret

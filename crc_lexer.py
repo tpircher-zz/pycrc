@@ -1,6 +1,6 @@
 #  pycrc -- parameterisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2013  Thomas Pircher  <tehpeh-pycrc@tty1.net>
+#  Copyright (c) 2006-2015  Thomas Pircher  <tehpeh-pycrc@tty1.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to
@@ -34,10 +34,10 @@ A basic example of how the lexer is used:
     lex.set_str(input_str)
     while True:
         tok = lex.peek()
-        if tok == lex.tok_EOF:
+        if tok == lex.tok_eof:
             break
         else:
-            print("%4d: %s\n" % (tok, lex.text))
+            print("{0:4d}: {1:s}\n".format(tok, lex.text))
             lex.advance()
 """
 
@@ -52,23 +52,23 @@ class Lexer(object):
     A lexical analyser base class.
     """
     # Tokens.
-    tok_unknown     = 0
-    tok_EOF         = 1
-    tok_gibberish   = 10
-    tok_identifier  = 11
-    tok_block_open  = 12
+    tok_unknown = 0
+    tok_eof = 1
+    tok_gibberish = 10
+    tok_identifier = 11
+    tok_block_open = 12
     tok_block_close = 13
-    tok_num         = 20
-    tok_str         = 21
-    tok_par_open    = 22
-    tok_par_close   = 23
-    tok_op          = 24
-    tok_and         = 25
-    tok_or          = 26
+    tok_num = 20
+    tok_str = 21
+    tok_par_open = 22
+    tok_par_close = 23
+    tok_op = 24
+    tok_and = 25
+    tok_or = 26
 
     # States of the lexer.
     state_gibberish = 0
-    state_expr      = 1
+    state_expr = 1
 
     # Regular Expressions used by the parser.
     re_id = re.compile("^\\$[a-zA-Z][a-zA-Z0-9_-]*")
@@ -79,11 +79,13 @@ class Lexer(object):
 
     # Class constructor
     ###############################################################################
-    def __init__(self, input_str = ""):
+    def __init__(self, input_str=""):
         """
         The class constructor.
         """
-        self.set_str(input_str)
+        self.input_str = input_str
+        self.text = ""
+        self.next_token = None
         self.state = self.state_gibberish
 
 
@@ -111,7 +113,7 @@ class Lexer(object):
 
     # function advance
     ###############################################################################
-    def advance(self, skip_nl = False):
+    def advance(self, skip_nl=False):
         """
         Discard the current symbol from the input stream and advance to the
         following characters.  If skip_nl is True, then skip also a following
@@ -124,7 +126,7 @@ class Lexer(object):
 
     # function delete_spaces
     ###############################################################################
-    def delete_spaces(self, skip_unconditional = True):
+    def delete_spaces(self, skip_unconditional=True):
         """
         Delete spaces in the input string.
         If skip_unconditional is False, then skip the spaces only if followed
@@ -133,11 +135,11 @@ class Lexer(object):
         new_input = self.input_str.lstrip(" \t")
 
         # check for an identifier
-        m = self.re_id.match(new_input)
-        if m != None:
-            text = m.group(0)[1:]
+        match = self.re_id.match(new_input)
+        if match != None:
+            text = match.group(0)[1:]
             # if the identifier is a reserved keyword, skip the spaces.
-            if (text == "if" or text == "elif" or text == "else"):
+            if text == "if" or text == "elif" or text == "else":
                 skip_unconditional = True
         if skip_unconditional:
             self.next_token = None
@@ -173,7 +175,7 @@ class Lexer(object):
         text from the imput stream.
         """
         if len(self.input_str) == 0:
-            return self.tok_EOF
+            return self.tok_eof
 
         if self.state == self.state_gibberish:
             return self._parse_gibberish()
@@ -190,10 +192,10 @@ class Lexer(object):
         text from the imput stream.
         """
         # check for an identifier
-        m = self.re_id.match(self.input_str)
-        if m != None:
-            self.text = m.group(0)[1:]
-            self.input_str = self.input_str[m.end():]
+        match = self.re_id.match(self.input_str)
+        if match != None:
+            self.text = match.group(0)[1:]
+            self.input_str = self.input_str[match.end():]
             return self.tok_identifier
 
         if len(self.input_str) > 1:
@@ -245,6 +247,8 @@ class Lexer(object):
         Parse the next token, update the state variables and take the consumed
         text from the imput stream.
         """
+        # pylint: disable=too-many-return-statements
+
         # skip whitespaces
         pos = 0
         while pos < len(self.input_str) and self.input_str[pos] == ' ':
@@ -253,24 +257,24 @@ class Lexer(object):
             self.input_str = self.input_str[pos:]
 
         if len(self.input_str) == 0:
-            return self.tok_EOF
+            return self.tok_eof
 
-        m = self.re_id.match(self.input_str)
-        if m != None:
-            self.text = m.group(0)[1:]
-            self.input_str = self.input_str[m.end():]
+        match = self.re_id.match(self.input_str)
+        if match != None:
+            self.text = match.group(0)[1:]
+            self.input_str = self.input_str[match.end():]
             return self.tok_identifier
 
-        m = self.re_num.match(self.input_str)
-        if m != None:
-            self.text = m.group(0)
-            self.input_str = self.input_str[m.end():]
+        match = self.re_num.match(self.input_str)
+        if match != None:
+            self.text = match.group(0)
+            self.input_str = self.input_str[match.end():]
             return self.tok_num
 
-        m = self.re_op.match(self.input_str)
-        if m != None:
-            self.text = m.string[:m.end()]
-            self.input_str = self.input_str[m.end():]
+        match = self.re_op.match(self.input_str)
+        if match != None:
+            self.text = match.string[:match.end()]
+            self.input_str = self.input_str[match.end():]
             return self.tok_op
 
         if self.input_str[:4] == "and ":
@@ -283,10 +287,10 @@ class Lexer(object):
             self.input_str = self.input_str[len(self.text) + 1:]
             return self.tok_or
 
-        m = self.re_str.match(self.input_str)
-        if m != None:
-            self.text = m.group(1)
-            self.input_str = self.input_str[m.end():]
+        match = self.re_str.match(self.input_str)
+        if match != None:
+            self.text = match.group(1)
+            self.input_str = self.input_str[match.end():]
             return self.tok_str
 
         if self.input_str[0] == "(":

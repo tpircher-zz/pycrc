@@ -42,7 +42,7 @@ It supports the following CRC algorithms:
 from __future__ import print_function
 from crc_opt import Options
 from crc_algorithms import Crc
-from crc_parser import MacroParser, ParseError
+from crc_parser import MacroParser
 import binascii
 import sys
 
@@ -53,7 +53,7 @@ def print_parameters(opt):
     """
     Generate a string with the options pretty-printed (used in the --verbose mode).
     """
-    in_str  = ""
+    in_str = ""
     in_str += "Width        = $crc_width\n"
     in_str += "Poly         = $crc_poly\n"
     in_str += "ReflectIn    = $crc_reflect_in\n"
@@ -62,9 +62,9 @@ def print_parameters(opt):
     in_str += "XorOut       = $crc_xor_out\n"
     in_str += "Algorithm    = $crc_algorithm\n"
 
-    mp = MacroParser(opt)
-    mp.parse(in_str)
-    return mp.out_str
+    parser = MacroParser(opt)
+    parser.parse(in_str)
+    return parser.out_str
 
 
 # function check_string
@@ -74,44 +74,45 @@ def check_string(opt):
     Return the calculated CRC sum of a string.
     """
     error = False
-    if opt.UndefinedCrcParameters:
-        sys.stderr.write("%s: error: undefined parameters\n" % sys.argv[0])
+    if opt.undefined_crc_parameters:
+        sys.stderr.write("{0:s}: error: undefined parameters\n".format(sys.argv[0]))
         sys.exit(1)
-    if opt.Algorithm == 0:
-        opt.Algorithm = opt.Algo_Bit_by_Bit | opt.Algo_Bit_by_Bit_Fast | opt.Algo_Table_Driven
+    if opt.algorithm == 0:
+        opt.algorithm = opt.algo_bit_by_bit | opt.algo_bit_by_bit_fast | opt.algo_table_driven
 
-    alg = Crc(width = opt.Width, poly = opt.Poly,
-        reflect_in = opt.ReflectIn, xor_in = opt.XorIn,
-        reflect_out = opt.ReflectOut, xor_out = opt.XorOut,
-        table_idx_width = opt.TableIdxWidth)
+    alg = Crc(
+        width=opt.width, poly=opt.poly,
+        reflect_in=opt.reflect_in, xor_in=opt.xor_in,
+        reflect_out=opt.reflect_out, xor_out=opt.xor_out,
+        table_idx_width=opt.tbl_idx_width)
 
     crc = None
-    if opt.Algorithm & opt.Algo_Bit_by_Bit:
-        bbb_crc = alg.bit_by_bit(opt.CheckString)
+    if opt.algorithm & opt.algo_bit_by_bit:
+        bbb_crc = alg.bit_by_bit(opt.check_string)
         if crc != None and bbb_crc != crc:
             error = True
         crc = bbb_crc
-    if opt.Algorithm & opt.Algo_Bit_by_Bit_Fast:
-        bbf_crc = alg.bit_by_bit_fast(opt.CheckString)
+    if opt.algorithm & opt.algo_bit_by_bit_fast:
+        bbf_crc = alg.bit_by_bit_fast(opt.check_string)
         if crc != None and bbf_crc != crc:
             error = True
         crc = bbf_crc
-    if opt.Algorithm & opt.Algo_Table_Driven:
+    if opt.algorithm & opt.algo_table_driven:
         # no point making the python implementation slower by using less than 8 bits as index.
-        opt.TableIdxWidth = 8
-        tbl_crc = alg.table_driven(opt.CheckString)
+        opt.tbl_idx_width = 8
+        tbl_crc = alg.table_driven(opt.check_string)
         if crc != None and tbl_crc != crc:
             error = True
         crc = tbl_crc
 
     if error:
-        sys.stderr.write("%s: error: different checksums!\n" % sys.argv[0])
-        if opt.Algorithm & opt.Algo_Bit_by_Bit:
-            sys.stderr.write("       bit-by-bit:        0x%x\n" % bbb_crc)
-        if opt.Algorithm & opt.Algo_Bit_by_Bit_Fast:
-            sys.stderr.write("       bit-by-bit-fast:   0x%x\n" % bbf_crc)
-        if opt.Algorithm & opt.Algo_Table_Driven:
-            sys.stderr.write("       table_driven:      0x%x\n" % tbl_crc)
+        sys.stderr.write("{0:s}: error: different checksums!\n".format(sys.argv[0]))
+        if opt.algorithm & opt.algo_bit_by_bit:
+            sys.stderr.write("       bit-by-bit:        {0:#x}\n".format(bbb_crc))
+        if opt.algorithm & opt.algo_bit_by_bit_fast:
+            sys.stderr.write("       bit-by-bit-fast:   {0:#x}\n".format(bbf_crc))
+        if opt.algorithm & opt.algo_table_driven:
+            sys.stderr.write("       table_driven:      {0:#x}\n".format(tbl_crc))
         sys.exit(1)
     return crc
 
@@ -122,20 +123,21 @@ def check_hexstring(opt):
     """
     Return the calculated CRC sum of a hex string.
     """
-    if opt.UndefinedCrcParameters:
-        sys.stderr.write("%s: error: undefined parameters\n" % sys.argv[0])
+    if opt.undefined_crc_parameters:
+        sys.stderr.write("{0:s}: error: undefined parameters\n".format(sys.argv[0]))
         sys.exit(1)
-    if len(opt.CheckString) % 2 != 0:
-        opt.CheckString = "0" + opt.CheckString
-    if sys.version_info >= (3,0):
-        opt.CheckString = bytes(opt.CheckString, 'utf-8')
+    if len(opt.check_string) % 2 != 0:
+        opt.check_string = "0" + opt.check_string
+    if sys.version_info >= (3, 0):
+        opt.check_string = bytes(opt.check_string, 'utf-8')
     try:
-        check_str = binascii.unhexlify(opt.CheckString)
+        check_str = binascii.unhexlify(opt.check_string)
     except TypeError:
-        sys.stderr.write("%s: error: invalid hex string %s\n" % (sys.argv[0], opt.CheckString))
+        sys.stderr.write(
+            "{0:s}: error: invalid hex string {1:s}\n".format(sys.argv[0], opt.check_string))
         sys.exit(1)
 
-    opt.CheckString = check_str
+    opt.check_string = check_str
     return check_string(opt)
 
 
@@ -150,16 +152,16 @@ def crc_file_update(alg, register, check_bytes):
         check_bytes = bytearray(check_bytes, 'utf-8')
 
     for octet in check_bytes:
-        if alg.ReflectIn:
+        if alg.reflect_in:
             octet = alg.reflect(octet, 8)
         for j in range(8):
-            bit = register & alg.MSB_Mask
+            bit = register & alg.msb_mask
             register <<= 1
             if octet & (0x80 >> j):
-                bit ^= alg.MSB_Mask
+                bit ^= alg.msb_mask
             if bit:
-                register ^= alg.Poly
-        register &= alg.Mask
+                register ^= alg.poly
+        register &= alg.mask
     return register
 
 
@@ -170,24 +172,26 @@ def check_file(opt):
     Calculate the CRC of a file.
     This algorithm uses the table_driven CRC algorithm.
     """
-    if opt.UndefinedCrcParameters:
-        sys.stderr.write("%s: error: undefined parameters\n" % sys.argv[0])
+    if opt.undefined_crc_parameters:
+        sys.stderr.write("{0:s}: error: undefined parameters\n".format(sys.argv[0]))
         sys.exit(1)
-    alg = Crc(width = opt.Width, poly = opt.Poly,
-        reflect_in = opt.ReflectIn, xor_in = opt.XorIn,
-        reflect_out = opt.ReflectOut, xor_out = opt.XorOut,
-        table_idx_width = opt.TableIdxWidth)
+    alg = Crc(
+        width=opt.width, poly=opt.poly,
+        reflect_in=opt.reflect_in, xor_in=opt.xor_in,
+        reflect_out=opt.reflect_out, xor_out=opt.xor_out,
+        table_idx_width=opt.tbl_idx_width)
 
     try:
-        in_file = open(opt.CheckFile, 'rb')
+        in_file = open(opt.check_file, 'rb')
     except IOError:
-        sys.stderr.write("%s: error: can't open file %s\n" % (sys.argv[0], opt.CheckFile))
+        sys.stderr.write(
+            "{0:s}: error: can't open file {1:s}\n".format(sys.argv[0], opt.check_file))
         sys.exit(1)
 
-    if not opt.ReflectIn:
-        register = opt.XorIn
+    if not opt.reflect_in:
+        register = opt.xor_in
     else:
-        register = alg.reflect(opt.XorIn, opt.Width)
+        register = alg.reflect(opt.xor_in, opt.width)
     # Read bytes from the file.
     check_bytes = in_file.read(1024)
     while check_bytes:
@@ -195,10 +199,25 @@ def check_file(opt):
         check_bytes = in_file.read(1024)
     in_file.close()
 
-    if opt.ReflectOut:
-        register = alg.reflect(register, opt.Width)
-    register = register ^ opt.XorOut
+    if opt.reflect_out:
+        register = alg.reflect(register, opt.width)
+    register = register ^ opt.xor_out
     return register
+
+
+# function write_file
+###############################################################################
+def write_file(filename, out_str):
+    """
+    Write the content of out_str to filename.
+    """
+    try:
+        out_file = open(filename, "w")
+        out_file.write(out_str)
+        out_file.close()
+    except IOError:
+        sys.stderr.write("{0:s}: error: cannot write to file {1:s}\n".format(sys.argv[0], filename))
+        sys.exit(1)
 
 
 # main function
@@ -209,41 +228,38 @@ def main():
     """
     opt = Options()
     opt.parse(sys.argv[1:])
-    if opt.Verbose:
+    if opt.verbose:
         print(print_parameters(opt))
-    if opt.Action == opt.Action_Check_String:
+    if opt.action == opt.action_check_str:
         crc = check_string(opt)
-        print("0x%x" % crc)
-    if opt.Action == opt.Action_Check_Hex_String:
+        print("{0:#x}".format(crc))
+    if opt.action == opt.action_check_hex_str:
         crc = check_hexstring(opt)
-        print("0x%x" % crc)
-    if opt.Action == opt.Action_Check_File:
+        print("{0:#x}".format(crc))
+    if opt.action == opt.action_check_file:
         crc = check_file(opt)
-        print("0x%x" % crc)
-    if opt.Action in set([opt.Action_Generate_H, opt.Action_Generate_C, opt.Action_Generate_C_Main, opt.Action_Generate_Table]):
-        mp = MacroParser(opt)
-        if opt.Action == opt.Action_Generate_H:
+        print("{0:#x}".format(crc))
+    if opt.action in set([
+            opt.action_generate_h, opt.action_generate_c, opt.action_generate_c_main,
+            opt.action_generate_table]):
+        parser = MacroParser(opt)
+        if opt.action == opt.action_generate_h:
             in_str = "$h_template"
-        elif opt.Action == opt.Action_Generate_C:
+        elif opt.action == opt.action_generate_c:
             in_str = "$c_template"
-        elif opt.Action == opt.Action_Generate_C_Main:
+        elif opt.action == opt.action_generate_c_main:
             in_str = "$c_template\n\n$main_template"
-        elif opt.Action == opt.Action_Generate_Table:
+        elif opt.action == opt.action_generate_table:
             in_str = "$crc_table_init"
         else:
-            sys.stderr.write("%s: error: unknown action. Please file a bug report!\n" % sys.argv[0])
+            sys.stderr.write(
+                "{0:s}: error: unknown action. Please file a bug report!\n".format(sys.argv[0]))
             sys.exit(1)
-        mp.parse(in_str)
-        if opt.OutputFile == None:
-            print(mp.out_str)
+        parser.parse(in_str)
+        if opt.output_file == None:
+            print(parser.out_str)
         else:
-            try:
-                out_file = open(opt.OutputFile, "w")
-                out_file.write(mp.out_str)
-                out_file.close()
-            except IOError:
-                sys.stderr.write("%s: error: cannot write to file %s\n" % (sys.argv[0], opt.OutputFile))
-                sys.exit(1)
+            write_file(opt.output_file, parser.out_str)
     return 0
 
 
