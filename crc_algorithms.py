@@ -55,7 +55,7 @@ class Crc(object):
 
     # Class constructor
     ###############################################################################
-    def __init__(self, width, poly, reflect_in, xor_in, reflect_out, xor_out, table_idx_width=None):
+    def __init__(self, width, poly, reflect_in, xor_in, reflect_out, xor_out, table_idx_width=None, slice_by=1):
         """The Crc constructor.
 
         The parameters are as follows:
@@ -75,6 +75,7 @@ class Crc(object):
         self.reflect_out = reflect_out
         self.xor_out = xor_out
         self.tbl_idx_width = table_idx_width
+        self.slice_by = slice_by
 
         self.msb_mask = 0x1 << (self.width - 1)
         self.mask = ((self.msb_mask - 1) << 1) | 1
@@ -196,7 +197,7 @@ class Crc(object):
         instead.
         """
         table_length = 1 << self.tbl_idx_width
-        tbl = [0] * table_length
+        tbl = [[0 for i in range(table_length)] for j in range(self.slice_by)]
         for i in range(table_length):
             reg = i
             if self.reflect_in:
@@ -209,7 +210,11 @@ class Crc(object):
                     reg = (reg << 1)
             if self.reflect_in:
                 reg = self.reflect(reg >> self.crc_shift, self.width) << self.crc_shift
-            tbl[i] = reg & (self.mask << self.crc_shift)
+            tbl[0][i] = reg & (self.mask << self.crc_shift)
+
+        for j in range(1, self.slice_by):
+            for i in range(table_length):
+                tbl[j][i] = (tbl[j - 1][i] >> 8) ^ tbl[0][tbl[j - 1][i] & 0xff]
         return tbl
 
 
@@ -231,13 +236,13 @@ class Crc(object):
         if not self.reflect_in:
             for octet in in_data:
                 tblidx = ((reg >> (self.width - self.tbl_idx_width + self.crc_shift)) ^ octet) & 0xff
-                reg = ((reg << (self.tbl_idx_width - self.crc_shift)) ^ tbl[tblidx]) & (self.mask << self.crc_shift)
+                reg = ((reg << (self.tbl_idx_width - self.crc_shift)) ^ tbl[0][tblidx]) & (self.mask << self.crc_shift)
             reg = reg >> self.crc_shift
         else:
             reg = self.reflect(reg, self.width + self.crc_shift) << self.crc_shift
             for octet in in_data:
                 tblidx = ((reg >> self.crc_shift) ^ octet) & 0xff
-                reg = ((reg >> self.tbl_idx_width) ^ tbl[tblidx]) & (self.mask << self.crc_shift)
+                reg = ((reg >> self.tbl_idx_width) ^ tbl[0][tblidx]) & (self.mask << self.crc_shift)
             reg = self.reflect(reg, self.width + self.crc_shift) & self.mask
 
         if self.reflect_out:

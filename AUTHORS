@@ -5,5 +5,8 @@ Matthias Urlichs: removed the unused 'direct' parameter and added a fix not to
 
 Marti Raudsepp: improved spacin for the table-driven algorithm.
 
+Stephan Brumme: his implementation of the slice-by-x algorithm was used as a
+    basis for the implementation in pycrc.
+
 Danjel McGougan: whose Universal Crc project was highly influential in the
     implementation of widths < 8 in the table-driven algorithm.

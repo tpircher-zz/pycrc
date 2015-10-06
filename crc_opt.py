@@ -77,6 +77,7 @@ class Options(object):
         self.xor_out = None
         self.tbl_idx_width = 8
         self.tbl_width = 1 << self.tbl_idx_width
+        self.slice_by = 1
         self.verbose = False
         self.check_string = "123456789"
         self.msb_mask = None
@@ -192,6 +193,11 @@ of the following parameters:
             help="xor the final CRC value with HEX",
             metavar="HEX")
         parser.add_option(
+            "--slice-by",
+            action="store", type="int", dest="slice_by",
+            help="read NUM bytes at a time from the input. NUM must be one of the values {4, 8, 16}",
+            metavar="NUM")
+        parser.add_option(
             "--table-idx-width",
             action="store", type="int", dest="table_idx_width",
             help="use NUM bits to index the CRC table; NUM must be one of the values {1, 2, 4, 8}",
@@ -219,6 +225,15 @@ of the following parameters:
             metavar="FILE")
 
         (options, args) = parser.parse_args(argv)
+
+        if options.c_std != None:
+            std = options.c_std.upper()
+            if std == "ANSI" or std == "C89":
+                self.c_std = "C89"
+            elif std == "C99":
+                self.c_std = std
+            else:
+                self.__error("unknown C standard {0:s}".format(options.c_std))
 
         undefined_params = []
         if options.width != None:
@@ -251,16 +266,11 @@ of the following parameters:
                 self.tbl_idx_width = options.table_idx_width
                 self.tbl_width = 1 << options.table_idx_width
             else:
-                sys.stderr.write(
-                    "{0:s}: error: unsupported table-idx-width {1:d}\n"
-                    .format(sys.argv[0], options.table_idx_width))
-                sys.exit(1)
+                self.__error("unsupported table-idx-width {0:d}".format(options.table_idx_width))
 
         if self.width != None:
             if self.width <= 0:
-                sys.stderr.write(
-                    "{0:s}: error: Width must be strictly positive\n".format(sys.argv[0]))
-                sys.exit(1)
+                self.__error("Width must be strictly positive")
             self.msb_mask = 0x1 << (self.width - 1)
             self.mask = ((self.msb_mask - 1) << 1) | 1
             if self.poly != None:
@@ -283,6 +293,23 @@ of the following parameters:
         else:
             self.undefined_crc_parameters = False
 
+        if options.slice_by != None:
+            if options.slice_by in set((4, 8, 16)):
+                self.slice_by = options.slice_by
+            else:
+                self.__error("unsupported slice-by {0:d}".format(options.slice_by))
+            if self.undefined_crc_parameters:
+                self.__error("slice-by is only implemented for fully defined models")
+            if self.tbl_idx_width != 8:
+                self.__error("slice-by is only implemented for table-idx-width=8")
+# FIXME tp: reintroduce this?
+#            if self.width % 8 != 0:
+#                self.__error("slice-by is only implemented for width multiples of 8")
+#            if options.slice_by < self.width / 8:
+#                self.__error("slice-by must be greater or equal width / 8")
+            if self.c_std == "C89":
+                self.__error("--slice-by not supported for C89")
+
         if options.algorithm != None:
             alg = options.algorithm.lower()
             if alg in set(["bit-by-bit", "bbb", "all"]):
@@ -292,22 +319,8 @@ of the following parameters:
             if alg in set(["table-driven", "tbl", "all"]):
                 self.algorithm |= self.algo_table_driven
             if self.algorithm == 0:
-                sys.stderr.write(
-                    "{0:s}: error: unknown algorithm {1:s}\n"
-                    .format(sys.argv[0], options.algorithm))
-                sys.exit(1)
+                self.__error("unknown algorithm {0:s}".format(options.algorithm))
 
-        if options.c_std != None:
-            std = options.c_std.upper()
-            if std == "ANSI" or std == "C89":
-                self.c_std = "C89"
-            elif std == "C99":
-                self.c_std = std
-            else:
-                sys.stderr.write(
-                    "{0:s}: error: unknown C standard {1:s}\n"
-                    .format(sys.argv[0], options.c_std))
-                sys.exit(1)
         if options.symbol_prefix != None:
             self.symbol_prefix = options.symbol_prefix
         if options.include_files != None:
@@ -340,54 +353,60 @@ of the following parameters:
             elif arg == 'table':
                 self.action = self.action_generate_table
             else:
-                sys.stderr.write(
-                    "{0:s}: error: don't know how to generate {1:s}\n"
-                    .format(sys.argv[0], options.generate))
-                sys.exit(1)
+                self.__error("don't know how to generate {0:s}".format(options.generate))
             op_count += 1
 
             if self.action == self.action_generate_table:
                 if self.algorithm & self.algo_table_driven == 0:
-                    sys.stderr.write(
-                        "{0:s}: error: the --generate table option is incompatible "
-                        "with the --algorithm option\n".format(sys.argv[0]))
-                    sys.exit(1)
+                    self.__error("the --generate table option is incompatible "
+                        "with the --algorithm option")
                 self.algorithm = self.algo_table_driven
             elif self.algorithm not in set(
                     [self.algo_bit_by_bit, self.algo_bit_by_bit_fast, self.algo_table_driven]):
-                sys.stderr.write(
-                    "{0:s}: error: select an algorithm to be used in the generated file\n"
-                    .format(sys.argv[0]))
-                sys.exit(1)
+                self.__error("select an algorithm to be used in the generated file")
         else:
             if self.tbl_idx_width != 8:
-                sys.stderr.write(
-                    "{0:s}: warning: reverting to Table Index Width = 8 "
-                    "for internal CRC calculation\n"
-                    .format(sys.argv[0]))
+                self.__warning("reverting to Table Index Width = 8 "
+                    "for internal CRC calculation")
                 self.tbl_idx_width = 8
                 self.tbl_width = 1 << options.table_idx_width
         if op_count == 0:
             self.action = self.action_check_str
         if op_count > 1:
-            sys.stderr.write(
-                "{0:s}: error: too many actions scecified\n".format(sys.argv[0]))
-            sys.exit(1)
+            self.__error("too many actions scecified")
 
         if len(args) != 0:
-            sys.stderr.write(
-                "{0:s}: error: unrecognized argument(s): {1:s}\n"
-                .format(sys.argv[0], " ".join(args)))
-            sys.exit(1)
+            self.__error("unrecognized argument(s): {0:s}".format(" ".join(args)))
 
         def_params_acts = (self.action_check_str, self.action_check_hex_str,
                            self.action_check_file, self.action_generate_table)
         if self.undefined_crc_parameters and self.action in set(def_params_acts):
-            sys.stderr.write(
-                "{0:s}: error: undefined parameters: Add {1:s} or use --model\n"
-                .format(sys.argv[0], ", ".join(undefined_params)))
-            sys.exit(1)
+            self.__error("undefined parameters: Add {0:s} or use --model"
+                .format(", ".join(undefined_params)))
         self.verbose = options.verbose
+
+
+
+    # function __warning
+    ###############################################################################
+    def __warning(self, message):
+        """
+        Print a warning message to stderr.
+        """
+        sys.stderr.write(
+            "{0:s}: warning: {1:s}\n".format(sys.argv[0], message))
+
+
+
+    # function _error
+    ###############################################################################
+    def __error(self, message):
+        """
+        Print a error message to stderr and terminate the program.
+        """
+        sys.stderr.write(
+            "{0:s}: error: {1:s}\n".format(sys.argv[0], message))
+        sys.exit(1)
 
 
 # function _model_cb
@@ -429,7 +448,7 @@ def _check_hex(dummy_option, opt, value):
             return int(value)
     except ValueError:
         raise OptionValueError(
-            "option {0:s}: invalid integer or hexadecimal value: {1:r}.".format(opt, value))
+            "option {0:s}: invalid integer or hexadecimal value: {1:s}.".format(opt, value))
 
 
 # function _check_bool
@@ -446,7 +465,7 @@ def _check_bool(dummy_option, opt, value):
     elif value.lower() == "true":
         return True
     else:
-        raise OptionValueError("option {0:s}: invalid boolean value: {1:r}.".format(opt, value))
+        raise OptionValueError("option {0:s}: invalid boolean value: {1:s}.".format(opt, value))
 
 
 # Class MyOption

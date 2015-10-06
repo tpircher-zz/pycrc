@@ -1,3 +1,18 @@
+2015-10-06  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * AUTHORS:
+    Added Stephan Brumme as his implementation of the slice-by algorithm is the
+    basis for pycrc's implementation.
+
+    * crc_algorithms.py:
+    * crc_opt.py:
+    * crc_symtable.py:
+    Added a new option --slice-by. This option is still experimental and
+    limited in its use.
+
+    * test/test.py:
+    Added tests for --slice-by.
+
 2015-09-12  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_algorithms.py:
@@ -10,8 +25,8 @@
     Run the code through pylint.
     API change: changed the names of the member variables from CamelCase to the
     format suggested in PEP 0008 (lowercase letters and words separated by
-
     underscore).
+
 2015-08-31  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_opt.py:

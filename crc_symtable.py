@@ -105,6 +105,7 @@ class SymbolTable(object):
         self.table["crc_xor_in"] = self.__pretty_hex(self.opt.xor_in, self.opt.width)
         self.table["crc_reflect_out"] = self.__pretty_bool(self.opt.reflect_out)
         self.table["crc_xor_out"] = self.__pretty_hex(self.opt.xor_out, self.opt.width)
+        self.table["crc_slice_by"] = str(self.opt.slice_by)
         self.table["crc_table_idx_width"] = str(self.opt.tbl_idx_width)
         self.table["crc_table_width"] = str(1 << self.opt.tbl_idx_width)
         self.table["crc_table_mask"] = self.__pretty_hex(self.opt.tbl_width - 1, 8)
@@ -413,13 +414,16 @@ $crc_finalize_function_def;
  * Generated on $datetime,
  * by $program_version, $program_url
  * using the configuration:
- *    Width        = $crc_width
- *    Poly         = $crc_poly
- *    XorIn        = $crc_xor_in
- *    ReflectIn    = $crc_reflect_in
- *    XorOut       = $crc_xor_out
- *    ReflectOut   = $crc_reflect_out
- *    Algorithm    = $crc_algorithm
+ *    Width         = $crc_width
+ *    Poly          = $crc_poly
+ *    Xor_In        = $crc_xor_in
+ *    ReflectIn     = $crc_reflect_in
+ *    Xor_Out       = $crc_xor_out
+ *    ReflectOut    = $crc_reflect_out
+ *    Algorithm     = $crc_algorithm
+$if ($crc_slice_by > 1) {:
+ *    SliceBy       = $crc_slice_by
+:}
  *****************************************************************************/\
 """
 
@@ -582,6 +586,100 @@ $crc_table_core_algorithm_nonreflected
         }
     }
 :} $else {:
+$if ($crc_slice_by > 1) {:
+    const uint32_t *d32 = (const uint32_t *)d;
+    while (data_len >= $crc_slice_by)
+    {
+#if __BYTE_ORDER == __BIG_ENDIAN
+        $crc_t d1 = *d32++ ^ le16toh(crc);
+$if ($crc_slice_by >= 8) {:
+        $crc_t d2 = *d32++;
+$if ($crc_slice_by >= 16) {:
+        $crc_t d3 = *d32++;
+        $crc_t d4 = *d32++;
+:}:}
+        crc  =
+$if ($crc_slice_by == 4) {:
+            crc_table[ 0][ d1        & 0xffu] ^
+            crc_table[ 1][(d1 >>  8) & 0xffu] ^
+            crc_table[ 2][(d1 >> 16) & 0xffu] ^
+            crc_table[ 3][(d1 >> 24) & 0xffu];
+:} $elif ($crc_slice_by == 8) {:
+            crc_table[ 0][ d2        & 0xffu] ^
+            crc_table[ 1][(d2 >>  8) & 0xffu] ^
+            crc_table[ 2][(d2 >> 16) & 0xffu] ^
+            crc_table[ 3][(d2 >> 24) & 0xffu] ^
+            crc_table[ 4][ d1        & 0xffu] ^
+            crc_table[ 5][(d1 >>  8) & 0xffu] ^
+            crc_table[ 6][(d1 >> 16) & 0xffu] ^
+            crc_table[ 7][(d1 >> 24) & 0xffu];
+:} $elif ($crc_slice_by == 16) {:
+            crc_table[ 0][ d4        & 0xffu] ^
+            crc_table[ 1][(d4 >>  8) & 0xffu] ^
+            crc_table[ 2][(d4 >> 16) & 0xffu] ^
+            crc_table[ 3][(d4 >> 24) & 0xffu] ^
+            crc_table[ 4][ d3        & 0xffu] ^
+            crc_table[ 5][(d3 >>  8) & 0xffu] ^
+            crc_table[ 6][(d3 >> 16) & 0xffu] ^
+            crc_table[ 7][(d3 >> 24) & 0xffu] ^
+            crc_table[ 8][ d2        & 0xffu] ^
+            crc_table[ 9][(d2 >>  8) & 0xffu] ^
+            crc_table[10][(d2 >> 16) & 0xffu] ^
+            crc_table[11][(d2 >> 24) & 0xffu] ^
+            crc_table[12][ d1        & 0xffu] ^
+            crc_table[13][(d1 >>  8) & 0xffu] ^
+            crc_table[14][(d1 >> 16) & 0xffu] ^
+            crc_table[15][(d1 >> 24) & 0xffu];
+:}
+#else
+        $crc_t d1 = *d32++ ^ crc;
+$if ($crc_slice_by >= 8) {:
+        $crc_t d2 = *d32++;
+$if ($crc_slice_by >= 16) {:
+        $crc_t d3 = *d32++;
+        $crc_t d4 = *d32++;
+:}:}
+        crc  =
+$if ($crc_slice_by == 4) {:
+            crc_table[ 0][(d1 >> 24) & 0xffu] ^
+            crc_table[ 1][(d1 >> 16) & 0xffu] ^
+            crc_table[ 2][(d1 >>  8) & 0xffu] ^
+            crc_table[ 3][ d1        & 0xffu];
+:} $elif ($crc_slice_by == 8) {:
+            crc_table[ 0][(d2 >> 24) & 0xffu] ^
+            crc_table[ 1][(d2 >> 16) & 0xffu] ^
+            crc_table[ 2][(d2 >>  8) & 0xffu] ^
+            crc_table[ 3][ d2        & 0xffu] ^
+            crc_table[ 4][(d1 >> 24) & 0xffu] ^
+            crc_table[ 5][(d1 >> 16) & 0xffu] ^
+            crc_table[ 6][(d1 >>  8) & 0xffu] ^
+            crc_table[ 7][ d1        & 0xffu];
+:} $elif ($crc_slice_by == 16) {:
+            crc_table[ 0][(d4 >> 24) & 0xffu] ^
+            crc_table[ 1][(d4 >> 16) & 0xffu] ^
+            crc_table[ 2][(d4 >>  8) & 0xffu] ^
+            crc_table[ 3][ d4        & 0xffu] ^
+            crc_table[ 4][(d3 >> 24) & 0xffu] ^
+            crc_table[ 5][(d3 >> 16) & 0xffu] ^
+            crc_table[ 6][(d3 >>  8) & 0xffu] ^
+            crc_table[ 7][ d3        & 0xffu] ^
+            crc_table[ 8][(d2 >> 24) & 0xffu] ^
+            crc_table[ 9][(d2 >> 16) & 0xffu] ^
+            crc_table[10][(d2 >>  8) & 0xffu] ^
+            crc_table[11][ d2        & 0xffu] ^
+            crc_table[12][(d1 >> 24) & 0xffu] ^
+            crc_table[13][(d1 >> 16) & 0xffu] ^
+            crc_table[14][(d1 >>  8) & 0xffu] ^
+            crc_table[15][ d1        & 0xffu];
+:}
+#endif
+
+        data_len -= $crc_slice_by;
+    }
+
+    /* Remaining bytes with the standard algorithm */
+    d = (const unsigned char *)d32;
+:}
     while (data_len--) {
 $if ($crc_reflect_in == True) {:
 $crc_table_core_algorithm_reflected
@@ -806,6 +904,9 @@ $if ($undefined_parameters == True or $crc_algorithm == "bit-by-bit" or $crc_alg
 #include <stdbool.h>
 :}
 :}
+$if ($crc_slice_by > 1) {:
+#include <endian.h>
+:}
 
 $if ($use_reflect_func == True and $static_reflect_func == True) {:
 static $crc_reflect_function_def;
@@ -830,9 +931,7 @@ $if ($undefined_parameters == True) {:
 $if ($constant_crc_table != True) {:
 static $crc_t crc_table[$crc_table_width];
 :} $else {:
-static const $crc_t crc_table[$crc_table_width] = {
-$crc_table_init
-};
+static const $crc_t crc_table$if ($crc_slice_by > 1) {:[$crc_slice_by]:}[$crc_table_width] = $crc_table_init;
 :}
 
 :}"""
@@ -1297,6 +1396,26 @@ $if ($crc_xor_out == Undefined) {:
         return self.__pretty_hex(init, self.opt.width)
 
 
+    # function __get_simple_table
+    ###############################################################################
+    def __get_simple_table(self, crc_tbl, values_per_line, format_width, indent):
+        """
+        FIXME
+        """
+        out = ""
+        for i in range(self.opt.tbl_width):
+            if i % values_per_line == 0:
+                out += " " * indent
+            tbl_val = self.__pretty_hex(crc_tbl[i], format_width)
+            if i == (self.opt.tbl_width - 1):
+                out += "{0:s}".format(tbl_val)
+            elif i % values_per_line == (values_per_line - 1):
+                out += "{0:s},\n".format(tbl_val)
+            else:
+                out += "{0:s}, ".format(tbl_val)
+        return out
+
+
     # function __get_table_init
     ###############################################################################
     def __get_table_init(self):
@@ -1311,27 +1430,31 @@ $if ($crc_xor_out == Undefined) {:
             width=self.opt.width, poly=self.opt.poly,
             reflect_in=self.opt.reflect_in,
             xor_in=0, reflect_out=False, xor_out=0,     # set unimportant variables to known values
-            table_idx_width=self.opt.tbl_idx_width)
+            table_idx_width=self.opt.tbl_idx_width,
+            slice_by=self.opt.slice_by)
         crc_tbl = crc.gen_table()
-        if self.opt.width >= 32:
+        if self.opt.width > 32:
             values_per_line = 4
         elif self.opt.width >= 16:
             values_per_line = 8
         else:
             values_per_line = 16
         format_width = max(self.opt.width, 8)
-        out = ""
-        for i in range(self.opt.tbl_width):
-            if i % values_per_line == 0:
-                out += " " * 4
-            tbl_val = self.__pretty_hex(crc_tbl[i], format_width)
-            if i == (self.opt.tbl_width - 1):
-                out += "{0:s}".format(tbl_val)
-            elif i % values_per_line == (values_per_line - 1):
-                out += "{0:s},\n".format(tbl_val)
-            else:
-                out += "{0:s}, ".format(tbl_val)
-        return out
+        if self.opt.slice_by == 1:
+            indent = 4
+        else:
+            indent = 8
+
+        out = [''] * self.opt.slice_by
+        for i in range(self.opt.slice_by):
+            out[i] = self.__get_simple_table(crc_tbl[i], values_per_line, format_width, indent)
+        fixed_indent = ' ' * (indent - 4)
+        out = '{0:s}{{\n'.format(fixed_indent) + \
+            '\n{0:s}}},\n{0:s}{{\n'.format(fixed_indent).join(out) + \
+            '\n{0:s}}}'.format(fixed_indent)
+        if self.opt.slice_by == 1:
+            return out
+        return '{\n' + out + '\n}'
 
 
     # function __get_tbl_core_nonreflected
@@ -1371,7 +1494,10 @@ $if ($crc_xor_out == Undefined) {:
             crc_xor_expr = " ^ (crc << $cfg_table_idx_width)"
 
         if self.opt.tbl_idx_width == 8:
-            crc_lookup = 'crc_table[tbl_idx]'
+            if self.opt.slice_by > 1:
+                crc_lookup = 'crc_table[0][tbl_idx]'
+            else:
+                crc_lookup = 'crc_table[tbl_idx]'
             loop_core += loop_indent + "tbl_idx = (" + crc_shifted_right + " ^ *d)" \
                             "$if ($crc_width > 8) {: & $crc_table_mask:};" + '\n' + \
                             loop_indent + "crc = (" + crc_lookup + crc_xor_expr + ") & " + \
@@ -1409,7 +1535,10 @@ $if ($crc_xor_out == Undefined) {:
             crc_xor_expr = " ^ (crc >> $cfg_table_idx_width)"
 
         if self.opt.tbl_idx_width == 8:
-            crc_lookup = 'crc_table[tbl_idx]'
+            if self.opt.slice_by > 1:
+                crc_lookup = 'crc_table[0][tbl_idx]'
+            else:
+                crc_lookup = 'crc_table[tbl_idx]'
             loop_core += loop_indent + "tbl_idx = (" + crc_shifted_right + " ^ *d)" \
                             "$if ($crc_width > 8) {: & $crc_table_mask:};" + '\n' + \
                             loop_indent + "crc = (" + crc_lookup + crc_xor_expr + ") & " + \
