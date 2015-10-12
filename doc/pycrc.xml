@@ -1,11 +1,12 @@
-<?xml version='1.0'?>
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V5.0//EN"
-                    "http://www.oasis-open.org/docbook/xml/5.0/docbook.dtd" [
+<?xml version='1.0' encoding="utf-8"?>
+
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook V5.1//EN"
+        "http://www.oasis-open.org/docbook/xml/5.0b5/dtd/docbook.dtd" [
 <!ENTITY project_name       "pycrc">
-<!ENTITY project_version    "0.8">
+<!ENTITY project_version    "0.9">
 <!ENTITY project_homepage   "https://pycrc.org">
 <!ENTITY project_models     "https://pycrc.org/models.html">
-<!ENTITY date               "2015-08-29">
+<!ENTITY date               "2015-10-11">
 <!ENTITY author_firstname   "Thomas">
 <!ENTITY author_surname     "Pircher">
 <!ENTITY author_email       "tehpeh-pycrc@tty1.net">
@@ -15,6 +16,7 @@
 <!ENTITY bbf                "bbf">
 <!ENTITY table-driven       "table-driven">
 <!ENTITY tbl                "tbl">
+<!ENTITY slice-by           "slice-by">
 <!ENTITY width          "Width">
 <!ENTITY poly           "Polynomial">
 <!ENTITY reflect_in     "ReflectIn">
@@ -24,7 +26,9 @@
 <!ENTITY check          "Check">
 ]>
 
-<refentry xmlns="http://docbook.org/ns/docbook" version="5.0" id="&project_name;">
+
+<refentry xmlns:db="http://docbook.org/ns/docbook" db:version="5.0b5"
+         xml:id="&project_name;">
 
     <refentryinfo>
         <title>&project_name;</title>
@@ -109,6 +113,14 @@
                         with the <option>--table-idx-width</option> command line switch.
                         The value of 4 bits for the table index (16 elements in the look-up table) can be a good
                         compromise between execution speed and code size.
+                    </para>
+                    <para>
+                        The <option>--slice-by</option> option enables a variant of the <replaceable>&table-driven;</replaceable>
+                        algorithm that operates on 32 bits of data or more at a time rather than 8 bits.
+                        This can speed-up the caluculation of the CRC by several orders of magnitude,
+                        at the cost of increased code and data usage.
+                        <emphasis>Note</emphasis>: this option is experimental and not well-tested.
+                        Check your results and please raise bugs if you find problems.
                     </para>
                 </listitem>
             </itemizedlist>
@@ -287,6 +299,19 @@
                     <replaceable>NUM</replaceable> must be one of the values
                     {<replaceable>1</replaceable>, <replaceable>2</replaceable>,
                     <replaceable>4</replaceable>, <replaceable>8</replaceable>}.</para>
+            </listitem>
+        </varlistentry>
+        <varlistentry>
+            <term>
+                <option>--slice-by=</option><replaceable>NUM</replaceable>
+            </term>
+            <listitem>
+                <para>speed-up the &table-driven; calculation by operating on
+                    <replaceable>NUM</replaceable> octets of data rather than a
+                    single octet at a time.
+                    <replaceable>NUM</replaceable> must be one of the values
+                    {<replaceable>4</replaceable>, <replaceable>8</replaceable>,
+                    <replaceable>16</replaceable>}.</para>
             </listitem>
         </varlistentry>
         <varlistentry>

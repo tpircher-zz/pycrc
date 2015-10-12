@@ -1,9 +1,7 @@
-XSLTPROC		= xsltproc
-XSLTPARAM		= --nonet --novalid
-HTML_STYLESHEET	= /usr/share/xml/docbook/stylesheet/docbook-xsl-ns/xhtml5/docbook.xsl
-MAN_STYLESHEET	= /usr/share/xml/docbook/stylesheet/docbook-xsl-ns/manpages/docbook.xsl
+HTML_PARAMS	= style-html.xsl
+MAN_PARAMS	= style-man.xsl
 
-source      = pycrc.xml
+source		= pycrc.xml
 targets		= $(source:.xml=.html) $(source:.xml=.1)
 
 all: $(targets)
@@ -16,11 +14,11 @@ clean:
 check:
 	xmllint --valid --noout $(source)
 
-%.html: %.xml
-	$(XSLTPROC) $(XSLTPARAM) -o $@ $(HTML_STYLESHEET) $<
+%.html: %.xml $(HTML_PARAMS)
+	saxon-xslt -o $@ $^
 
-%.1: %.xml
-	$(XSLTPROC) $(XSLTPARAM) -o $@ $(MAN_STYLESHEET) $<
+%.1: %.xml $(MAN_PARAMS)
+	saxon-xslt -o $@ $^
 
 %.txt: %.html
 	links -dump -no-numbering -no-references $< > $@
