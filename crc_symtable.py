@@ -262,9 +262,9 @@ class SymbolTable(object):
             return  """\
 $if ($crc_algorithm == "table-driven") {:
 $if ($crc_reflect_in == $crc_reflect_out) {:
-$if ($crc_shift != 0) {:(crc >> $cfg_shift):} $else {:crc:} ^ $crc_xor_out\
+crc ^ $crc_xor_out\
 :} $else {:
-$crc_reflect_function($if ($crc_shift != 0) {:(crc >> $cfg_shift):} $else {:crc:}, $crc_width) ^ $crc_xor_out\
+$crc_reflect_function(crc, $crc_width) ^ $crc_xor_out\
 :}:} $elif ($crc_reflect_out == True) {:
 $crc_reflect_function(crc, $crc_width) ^ $crc_xor_out\
 :} $else {:
@@ -370,11 +370,11 @@ $crc_init_doc
 $if ($constant_crc_init == False) {:
 $crc_init_function_def;
 :} $elif ($c_std == C89) {:
-#define $crc_init_function()      ($crc_init_value$if ($crc_shift != 0) {: << $cfg_shift:})
+#define $crc_init_function()      ($crc_init_value)
 :} $else {:
 static inline $crc_init_function_def$nop
 {
-    return $crc_init_value$if ($crc_shift != 0) {: << $cfg_shift:};
+    return $crc_init_value;
 }
 :}
 
@@ -489,14 +489,14 @@ $if ($crc_algorithm == "bit-by-bit") {:
 :} $elif ($crc_algorithm == "table-driven") {:
 $if ($crc_reflect_in == Undefined) {:
     if ($cfg_reflect_in) {
-        return $crc_reflect_function($cfg_xor_in & $cfg_mask, $cfg_width)$if ($crc_shift != 0) {: << $cfg_shift:};
+        return $crc_reflect_function($cfg_xor_in & $cfg_mask, $cfg_width);
     } else {
-        return $cfg_xor_in & $cfg_mask$if ($crc_shift != 0) {: << $cfg_shift:};
+        return $cfg_xor_in & $cfg_mask;
     }
 :} $elif ($crc_reflect_in == True) {:
-    return $crc_reflect_function($cfg_xor_in & $cfg_mask, $cfg_width)$if ($crc_shift != 0) {: << $cfg_shift:};
+    return $crc_reflect_function($cfg_xor_in & $cfg_mask, $cfg_width);
 :} $else {:
-    return $cfg_xor_in & $cfg_mask$if ($crc_shift != 0) {: << $cfg_shift:};
+    return $cfg_xor_in & $cfg_mask;
 :}
 :}
 }
@@ -689,7 +689,7 @@ $crc_table_core_algorithm_nonreflected
         d++;
     }
 :}
-    return crc & $cfg_mask_shifted;
+    return crc & $cfg_mask;
 :}
 }
 
@@ -731,9 +731,6 @@ $if ($crc_reflect_out == Undefined) {:
 :}
     return (crc ^ $cfg_xor_out) & $cfg_mask;
 :} $elif ($crc_algorithm == "table-driven") {:
-$if ($crc_shift != 0) {:
-    crc >>= $cfg_shift;
-:}
 $if ($crc_reflect_in == Undefined or $crc_reflect_out == Undefined) {:
 $if ($crc_reflect_in == Undefined and $crc_reflect_out == Undefined) {:
     if (cfg->reflect_in == !cfg->reflect_out):}
@@ -801,7 +798,7 @@ $if ($crc_shift != 0) {:
         crc = $crc_reflect_function(crc, $cfg_width);
 :}
 :}
-        crc_table[i] = crc & $cfg_mask_shifted;
+        crc_table[i] = (crc & $cfg_mask_shifted) >> $cfg_shift;
     }
 }
 
@@ -1400,7 +1397,8 @@ $if ($crc_xor_out == Undefined) {:
     ###############################################################################
     def __get_simple_table(self, crc_tbl, values_per_line, format_width, indent):
         """
-        FIXME
+        Get one CRC table, formatted as string with appropriate indenting and
+        line breaks.
         """
         out = ""
         for i in range(self.opt.tbl_width):
@@ -1476,16 +1474,19 @@ $if ($crc_xor_out == Undefined) {:
             loop_indent = " " * 8
 
         if self.opt.width == None:
-            shr = "($cfg_width - $cfg_table_idx_width + $cfg_shift)"
+            crc_shifted_right = "(crc >> ($cfg_width - $cfg_table_idx_width))"
         elif self.opt.width < 8:
-            shr = "{0:d}".format(self.opt.width - self.opt.tbl_idx_width + 8 - self.opt.width)
+            shift_val = self.opt.width - self.opt.tbl_idx_width
+            if shift_val < 0:
+                crc_shifted_right = "(crc << {0})".format(-shift_val)
+            else:
+                crc_shifted_right = "(crc >> {0})".format(shift_val)
         else:
-            shr = "{0:d}".format(self.opt.width - self.opt.tbl_idx_width)
-
-        if shr != "0":
-            crc_shifted_right = "(crc >> {0})".format(shr)
-        else:
-            crc_shifted_right = "crc"
+            shift_val = self.opt.width - self.opt.tbl_idx_width
+            if shift_val == 0:
+                crc_shifted_right = "crc"
+            else:
+                crc_shifted_right = "(crc >> {0})".format(shift_val)
 
         if self.opt.width != None and self.opt.tbl_idx_width != None and \
                 self.opt.width <= self.opt.tbl_idx_width:
@@ -1501,7 +1502,7 @@ $if ($crc_xor_out == Undefined) {:
             loop_core += loop_indent + "tbl_idx = (" + crc_shifted_right + " ^ *d)" \
                             "$if ($crc_width > 8) {: & $crc_table_mask:};" + '\n' + \
                             loop_indent + "crc = (" + crc_lookup + crc_xor_expr + ") & " + \
-                            "$cfg_mask_shifted;" + '\n'
+                            "$cfg_mask;" + '\n'
         else:
             crc_lookup = 'crc_table[tbl_idx & $crc_table_mask]'
             for i in range(8 // self.opt.tbl_idx_width):
@@ -1527,7 +1528,7 @@ $if ($crc_xor_out == Undefined) {:
             loop_indent = " " * 12
         else:
             loop_indent = " " * 8
-        crc_shifted_right = "$if ($crc_shift != 0) {:(crc >> $cfg_shift):} $else {:crc:}"
+        crc_shifted_right = "crc"
         if self.opt.width != None and self.opt.tbl_idx_width != None and \
                 self.opt.width <= self.opt.tbl_idx_width:
             crc_xor_expr = ""
@@ -1542,7 +1543,7 @@ $if ($crc_xor_out == Undefined) {:
             loop_core += loop_indent + "tbl_idx = (" + crc_shifted_right + " ^ *d)" \
                             "$if ($crc_width > 8) {: & $crc_table_mask:};" + '\n' + \
                             loop_indent + "crc = (" + crc_lookup + crc_xor_expr + ") & " + \
-                            "$cfg_mask_shifted;" + '\n'
+                            "$cfg_mask;" + '\n'
         else:
             crc_lookup = 'crc_table[tbl_idx & $crc_table_mask]'
             for i in range(8 // self.opt.tbl_idx_width):

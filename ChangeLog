@@ -5,6 +5,11 @@
 
 2015-10-06  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
+    * crc_algorithms.py:
+    Simplified the implementation where Width is less than 8 bits.
+
+2015-10-06  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
     * AUTHORS:
     Added Stephan Brumme as his implementation of the slice-by algorithm is the
     basis for pycrc's implementation.

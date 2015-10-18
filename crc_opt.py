@@ -302,6 +302,19 @@ of the following parameters:
                 self.__error("slice-by is only implemented for fully defined models")
             if self.tbl_idx_width != 8:
                 self.__error("slice-by is only implemented for table-idx-width=8")
+            # FIXME: disable the following tests
+            if self.width < 8:
+                self.__warning("disabling slice-by for width {0}".format(self.width))
+                self.slice_by = 1
+            if self.width < 16:
+                self.__warning("disabling slice-by for width {0}".format(self.width))
+                self.slice_by = 1
+            if self.width > 32:
+                self.__warning("disabling slice-by for width {0}".format(self.width))
+                self.slice_by = 1
+            if not self.reflect_in:
+                self.__warning("disabling slice-by for non-reflected algorithm")
+                self.slice_by = 1
 # FIXME tp: reintroduce this?
 #            if self.width % 8 != 0:
 #                self.__error("slice-by is only implemented for width multiples of 8")

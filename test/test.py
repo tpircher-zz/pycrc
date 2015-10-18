@@ -459,15 +459,14 @@ class CrcTests(object):
                 if not self.__compile_and_check_res('--algorithm table-driven' + ' ' + cmp_opt, None, 'crc_tbl_mod', expected_crc):
                     return False
 
-                # FIXME re-enable these checks
-#                if not self.__compile_and_check_res('--algorithm table-driven --slice-by=4' + ' ' + cmp_opt, None, 'crc_tsb4_mod', expected_crc):
-#                    return False
-#
-#                if not self.__compile_and_check_res('--algorithm table-driven --slice-by=8' + ' ' + cmp_opt, None, 'crc_tsb8_mod', expected_crc):
-#                    return False
-#
-#                if not self.__compile_and_check_res('--algorithm table-driven --slice-by=16' + ' ' + cmp_opt, None, 'crc_tsb16_mod', expected_crc):
-#                    return False
+                if not self.__compile_and_check_res('--algorithm table-driven --slice-by=4' + ' ' + cmp_opt, None, 'crc_tsb4_mod', expected_crc):
+                    return False
+
+                if not self.__compile_and_check_res('--algorithm table-driven --slice-by=8' + ' ' + cmp_opt, None, 'crc_tsb8_mod', expected_crc):
+                    return False
+
+                if not self.__compile_and_check_res('--algorithm table-driven --slice-by=16' + ' ' + cmp_opt, None, 'crc_tsb16_mod', expected_crc):
+                    return False
 
                 if not self.__compile_and_check_res('--algorithm table-driven --table-idx-width=2' + ' ' + cmp_opt, None, 'crc_tix2_mod', expected_crc):
                     return False
