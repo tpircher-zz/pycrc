@@ -4,7 +4,7 @@ set -e
 PYCRC=`dirname $0`/../pycrc.py
 
 cleanup() {
-    rm -f a.out performance.c crc_bbb.[ch] crc_bbf.[ch] crc_tb[l4].[ch] crc_bw[e4].[ch]
+    rm -f a.out performance.c crc_bbb.[ch] crc_bbf.[ch] crc_tb[l4].[ch] crc_sb4.[ch]
 }
 
 trap cleanup 0 1 2 3 15
@@ -23,6 +23,9 @@ $PYCRC --model $model --symbol-prefix crc_${prefix}_ --generate c -o crc_$prefix
 prefix=tb4
 $PYCRC --model $model --symbol-prefix crc_${prefix}_ --generate h -o crc_$prefix.h --algo table-driven --table-idx-width 4
 $PYCRC --model $model --symbol-prefix crc_${prefix}_ --generate c -o crc_$prefix.c --algo table-driven --table-idx-width 4
+prefix=sb4
+$PYCRC --model $model --symbol-prefix crc_${prefix}_ --generate h -o crc_$prefix.h --algo table-driven --slice-by 4
+$PYCRC --model $model --symbol-prefix crc_${prefix}_ --generate c -o crc_$prefix.c --algo table-driven --slice-by 4
 
 
 print_main() {
@@ -31,6 +34,7 @@ cat <<EOF
 #include "crc_bbf.h"
 #include "crc_tbl.h"
 #include "crc_tb4.h"
+#include "crc_sb4.h"
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -46,6 +50,7 @@ void test_bbb(unsigned char *buf, size_t buf_len, size_t num_runs, clock_t clock
 void test_bbf(unsigned char *buf, size_t buf_len, size_t num_runs, clock_t clock_per_sec);
 void test_tbl(unsigned char *buf, size_t buf_len, size_t num_runs, clock_t clock_per_sec);
 void test_tb4(unsigned char *buf, size_t buf_len, size_t num_runs, clock_t clock_per_sec);
+void test_sb4(unsigned char *buf, size_t buf_len, size_t num_runs, clock_t clock_per_sec);
 
 /**
  * Print results.
@@ -94,6 +99,9 @@ int main(void)
     // table-driven idx4
     test_tb4(buf, sizeof(buf), NUM_RUNS / 2, clock_per_sec);
 
+    // table-driven slice-by 4
+    test_sb4(buf, sizeof(buf), NUM_RUNS, clock_per_sec);
+
     return 0;
 }
 EOF
@@ -133,6 +141,7 @@ print_routine "bit-by-bit" bbb >> performance.c
 print_routine "bit-by-bit-fast" bbf >> performance.c
 print_routine "table-driven" tbl >> performance.c
 print_routine "table-driven idx4" tb4 >> performance.c
+print_routine "table-driven sb4" sb4 >> performance.c
 
-gcc -W -Wall -O3 crc_bbb.c crc_bbf.c crc_tbl.c crc_tb4.c performance.c
+gcc -W -Wall -O3 crc_bbb.c crc_bbf.c crc_tbl.c crc_tb4.c crc_sb4.c performance.c
 ./a.out

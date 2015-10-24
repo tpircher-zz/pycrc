@@ -39,6 +39,10 @@ Then the script can be called like an application.
 
     ./pycrc.py [options]
 
+If you get an error "No such file or directory" when running ./pycrc.py then
+make sure the file is saved in UNIX file endings:
+
+    dos2unix pycrc.py
 
 
 Getting help
