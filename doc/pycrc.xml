@@ -223,7 +223,7 @@
                     <replaceable>crc-16-usb</replaceable>,
                     <replaceable>crc-16-modbus</replaceable>,
                     <replaceable>crc-16-genibus</replaceable>,
-                    <replaceable>ccitt</replaceable>,
+                    <replaceable>crc-16-ccitt</replaceable>,
                     <replaceable>r-crc-16</replaceable>,
                     <replaceable>kermit</replaceable>,
                     <replaceable>x-25</replaceable>,

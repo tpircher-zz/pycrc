@@ -1,3 +1,11 @@
+2015-10-25  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_models.py:
+    * doc/pycrc.xml:
+    Fixed the initial value of the 16-bit CCITT algorithm. Renamed the model
+    from ccitt to crc-16-ccitt.
+    Fixes #7. Thanks to Craig McQueen.
+
 2015-10-11  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * doc/pycrc.xml:

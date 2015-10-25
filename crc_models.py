@@ -147,14 +147,14 @@ class CrcModels(object):
         'check':         0xd64e,
     })
     models.append({
-        'name':         'ccitt',
+        'name':         'crc-16-ccitt',
         'width':         16,
         'poly':          0x1021,
         'reflect_in':    False,
-        'xor_in':        0xffff,
+        'xor_in':        0x1d0f,
         'reflect_out':   False,
         'xor_out':       0x0,
-        'check':         0x29b1,
+        'check':         0xe5cc,
     })
     models.append({
         'name':         'r-crc-16',

@@ -40,9 +40,9 @@ This is an example use of the different algorithms:
 >>> crc = Crc(width = 16, poly = 0x8005,
 ...           reflect_in = True, xor_in = 0x0000,
 ...           reflect_out = True, xor_out = 0x0000)
->>> print("0x{0:x}".format(crc.bit_by_bit("123456789")))
->>> print("0x{0:x}".format(crc.bit_by_bit_fast("123456789")))
->>> print("0x{0:x}".format(crc.table_driven("123456789")))
+>>> print("{0:#x}".format(crc.bit_by_bit("123456789")))
+>>> print("{0:#x}".format(crc.bit_by_bit_fast("123456789")))
+>>> print("{0:#x}".format(crc.table_driven("123456789")))
 """
 
 # Class Crc
