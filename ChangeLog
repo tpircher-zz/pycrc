@@ -1,5 +1,8 @@
 2015-10-26  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
+    * pycrc.py:
+    Allow strings with values greater than 0x80 in --check-hexstring.
+
     * crc_algorithms.py:
     When the CRC width is less than 8 then the bit-by-bit algorithm needs to
     apply the CRC mask to the final value.

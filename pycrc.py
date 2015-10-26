@@ -131,7 +131,7 @@ def check_hexstring(opt):
     if sys.version_info >= (3, 0):
         opt.check_string = bytes(opt.check_string, 'utf-8')
     try:
-        check_str = binascii.unhexlify(opt.check_string)
+        check_str = bytearray(binascii.unhexlify(opt.check_string))
     except TypeError:
         sys.stderr.write(
             "{0:s}: error: invalid hex string {1:s}\n".format(sys.argv[0], opt.check_string))
