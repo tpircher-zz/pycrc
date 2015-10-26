@@ -155,7 +155,7 @@ class Crc(object):
 
         if self.reflect_out:
             reg = self.reflect(reg, self.width)
-        return reg ^ self.xor_out
+        return (reg ^ self.xor_out) & self.mask
 
 
     # function bit_by_bit_fast
