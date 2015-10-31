@@ -218,10 +218,22 @@ class SymbolTable(object):
             return  self.__pretty_bool(False)
 
         elif name == "use_reflect_func":
-            if self.opt.reflect_out == False and self.opt.reflect_in == False:
-                return  self.__pretty_bool(False)
-            else:
+            if self.opt.reflect_out == None or self.opt.reflect_in == None:
                 return  self.__pretty_bool(True)
+            elif self.opt.algorithm == self.opt.algo_table_driven:
+                if self.opt.reflect_in != self.opt.reflect_out:
+                    return  self.__pretty_bool(True)
+            elif self.opt.algorithm == self.opt.algo_bit_by_bit:
+                if self.opt.reflect_in:
+                    return  self.__pretty_bool(True)
+                if self.opt.reflect_out:
+                    return  self.__pretty_bool(True)
+            elif self.opt.algorithm == self.opt.algo_bit_by_bit_fast:
+                if self.opt.reflect_in:
+                    return  self.__pretty_bool(True)
+                if self.opt.reflect_out:
+                    return  self.__pretty_bool(True)
+            return  self.__pretty_bool(False)
 
         elif name == "static_reflect_func":
             if self.opt.algorithm == self.opt.algo_table_driven:
@@ -734,9 +746,9 @@ $if ($crc_reflect_out == Undefined) {:
 $if ($crc_reflect_in == Undefined or $crc_reflect_out == Undefined) {:
 $if ($crc_reflect_in == Undefined and $crc_reflect_out == Undefined) {:
     if (cfg->reflect_in == !cfg->reflect_out):}
- $elif ($crc_reflect_out == Undefined) {:
+$elif ($crc_reflect_out == Undefined) {:
     if ($if ($crc_reflect_in == True) {:!:}cfg->reflect_out):}
- $elif ($crc_reflect_in == Undefined) {:
+$elif ($crc_reflect_in == Undefined) {:
     if ($if ($crc_reflect_out == True) {:!:}cfg->reflect_in):} {
         crc = $crc_reflect_function(crc, $cfg_width);
     }

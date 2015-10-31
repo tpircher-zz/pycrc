@@ -1,3 +1,9 @@
+2015-10-31  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_symtable.py:
+    Suppressed the crc_reflect function where not needed. Addresses part of #8.
+    Thanks to Craig McQueen.
+
 2015-10-26  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * pycrc.py:
