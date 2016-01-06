@@ -1,6 +1,6 @@
 #  pycrc -- parameterisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2015  Thomas Pircher  <tehpeh-pycrc@tty1.net>
+#  Copyright (c) 2006-2016  Thomas Pircher  <tehpeh-pycrc@tty1.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to
@@ -47,7 +47,7 @@ class Options(object):
 
     # Program details
     program_name = "pycrc"
-    version = "0.8.3"
+    version = "0.9"
     version_str = "{0:s} v{1:s}".format(program_name, version)
     web_address = "https://pycrc.org"
 

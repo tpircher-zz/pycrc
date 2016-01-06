@@ -1,3 +1,8 @@
+2016-01-06  Thomas Pircher   <tehpeh-pycrc@tty1.net>
+
+    * crc_opt.py:
+    Version 0.9
+
 2015-10-31  Thomas Pircher   <tehpeh-pycrc@tty1.net>
 
     * crc_symtable.py:
