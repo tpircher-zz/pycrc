@@ -117,8 +117,8 @@
                     <para>
                         The <option>--slice-by</option> option enables a variant of the <replaceable>&table-driven;</replaceable>
                         algorithm that operates on 32 bits of data or more at a time rather than 8 bits.
-                        This can speed-up the caluculation of the CRC by several orders of magnitude,
-                        at the cost of increased code and data usage.
+                        This can drammatically speed-up the calculation of the CRC, at the cost of
+                        increased code and data size.
                         <emphasis>Note</emphasis>: this option is experimental and not well-tested.
                         Check your results and please raise bugs if you find problems.
                     </para>
