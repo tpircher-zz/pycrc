@@ -129,7 +129,7 @@ def check_hexstring(opt):
     if len(opt.check_string) % 2 != 0:
         opt.check_string = "0" + opt.check_string
     if sys.version_info >= (3, 0):
-        opt.check_string = bytes(opt.check_string, 'utf-8')
+        opt.check_string = bytes(opt.check_string, 'utf_8')
     try:
         check_str = bytearray(binascii.unhexlify(opt.check_string))
     except TypeError:
@@ -149,7 +149,7 @@ def crc_file_update(alg, register, check_bytes):
     """
     # If the input data is a string, convert to bytes.
     if isinstance(check_bytes, str):
-        check_bytes = bytearray(check_bytes, 'utf-8')
+        check_bytes = bytearray(check_bytes, 'utf_8')
 
     for octet in check_bytes:
         if alg.reflect_in:
@@ -181,23 +181,21 @@ def check_file(opt):
         reflect_out=opt.reflect_out, xor_out=opt.xor_out,
         table_idx_width=opt.tbl_idx_width)
 
-    try:
-        in_file = open(opt.check_file, 'rb')
-    except IOError:
-        sys.stderr.write(
-            "{0:s}: error: can't open file {1:s}\n".format(sys.argv[0], opt.check_file))
-        sys.exit(1)
-
     if not opt.reflect_in:
         register = opt.xor_in
     else:
         register = alg.reflect(opt.xor_in, opt.width)
-    # Read bytes from the file.
-    check_bytes = in_file.read(1024)
-    while check_bytes:
-        register = crc_file_update(alg, register, check_bytes)
-        check_bytes = in_file.read(1024)
-    in_file.close()
+
+    try:
+        with open(opt.check_file, 'rb') as f:
+            check_bytes = bytearray(f.read(1024))
+            while check_bytes != b"":
+                register = crc_file_update(alg, register, check_bytes)
+                check_bytes = bytearray(f.read(1024))
+    except IOError:
+        sys.stderr.write(
+            "{0:s}: error: can't open file {1:s}\n".format(sys.argv[0], opt.check_file))
+        sys.exit(1)
 
     if opt.reflect_out:
         register = alg.reflect(register, opt.width)
