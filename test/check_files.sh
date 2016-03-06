@@ -65,8 +65,7 @@ populate() {
         for algo in "bit-by-bit" "bit-by-bit-fast" "table-driven"; do
             $PYCRC --model $m --algorithm $algo --generate h -o "${outdir}/${m}_${algo}.h"
             $PYCRC --model $m --algorithm $algo --generate c -o "${outdir}/${m}_${algo}.c"
-            sed -i -e 's/Generated on ... ... .. ..:..:.. ....,/Generated on XXX XXX XX XX:XX:XX XXXX,/; s/by pycrc v[0-9.]*/by pycrc vXXX/;' "${outdir}/${m}_${algo}.h"
-            sed -i -e 's/Generated on ... ... .. ..:..:.. ....,/Generated on XXX XXX XX XX:XX:XX XXXX,/; s/by pycrc v[0-9.]*/by pycrc vXXX/;' "${outdir}/${m}_${algo}.c"
+            sed -i -e 's/Generated on ... ... .. ..:..:.. ....,/Generated on XXX XXX XX XX:XX:XX XXXX,/; s/by pycrc v[0-9.]*/by pycrc vXXX/;' "${outdir}/${m}_${algo}.h" "${outdir}/${m}_${algo}.c"
         done
     done
 }
