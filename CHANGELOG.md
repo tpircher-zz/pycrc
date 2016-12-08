@@ -1,9 +1,8 @@
 # Change Log
 All notable changes to this project will be documented in this file.
+For a detailled list of chages see the [pycrc GitHub][pycrc github] page.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-For a detailled list of chages see the
-[pycrc GitHub][pycrc github] page.
 
 
 ## [Unreleased]
@@ -15,7 +14,7 @@ For a detailled list of chages see the
 ## [v0.9] - 2016-01-06
 
 ### Added
-- Added Stephan Brumme to the AUTHORS file as his implementation of the
+- Added Stephan Brumme to the `AUTHORS` file as his implementation of the
   slice-by algorithm is the basis for pycrc's implementation.
 - Added a new option `--slice-by`. This option is still experimental and
   limited in its use.
@@ -23,7 +22,7 @@ For a detailled list of chages see the
 ### Changed
 - Documented the experimental `--slice-by option`.
 - Simplified the implementation where Width is less than 8 bits.
-- Run the code through pylint.
+- Run the code through `pylint`.
 - __API change__: changed the names of the member variables from `CamelCase` to the
   format suggested in `PEP 0008` (lowercase letters and words separated by
   underscore).
@@ -52,7 +51,7 @@ For a detailled list of chages see the
 - Upgraded documentation to DocBook 5.
 - Removed sourceforge mailing list from `README.md` in an effort to move pycrc
   away from sourceforge.
-- Removed the experimental --bitwise-expression option to facilitate
+- Removed the experimental `--bitwise-expression` option to facilitate
   restructuring of the code.
 - The preferred format for the input data for the Python API is now a byte
   array. But if a string is supplied it is decoded as UTF-8 string.
@@ -100,7 +99,7 @@ For a detailled list of chages see the
 ### Changed
 - Updated [qm.py from GitHub][qm github].
 - Esplicitly stated that the output of pycrc is not considered a substantial
-  part of the code of pycrc in README.md.
+  part of the code of pycrc in `README.md`.
 - Re-organised the symbol table: grouped the code by functionality, not by
   algorithm.
 - The input to the CRC routines can now be bytes or strings.
@@ -143,7 +142,7 @@ For a detailled list of chages see the
   unknown model parameter was supplied.
 - Documented the possibility to abbreviate the algorithms. Minor
   improvements in the documentation.
-- Added a note to README.md that version 0.7.10 of pycrc is the last one
+- Added a note to `README.md` that version 0.7.10 of pycrc is the last one
   known to work with Python 2.4.
 - Updated a link to the list of CRC models.
 - Renamed i`README` to `README.md`.
@@ -157,7 +156,7 @@ For a detailled list of chages see the
 - Added a test for compiled standard models.
 
 ### Fixed
-- Fixed a wrong "check" value of the `crc-64-jones` model.
+- Fixed a wrong `check` value of the `crc-64-jones` model.
 - Don't use `snprintf()` with `c89` code, changed to `sprintf()`.
 - Deleted `test.sh` shell script and replaced it with `test.py`.
 
@@ -191,7 +190,7 @@ For a detailled list of chages see the
 ## [v0.7.8] - 2011-07-10
 
 ### Changed
-- When generating C code for the C89 or ANSI standard, don't include <stdint.h>.
+- When generating C code for the C89 or ANSI standard, don't include `stdint.h`.
   This closes issue 3338930
 - If no output file name is given while generating a C file, then pycrc will
   `#include` a hypothetical `pycrc.h` file instead of a `stdout.h` file.
@@ -238,7 +237,7 @@ For a detailled list of chages see the
   that are not byte-aligned or less than 8.
   This feature was heavily inspired by a similar feature in Danjel McGougan's
   [Universal Crc][universal crc].
-- __WARNING__: introduced new variable `crc_shift`, member of the `crc_cfg_t`
+- __API change__: introduced new variable `crc_shift`, member of the `crc_cfg_t`
   structure, which must be initialised manually when the width was undefined
   during C/C++ code generation.
 - Minor code cleanup.
@@ -395,7 +394,7 @@ For a detailled list of chages see the
 ## [v0.6] - 2007-05-21
 
 ### Added
-- Added the --std option to generate C89 (ANSI) compliant code.
+- Added the `--std` option to generate C89 (ANSI) compliant code.
 - Added a new check to the test script which validate all possible
   combination of undefined parameters.
 - Made the generated main function cope with command line arguments.
@@ -411,7 +410,7 @@ For a detailled list of chages see the
   generated source code obsolete.
   Changed all command line options with underscores to hyphen (e.g.
   `table_driven` becomes `table-driven`).
-  Added the option --generate which obsoletes the old options `--generate_c`
+  Added the option `--generate` which obsoletes the old options `--generate_c`
   `--generate_h` etc.
 
 
@@ -481,6 +480,7 @@ For a detailled list of chages see the
 [v0.6]: https://github.com/tpircher/pycrc/releases/tag/v0.6
 [v0.5]: https://github.com/tpircher/pycrc/releases/tag/v0.5
 [v0.4]: https://github.com/tpircher/pycrc/releases/tag/v0.4
+[v0.3]: https://github.com/tpircher/pycrc/releases/tag/v0.3
 
 [pycrc home]: https://pycrc.org
 [pycrc github]: https://github.com/tpircher/pycrc
