@@ -1,6 +1,6 @@
 # Change Log
 All notable changes to this project will be documented in this file.
-For a detailled list of chages see the [pycrc GitHub][pycrc github] page.
+For a detailed list of changes see the [pycrc GitHub][pycrc github] page.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
