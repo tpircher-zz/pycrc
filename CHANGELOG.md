@@ -7,6 +7,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Fixed
+- New license for the documentation:
+  [Creative Commons Attribution-Share Alike 4.0 Unported License][CC-BY-SA-4.0].
 - Fixed binary files handling with Python 2.7.
   Fixes #11. Thanks to James Bowman.
 
@@ -306,7 +308,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [v0.6.6] - 2008-06-05
 
 ### Changed
-- New license:
+- New license for the documentation:
   [Creative Commons Attribution-Share Alike 3.0 Unported License][CC-BY-SA-3.0].
 
 ### Fixed
@@ -489,3 +491,4 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 [universal crc]: http://mcgougan.se/universal_crc/
 [qm github]: https://github.com/tpircher/quine-mccluskey
 [CC-BY-SA-3.0]: https://creativecommons.org/licenses/by-sa/3.0/
+[CC-BY-SA-4.0]: https://creativecommons.org/licenses/by-sa/4.0/
