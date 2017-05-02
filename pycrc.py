@@ -2,7 +2,7 @@
 
 #  pycrc -- parameterisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2015  Thomas Pircher  <tehpeh-web@tty1.net>
+#  Copyright (c) 2006-2017  Thomas Pircher  <tehpeh-web@tty1.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to
@@ -42,7 +42,7 @@ It supports the following CRC algorithms:
 from __future__ import print_function
 from crc_opt import Options
 from crc_algorithms import Crc
-from crc_parser import MacroParser
+import crc_codegen as cg
 import binascii
 import sys
 
@@ -53,18 +53,7 @@ def print_parameters(opt):
     """
     Generate a string with the options pretty-printed (used in the --verbose mode).
     """
-    in_str = ""
-    in_str += "Width        = $crc_width\n"
-    in_str += "Poly         = $crc_poly\n"
-    in_str += "ReflectIn    = $crc_reflect_in\n"
-    in_str += "XorIn        = $crc_xor_in\n"
-    in_str += "ReflectOut   = $crc_reflect_out\n"
-    in_str += "XorOut       = $crc_xor_out\n"
-    in_str += "Algorithm    = $crc_algorithm\n"
-
-    parser = MacroParser(opt)
-    parser.parse(in_str)
-    return parser.out_str
+    return str(cg.ParamBlock(opt, ''))
 
 
 # function check_string
@@ -240,7 +229,6 @@ def main():
     if opt.action in set([
             opt.action_generate_h, opt.action_generate_c, opt.action_generate_c_main,
             opt.action_generate_table]):
-        parser = MacroParser(opt)
         if opt.action == opt.action_generate_h:
             in_str = "$h_template"
         elif opt.action == opt.action_generate_c:
@@ -253,11 +241,11 @@ def main():
             sys.stderr.write(
                 "{0:s}: error: unknown action. Please file a bug report!\n".format(sys.argv[0]))
             sys.exit(1)
-        parser.parse(in_str)
+        out = str(cg.File(opt, ''))
         if opt.output_file == None:
-            print(parser.out_str)
+            print(out)
         else:
-            write_file(opt.output_file, parser.out_str)
+            write_file(opt.output_file, out)
     return 0
 
 

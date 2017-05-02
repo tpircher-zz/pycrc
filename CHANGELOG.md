@@ -6,6 +6,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 ## [Unreleased]
+### Changed
+- Completely rewritten the code generator back-end. The new back-end is more
+  flexible and allows for a better optimisation of the generated expressions.
+
 ### Fixed
 - New license for the documentation:
   [Creative Commons Attribution-Share Alike 4.0 Unported License][CC-BY-SA-4.0].
