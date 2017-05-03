@@ -30,8 +30,6 @@ This modules simplifies an expression.
     print('"{}" -> "{}"'.format(expr, expr.simplify()))
 """
 
-DELETEME_no_simplify = True     # TODO delete
-#DELETEME_no_simplify = False     # TODO delete
 
 def _classify(val):
     """
@@ -114,7 +112,6 @@ class FunctionCall(Expression):
         """
         Return a simplified version of this sub-expression.
         """
-        if DELETEME_no_simplify: return self
         args = [arg.simplify() for arg in self.args]
         return FunctionCall(self.name, args)
 
@@ -133,7 +130,6 @@ class Parenthesis(Expression):
         """
         Return a simplified version of this sub-expression.
         """
-        if DELETEME_no_simplify: return self
         val = self.val.simplify()
         if type(val) is Terminal:
             return val
@@ -161,7 +157,6 @@ class Add(Expression):
         """
         Return a simplified version of this sub-expression.
         """
-        if DELETEME_no_simplify: return self
         lhs = self.lhs.simplify()
         rhs = self.rhs.simplify()
         if lhs.is_int() and rhs.is_int():
@@ -194,7 +189,6 @@ class Sub(Expression):
         """
         Return a simplified version of this sub-expression.
         """
-        if DELETEME_no_simplify: return self
         lhs = self.lhs.simplify()
         rhs = self.rhs.simplify()
         if lhs.is_int() and rhs.is_int():
@@ -227,7 +221,6 @@ class Mul(Expression):
         """
         Return a simplified version of this sub-expression.
         """
-        if DELETEME_no_simplify: return self
         lhs = self.lhs.simplify()
         rhs = self.rhs.simplify()
         if lhs.is_int() and rhs.is_int():
@@ -262,7 +255,6 @@ class Shl(Expression):
         """
         Return a simplified version of this sub-expression.
         """
-        if DELETEME_no_simplify: return self
         lhs = self.lhs.simplify()
         rhs = self.rhs.simplify()
         if lhs.is_int() and rhs.is_int():
@@ -295,7 +287,6 @@ class Shr(Expression):
         """
         Return a simplified version of this sub-expression.
         """
-        if DELETEME_no_simplify: return self
         lhs = self.lhs.simplify()
         rhs = self.rhs.simplify()
         if lhs.is_int() and rhs.is_int():
@@ -328,7 +319,6 @@ class Or(Expression):
         """
         Return a simplified version of this sub-expression.
         """
-        if DELETEME_no_simplify: return self
         lhs = self.lhs.simplify()
         rhs = self.rhs.simplify()
         if lhs.is_int() and rhs.is_int():
@@ -361,7 +351,6 @@ class And(Expression):
         """
         Return a simplified version of this sub-expression.
         """
-        if DELETEME_no_simplify: return self
         lhs = self.lhs.simplify()
         rhs = self.rhs.simplify()
         if lhs.is_int() and rhs.is_int():
@@ -392,7 +381,6 @@ class Xor(Expression):
         """
         Return a simplified version of this sub-expression.
         """
-        if DELETEME_no_simplify: return self
         lhs = self.lhs.simplify()
         rhs = self.rhs.simplify()
         if lhs.is_int() and rhs.is_int():

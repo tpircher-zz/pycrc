@@ -45,16 +45,12 @@ This is an example use of the different algorithms:
 >>> print("{0:#x}".format(crc.table_driven("123456789")))
 """
 
-# Class Crc
-###############################################################################
 class Crc(object):
     """
     A base class for CRC routines.
     """
     # pylint: disable=too-many-instance-attributes
 
-    # Class constructor
-    ###############################################################################
     def __init__(self, width, poly, reflect_in, xor_in, reflect_out, xor_out, table_idx_width=None, slice_by=1):
         """The Crc constructor.
 
@@ -93,8 +89,6 @@ class Crc(object):
             self.crc_shift = 0
 
 
-    # function __get_nondirect_init
-    ###############################################################################
     def __get_nondirect_init(self, init):
         """
         return the non-direct init if the direct algorithm has been selected.
@@ -110,8 +104,6 @@ class Crc(object):
         return crc & self.mask
 
 
-    # function reflect
-    ###############################################################################
     def reflect(self, data, width):
         """
         reflect a data word, i.e. reverts the bit order.
@@ -125,8 +117,6 @@ class Crc(object):
         return res
 
 
-    # function bit_by_bit
-    ###############################################################################
     def bit_by_bit(self, in_data):
         """
         Classic simple and slow CRC implementation.  This function iterates bit
@@ -158,8 +148,6 @@ class Crc(object):
         return (reg ^ self.xor_out) & self.mask
 
 
-    # function bit_by_bit_fast
-    ###############################################################################
     def bit_by_bit_fast(self, in_data):
         """
         This is a slightly modified version of the bit-by-bit algorithm: it
@@ -187,8 +175,6 @@ class Crc(object):
         return reg ^ self.xor_out
 
 
-    # function gen_table
-    ###############################################################################
     def gen_table(self):
         """
         This function generates the CRC table used for the table_driven CRC
@@ -218,8 +204,6 @@ class Crc(object):
         return tbl
 
 
-    # function table_driven
-    ###############################################################################
     def table_driven(self, in_data):
         """
         The Standard table_driven CRC algorithm.

@@ -1,6 +1,6 @@
 #  pycrc -- parameterisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2015  Thomas Pircher  <tehpeh-web@tty1.net>
+#  Copyright (c) 2006-2017  Thomas Pircher  <tehpeh-web@tty1.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to
@@ -26,27 +26,25 @@ Collection of CRC models. This module contains the CRC models known to pycrc.
 
 To print the parameters of a particular model:
 
-    from crc_models import CrcModels
+    import crc_models
 
-    models = CrcModels()
-    print(models.get_list())
+    models = crc_models.CrcModels()
+    print(", ".join(models.names()))
     m = models.get_params("crc-32")
     if m != None:
-       print("Width:        {0:d}".format(m['width']))
-       print("Poly:         {0:#x}".format(m['poly']))
-       print("ReflectIn:    {0}".format(m['reflect_in']))
-       print("XorIn:        {0:#x}".format(m['xor_in']))
-       print("ReflectOut:   {0}".format(m['reflect_out']))
-       print("XorOut:       {0:#x}".format(m['xor_out']))
-       print("Check:        {0:#x}".format(m['check']))
+       print("Width:        {width:d}".format(**m))
+       print("Poly:         {poly:#x}".format(**m))
+       print("ReflectIn:    {reflect_in}".format(**m))
+       print("XorIn:        {xor_in:#x}".format(**m))
+       print("ReflectOut:   {reflect_out}".format(**m))
+       print("XorOut:       {xor_out:#x}".format(**m))
+       print("Check:        {check:#x}".format(**m))
     else:
        print("model not found.")
 """
 
 
 
-# Class CrcModels
-###############################################################################
 class CrcModels(object):
     """
     CRC Models.
@@ -318,20 +316,13 @@ class CrcModels(object):
     })
 
 
-    # function get_list
-    ###############################################################################
-    def get_list(self):
+    def names(self):
         """
         This function returns the list of supported CRC models.
         """
-        models = []
-        for i in self.models:
-            models.append(i['name'])
-        return models
+        return [model['name'] for model in self.models]
 
 
-    # function get_params
-    ###############################################################################
     def get_params(self, model):
         """
         This function returns the parameters of a given model.

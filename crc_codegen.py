@@ -33,7 +33,6 @@ use as follows:
         '}',
         ]))
 """
-# TODO document parameters as [in] and [out].
 
 import crc_symtable
 import crc_expr
@@ -115,7 +114,7 @@ class Comment(CodeGen):
         self.content = [
                 '/**',
                 CodeGen(opt, indent + ' * ', content),
-                ' *****************************************************************************/'   # TODO is this ascii-art really useful?
+                ' */'
                 ]
 
 
@@ -131,9 +130,9 @@ class ParamBlock(CodeGen):
         self.content = [
                 '{:13s} = {}'.format('Width', self.sym['crc_width']),
                 '{:13s} = {}'.format('Poly', self.sym['crc_poly']),
-                '{:13s} = {}'.format('Xor_In', self.sym['crc_xor_in']),                 # TODO s/Xor_/Xor/
+                '{:13s} = {}'.format('XorIn', self.sym['crc_xor_in']),
                 '{:13s} = {}'.format('ReflectIn', self.sym['crc_reflect_in']),
-                '{:13s} = {}'.format('Xor_Out', self.sym['crc_xor_out']),                 # TODO s/Xor_/Xor/
+                '{:13s} = {}'.format('XorOut', self.sym['crc_xor_out']),
                 '{:13s} = {}'.format('ReflectOut', self.sym['crc_reflect_out']),
                 Conditional(opt, '', algorithm,
                     ['{:13s} = {}'.format('Algorithm', self.sym['crc_algorithm'])]),
@@ -157,7 +156,7 @@ class File(CodeGen):
                     '\\file {filename}'.format(**self.sym),
                     'Functions and types for CRC checks.',
                     '',
-                    'Generated on {datetime},'.format(**self.sym),      # TODO delete the comma
+                    'Generated on {datetime}'.format(**self.sym),
                     'by {program_version}, {program_url}'.format(**self.sym),
                     'using the configuration:',
                     ParamBlock(opt, '   ', algorithm = True)
@@ -193,7 +192,7 @@ class File(CodeGen):
                     'The definition of the used algorithm.',
                     '',
                     'This is not used anywhere in the generated code, but it may be used by the',
-                    'application code to call algoritm-specific code, is desired.'          # TODO s/is/if/; s/algoritm/algorithm/g
+                    'application code to call algorithm-specific code, if desired.',
                     ]),
                 '#define {} 1'.format(_crc_algo_define(self.opt, self.sym)),
                 '', '',
@@ -207,24 +206,23 @@ class File(CodeGen):
                     '', '',
                     Comment(self.opt, self.indent, ['The configuration type of the CRC algorithm.']),
                     'typedef struct {',
-                    # TODO increase the distance  s/20/24/
                     Conditional(self.opt, 4*' ', self.opt.width is None,
-                        ['{:20s}    {}'.format('unsigned int width;',
+                        ['{:24s}    {}'.format('unsigned int width;',
                             '/*!< The width of the polynomial */')]),
                     Conditional(self.opt, 4*' ', self.opt.poly is None,
-                        ['{:20s}    {}'.format(self.sym['crc_t'] + ' poly;',
+                        ['{:24s}    {}'.format(self.sym['crc_t'] + ' poly;',
                             '/*!< The CRC polynomial */')]),
                     Conditional(self.opt, 4*' ', self.opt.reflect_in is None,
-                        ['{:20s}    {}'.format(self.sym['c_bool'] + ' reflect_in;',
-                            ' /*!< Whether the input shall be reflected or not */')]),      # TODO s/^ //
+                        ['{:24s}    {}'.format(self.sym['c_bool'] + ' reflect_in;',
+                            '/*!< Whether the input shall be reflected or not */')]),
                     Conditional(self.opt, 4*' ', self.opt.xor_in is None,
-                        ['{:20s}    {}'.format(self.sym['crc_t'] + ' xor_in;',
-                            '/*!< The initial value of the algorithm */')]),    # TODO s/algorithm/register/
+                        ['{:24s}    {}'.format(self.sym['crc_t'] + ' xor_in;',
+                            '/*!< The initial value of the register */')]),
                     Conditional(self.opt, 4*' ', self.opt.reflect_out is None,
-                        ['{:20s}    {}'.format(self.sym['c_bool'] + ' reflect_out;',
-                            ' /*!< Wether the output shall be reflected or not */')]),   # TODO s/Wether/Whether/; s/^ //
+                        ['{:24s}    {}'.format(self.sym['c_bool'] + ' reflect_out;',
+                            '/*!< Whether the output shall be reflected or not */')]),
                     Conditional(self.opt, 4*' ', self.opt.xor_out is None,
-                        ['{:20s}    {}'.format(self.sym['crc_t'] + ' xor_out;',
+                        ['{:24s}    {}'.format(self.sym['crc_t'] + ' xor_out;',
                             '/*!< The value which shall be XOR-ed to the final CRC value */')]),
                     Conditional(self.opt, 4*' ', self.opt.width is None, [
                         '',
@@ -243,8 +241,8 @@ class File(CodeGen):
                     Comment(self.opt, '', [
                         'Reflect all bits of a \\a data word of \\a data_len bytes.',
                         '',
-                        '\\param data         The data word to be reflected.',
-                        '\\param data_len     The width of \\a data expressed in number of bits.',
+                        '\\param[in] data     The data word to be reflected.',
+                        '\\param[in] data_len The width of \\a data expressed in number of bits.',
                         '\\return             The reflected data.'
                         ]),
                     '{crc_t} {crc_reflect_function}({crc_t} data, size_t data_len);'.format(**self.sym),
@@ -254,8 +252,7 @@ class File(CodeGen):
                     Comment(self.opt, '', [
                         'Populate the private static crc table.',
                         '',
-                        '\\param cfg  A pointer to a initialised {cfg_t} structure.'.format(**self.sym),    # TODO s/to a/to an/
-                        '\\return     void',    # TODO delete this nonsense
+                        '\\param[in] cfg  A pointer to an initialised {cfg_t} structure.'.format(**self.sym),
                         ]),
                     'void {crc_table_gen_function}(const {cfg_t} *cfg);'.format(**self.sym),
                     ]),
@@ -264,7 +261,7 @@ class File(CodeGen):
                     'Calculate the initial crc value.',
                     '',
                     Conditional(self.opt, '', _use_cfg(self.opt), [
-                        '\\param cfg  A pointer to a initialised {cfg_t} structure.'.format(**self.sym),    # TODO s/to a/to an/
+                        '\\param[in] cfg  A pointer to an initialised {cfg_t} structure.'.format(**self.sym),
                         ]),
                     '\\return     The initial crc value.',
                     ]),
@@ -284,23 +281,23 @@ class File(CodeGen):
                 Comment(self.opt, '', [
                     'Update the crc value with new data.',
                     '',
-                    '\\param crc      The current crc value.',
-                    Conditional(self.opt, '', not _use_simple_crc_update_def(self.opt), [
-                        '\\param cfg      A pointer to a initialised {cfg_t} structure.'.format(**self.sym),        # TODO s/to a/to an/
+                    '\\param[in] crc      The current crc value.',
+                    Conditional(self.opt, '', not _use_cfg_in_crc_update(self.opt), [
+                        '\\param[in] cfg      A pointer to an initialised {cfg_t} structure.'.format(**self.sym),
                         ]),
-                    '\\param data     Pointer to a buffer of \\a data_len bytes.',
-                    '\\param data_len Number of bytes in the \\a data buffer.',
-                    '\\return         The updated crc value.',
+                    '\\param[in] data     Pointer to a buffer of \\a data_len bytes.',
+                    '\\param[in] data_len Number of bytes in the \\a data buffer.',
+                    '\\return             The updated crc value.',
                     ]),
                 '{};'.format(_crc_update_function_def(self.opt, self.sym)),
                 '', '',
                 Comment(self.opt, '', [
                     'Calculate the final crc value.',
                     '',
-                    Conditional(self.opt, '', not _use_simple_crc_finalize_def(self.opt), [
-                        '\\param cfg  A pointer to a initialised {cfg_t} structure.'.format(**self.sym),    # TODO s/to a/to an/
+                    Conditional(self.opt, '', not _use_cfg_in_finalize(self.opt), [
+                        '\\param[in] cfg  A pointer to an initialised {cfg_t} structure.'.format(**self.sym),
                         ]),
-                    '\\param crc  The current crc value.',
+                    '\\param[in] crc  The current crc value.',
                     '\\return     The final crc value.',
                     ]),
                 Conditional2(self.opt, '', _use_inline_crc_finalize(self.opt), [
@@ -321,7 +318,7 @@ class File(CodeGen):
                 '#endif',
                 '',
                 '#endif      /* {header_protection} */'.format(**self.sym),
-                '',         # TODO: delete this line
+                '',
                 ]
         return out
 
@@ -344,21 +341,17 @@ class File(CodeGen):
                 Conditional(self.opt, '', self.opt.slice_by > 1, [
                     '#include <endian.h>',
                     ]),
-                '', # TODO delete this
                 Conditional(self.opt, '', _use_reflect_func(self.opt) and _use_static_reflect_func(self.opt), [
-                    #'', # TODO re-introduce this
+                    '',
                     'static {crc_t} {crc_reflect_function}({crc_t} data, size_t data_len);'.format(**self.sym),
-                    '', # TODO delete this
                     ]),
-                #'', TODO re-introduce this
+                '',
                 CodeGen(self.opt, '', _crc_table(self.opt, self.sym)),
                 CodeGen(self.opt, '', _crc_reflect_function_gen(self.opt, self.sym)),
                 CodeGen(self.opt, '', _crc_init_function_gen(self.opt, self.sym)),
                 CodeGen(self.opt, '', _crc_table_gen(self.opt, self.sym)),
                 CodeGen(self.opt, '', _crc_update_function_gen(self.opt, self.sym)),
                 CodeGen(self.opt, '', _crc_finalize_function_gen(self.opt, self.sym)),
-                '', # TODO delete this
-                '', # TODO delete this
                 '',
                 ]
         return out
@@ -385,18 +378,13 @@ class File(CodeGen):
                 '',
                 'static char str[256] = "123456789";',
                 'static {c_bool} verbose = {c_false};'.format(**self.sym),
-                '',
-                Conditional2(self.opt, '', self.opt.undefined_crc_parameters, [ # TODO make static and delete this
-                    'void print_params(const {cfg_t} *cfg);'.format(**self.sym),
-                    ], [
-                    'void print_params(void);',
-                    ]),
                 self._getopt_template(),
                 '',
+                '',
                 Conditional2(self.opt, '', self.opt.undefined_crc_parameters, [
-                    'void print_params(const {cfg_t} *cfg)'.format(**self.sym),
+                    'static void print_params(const {cfg_t} *cfg)'.format(**self.sym),
                     ], [
-                    'void print_params(void)',
+                    'static void print_params(void)',
                     ]),
                 '{',
                 CodeGen(self.opt, 4*' ', [
@@ -426,10 +414,13 @@ class File(CodeGen):
                     ]),
                 '}',
                 '',
+                '',
                 Comment(self.opt, '', [
                     'C main function.',
-                    '',     # TODO document argc and argv
-                    '\\return     0 on success, != 0 on error.',
+                    '\\param[in] argc the number of arguments in \\a argv.',
+                    '\\param[in] argv a NULL-terminated array of pointers to the argument strings.',
+                    '\\retval 0 on success.',
+                    '\\retval >0 on error.',
                     ]),
                 'int main(int argc, char *argv[])',
                 '{',
@@ -473,8 +464,8 @@ class File(CodeGen):
                         '{crc_table_gen_function}(&cfg);'.format(**self.sym),
                         ]),
                     'crc = {}({});'.format(self.sym['crc_init_function'], '' if _use_constant_crc_init(self.sym) else '&cfg'),
-                    'crc = {}({}crc, (void *)str, strlen(str));'.format(self.sym['crc_update_function'], '' if _use_simple_crc_update_def(self.opt) else '&cfg, '),
-                    'crc = {}({}crc);'.format(self.sym['crc_finalize_function'], '' if _use_simple_crc_finalize_def(self.opt) else '&cfg, '),
+                    'crc = {}({}crc, (void *)str, strlen(str));'.format(self.sym['crc_update_function'], '' if _use_cfg_in_crc_update(self.opt) else '&cfg, '),
+                    'crc = {}({}crc);'.format(self.sym['crc_finalize_function'], '' if _use_cfg_in_finalize(self.opt) else '&cfg, '),
                     '',
                     'if (verbose) {',
                     CodeGen(self.opt, 4*' ', [
@@ -498,16 +489,9 @@ class File(CodeGen):
         """
         out = [
                 Conditional(self.opt, '', self.opt.reflect_in is None or self.opt.reflect_out is None, [
-                    'static {c_bool} atob(const char *str);'.format(**self.sym),    # TODO only the definition for static  functions
-                    ]),
-                Conditional(self.opt, '', self.opt.poly is None or self.opt.xor_in is None or self.opt.xor_out is None, [
-                    'static crc_t xtoi(const char *str);',
-                    ]),
-                'static int get_config(int argc, char *argv[]{});'.format(', '+self.sym['cfg_t']+' *cfg' if self.opt.undefined_crc_parameters else ''),
-                Conditional(self.opt, '', self.opt.reflect_in is None or self.opt.reflect_out is None, [
                     '',
                     '',
-                    '{c_bool} atob(const char *str)'.format(**self.sym),
+                    'static {c_bool} atob(const char *str)'.format(**self.sym),
                     '{',
                     CodeGen(self.opt, 4*' ', [
                         'if (!str) {',
@@ -532,7 +516,7 @@ class File(CodeGen):
                 Conditional(self.opt, '', self.opt.poly is None or self.opt.xor_in is None or self.opt.xor_out is None, [
                     '',
                     '',
-                    'crc_t xtoi(const char *str)',
+                    'static crc_t xtoi(const char *str)',
                     '{',
                     CodeGen(self.opt, 4*' ', [
                         'crc_t ret = 0;',
@@ -644,7 +628,7 @@ class File(CodeGen):
                                         'printf(" with arg %s", optarg);',
                                         ]),
                                     'printf("\\n");',
-                                    # TODO: add break?
+                                    'break;',
                                     ]),
                                 Conditional(self.opt, '', self.opt.width is None, [
                                     'case \'w\':',
@@ -779,7 +763,6 @@ def _use_constant_crc_init(sym):
     """
     Return True if the inintial value is constant.
     """
-    # TODO implement crc_init_value as expression
     return sym['crc_init_value'] is not None
 
 
@@ -837,7 +820,7 @@ def _crc_init_function_def(opt, sym):
         return '{crc_t} {crc_init_function}(const {cfg_t} *cfg)'.format(**sym)
 
 
-def _use_simple_crc_update_def(opt):    # TODO: s/_use_simple_crc_update_def/_use_cfg_in_crc_update/
+def _use_cfg_in_crc_update(opt):
     """
     Return True if the update function uses the cfg_t parameter.
     """
@@ -854,13 +837,13 @@ def _crc_update_function_def(opt, sym):
     """
     The definition of the update function.
     """
-    if _use_simple_crc_update_def(opt):
+    if _use_cfg_in_crc_update(opt):
         return '{crc_t} {crc_update_function}({crc_t} crc, const void *data, size_t data_len)'.format(**sym)
     else:
         return '{crc_t} {crc_update_function}(const {cfg_t} *cfg, {crc_t} crc, const void *data, size_t data_len)'.format(**sym)
 
 
-def _use_simple_crc_finalize_def(opt):    # TODO: s/_use_simple_crc_finalize_def/_use_cfg_in_finalize/
+def _use_cfg_in_finalize(opt):
     """
     Return True if the cfg_t parameter is used in the finalize function.
     """
@@ -901,7 +884,7 @@ def _crc_finalize_function_def(opt, sym):
     """
     The definition of the finalize function.
     """
-    if _use_simple_crc_finalize_def(opt):
+    if _use_cfg_in_finalize(opt):
         return '{crc_t} {crc_finalize_function}({crc_t} crc)'.format(**sym)
     else:
         return '{crc_t} {crc_finalize_function}(const {cfg_t} *cfg, {crc_t} crc)'.format(**sym)
@@ -911,7 +894,6 @@ def _crc_final_value(opt, sym):
     """
     The return value for the finalize function.
     """
-    # TODO simplify this function
     if opt.algorithm == opt.algo_table_driven:
         if opt.reflect_in == opt.reflect_out:
             return crc_expr.Xor('crc', sym['crc_xor_out']).simplify()
@@ -936,7 +918,7 @@ def _crc_table(opt, sym):
             Comment(opt, '', [
                 'Static table used for the table_driven implementation.',
                 Conditional(opt, '', opt.undefined_crc_parameters, [
-                    'Must be initialised with the {crc_init_function} function.'.format(**sym),     # TODO this should be crc_table_driven_func_gen
+                    'Must be initialised with the {crc_table_gen_function} function.'.format(**sym),
                     ]),
                 ]),
             Conditional2(opt, '', _use_constant_crc_table(opt), [
@@ -958,7 +940,6 @@ def _crc_table_gen(opt, sym):
     if opt.algorithm != opt.algo_table_driven or _use_constant_crc_table(opt):
         return []
     return [
-            # TODO change expression strings to a optimisable expressions
             '', '',
             'void {crc_table_gen_function}(const {cfg_t} *cfg)'.format(**sym),
             '{',
@@ -990,7 +971,7 @@ def _crc_table_gen(opt, sym):
                         CodeGen(opt, 4*' ', [
                             'if (crc & {cfg_msb_mask_shifted}) '.format(**sym) + '{',
                             CodeGen(opt, 4*' ', [
-                                'crc = {};'.format(crc_expr.Xor(crc_expr.Parenthesis('crc << 1'), sym['cfg_poly_shifted']).simplify()),
+                                'crc = {};'.format(crc_expr.Xor(crc_expr.Parenthesis(crc_expr.Shl('crc', 1)), sym['cfg_poly_shifted']).simplify()),
                                 ]),
                             '} else {',
                             CodeGen(opt, 4*' ', [
@@ -1002,7 +983,7 @@ def _crc_table_gen(opt, sym):
                         Conditional(opt, '', opt.reflect_in is None, [
                             'if (cfg->reflect_in) {',
                             Conditional2(opt, 4*' ', sym.tbl_shift is None or sym.tbl_shift > 0, [
-                                'crc = {crc_reflect_function}(crc >> {cfg_shift}, {cfg_width}) << {cfg_shift};'.format(**sym),
+                                'crc = {};'.format(crc_expr.Shl(crc_expr.FunctionCall(sym['crc_reflect_function'], [crc_expr.Shr('crc', sym['cfg_shift']), sym['cfg_width']]), sym['cfg_shift']).simplify()),
                                 ], [
                                 'crc = {crc_reflect_function}(crc, {cfg_width});'.format(**sym),
                                 ]),
@@ -1010,12 +991,12 @@ def _crc_table_gen(opt, sym):
                             ]),
                         Conditional(opt, '', opt.reflect_in, [
                             Conditional2(opt, 4*' ', sym.tbl_shift is None or sym.tbl_shift > 0, [
-                                'crc = {crc_reflect_function}(crc >> {cfg_shift}, {cfg_width}) << {cfg_shift};'.format(**sym),
+                                'crc = {};'.format(crc_expr.Shl(crc_expr.FunctionCall(sym['crc_reflect_function'], [crc_expr.Shr('crc', sym['cfg_shift']), sym['cfg_width']]), sym['cfg_shift']).simplify()),
                                 ], [
                                 'crc = {crc_reflect_function}(crc, {cfg_width});'.format(**sym),
                                 ]),
                             ]),
-                        'crc_table[i] = (crc & {cfg_mask_shifted}) >> {cfg_shift};'.format(**sym),
+                        'crc_table[i] = {};'.format(crc_expr.Shr(crc_expr.Parenthesis(crc_expr.And('crc', sym['cfg_mask_shifted'])), sym['cfg_shift'])),
                         ]),
                     '}',
                 ]),
@@ -1033,14 +1014,7 @@ def _crc_reflect_function_gen(opt, sym):
             opt.reflect_out is None or opt.reflect_out):
         return []
     return [
-            '',
-            Comment(opt, '', [  # TODO: does this need to be documented twice?
-                'Reflect all bits of a \\a data word of \\a data_len bytes.',
-                '',
-                '\\param data         The data word to be reflected.',
-                '\\param data_len     The width of \\a data expressed in number of bits.',
-                '\\return             The reflected data.'
-                ]),
+            '', '',
             '{crc_t} {crc_reflect_function}({crc_t} data, size_t data_len)'.format(**sym),
             '{',
             CodeGen(opt, 4*' ', [
@@ -1057,7 +1031,6 @@ def _crc_reflect_function_gen(opt, sym):
                 'return ret;',
                 ]),
             '}',
-            '', # TODO delete this
             ]
 
 
@@ -1068,14 +1041,7 @@ def _crc_init_function_gen(opt, sym):
     if _use_constant_crc_init(sym):
         return []
     out = [
-            Comment(opt, '', [  # TODO documenting once is enough
-                'Calculate the initial crc value.',
-                '',
-                Conditional(opt, '', _use_cfg(opt), [
-                    '\\param cfg  A pointer to a initialised {cfg_t} structure.'.format(**sym),    # TODO s/to a/to an/
-                    ]),
-                '\\return     The initial crc value.',
-                ]),
+            '', '',
             _crc_init_function_def(opt, sym),
             '{',
             CodeGen(opt, 4*' ', [
@@ -1132,19 +1098,7 @@ def _crc_update_function_gen(opt, sym):
     Return the code for the update function.
     """
     out = [
-            #'', '',   # TODO re-iintroduce this
-            '', # TODO delete this
-            Comment(opt, '', [      # TODO: does this need to be documented twice?
-                'Update the crc value with new data.',
-                '',
-                '\\param crc      The current crc value.',
-                Conditional(opt, '', not _use_simple_crc_update_def(opt), [
-                    '\\param cfg      A pointer to a initialised {cfg_t} structure.'.format(**sym),        # TODO s/to a/to an/
-                    ]),
-                '\\param data     Pointer to a buffer of \\a data_len bytes.',
-                '\\param data_len Number of bytes in the \\a data buffer.',
-                '\\return         The updated crc value.',
-                ]),
+            '', '',
             _crc_update_function_def(opt, sym),
             '{',
             CodeGen(opt, 4*' ', [ 'const unsigned char *d = (const unsigned char *)data;' ]),
@@ -1287,7 +1241,6 @@ def _crc_update_function_gen(opt, sym):
                                     ], [
                                     _crc_table_core_algorithm_nonreflected(opt, sym),
                                     ]),
-                                '',     # TODO delete this
                                 'd++;',
                                 ]),
                             '}',
@@ -1310,18 +1263,9 @@ def _crc_finalize_function_gen(opt, sym):
         return []
     out = [
             '', '',
-            Comment(opt, '', [
-                'Calculate the final crc value.',
-                '',
-                Conditional(opt, '', not _use_simple_crc_finalize_def(opt), [
-                    '\\param cfg  A pointer to a initialised {cfg_t} structure.'.format(**sym),    # TODO s/to a/to an/
-                    ]),
-                '\\param crc  The current crc value.',
-                '\\return     The final crc value.',
-                ]),
-                _crc_finalize_function_def(opt, sym),
-                '{',
-                ]
+            _crc_finalize_function_def(opt, sym),
+            '{',
+            ]
     if opt.algorithm in set([opt.algo_bit_by_bit, opt.algo_bit_by_bit_fast]):
         out += [
                 Conditional(opt, 4*' ', opt.algorithm == opt.algo_bit_by_bit, [
@@ -1335,7 +1279,7 @@ def _crc_finalize_function_gen(opt, sym):
                             ], [
                             'bit = crc & {cfg_msb_mask};'.format(**sym),
                             ]),
-                        'crc = (crc << 1) | 0x00;',      # TODO simplify this expression
+                        'crc <<= 1;',
                         'if (bit) {',
                         CodeGen(opt, 4*' ', [
                             'crc ^= {cfg_poly};'.format(**sym),
@@ -1372,7 +1316,7 @@ def _crc_finalize_function_gen(opt, sym):
     if opt.algorithm == opt.algo_table_driven:
         if opt.reflect_in is None or opt.reflect_out is None:
             if opt.reflect_in is None and opt.reflect_out is None:
-                cond = 'cfg->reflect_in == !cfg->reflect_out'           # TODO s/== !/!=/
+                cond = 'cfg->reflect_in != cfg->reflect_out'
             elif opt.reflect_out is None:
                 cond = '!' if opt.reflect_in else '' + 'cfg->reflect_out'
             else:
@@ -1404,9 +1348,9 @@ def _crc_table_core_algorithm_reflected(opt, sym):
     """
     out = []
     if opt.width is not None and opt.tbl_idx_width is not None and opt.width <= opt.tbl_idx_width:
-        crc_xor_expr = ''
+        crc_xor_expr = '0'
     else:
-        crc_xor_expr = ' ^ (crc >> {cfg_table_idx_width})'.format(**sym)    # TODO express as an expr
+        crc_xor_expr = '(crc >> {cfg_table_idx_width})'.format(**sym)
 
     if opt.tbl_idx_width == 8:
         if opt.slice_by > 1:
@@ -1417,20 +1361,16 @@ def _crc_table_core_algorithm_reflected(opt, sym):
                 Conditional2(opt, '', opt.width is None or opt.width > 8, [
                     'tbl_idx = (crc ^ *d) & {crc_table_mask};'.format(**sym),
                     ], [
-                    'tbl_idx = (crc ^ *d);',    # TODO remove the brackets
+                    'tbl_idx = crc ^ *d;',
                     ]),
-                    Conditional2(opt, '', opt.width is not None and opt.tbl_idx_width is not None and opt.width <= opt.tbl_idx_width, [  # TODO replace with the long epression and let the siimlpifier do it's magic
-                        'crc = {};'.format(crc_expr.And(crc_expr.Parenthesis(crc_lookup), sym['cfg_mask']).simplify()),
-                    ], [
-                        'crc = {};'.format(crc_expr.And(crc_expr.Parenthesis(crc_expr.Xor(crc_lookup, crc_expr.Parenthesis(crc_expr.Shr('crc', sym['cfg_table_idx_width'])))), sym['cfg_mask']).simplify()),
-                    ]),
+                    'crc = {};'.format(crc_expr.And(crc_expr.Parenthesis(crc_expr.Xor(crc_lookup, crc_expr.Parenthesis(crc_expr.Shr('crc', sym['cfg_table_idx_width'])))), sym['cfg_mask']).simplify()),
                 ]
     else:
         crc_lookup = 'crc_table[tbl_idx & {crc_table_mask}]'.format(**sym)
         for i in range(8 // opt.tbl_idx_width):
             out += [
                 'tbl_idx = {};'.format(crc_expr.Xor('crc', crc_expr.Parenthesis(crc_expr.Shr('*d', crc_expr.Parenthesis(crc_expr.Mul(i, sym['cfg_table_idx_width']))))).simplify()),
-                'crc = ' + crc_lookup + crc_xor_expr + ';',
+                'crc = {};'.format(crc_expr.Xor(crc_lookup, crc_xor_expr).simplify())
                 ]
     return CodeGen(opt, '', out)
 
@@ -1449,15 +1389,12 @@ def _crc_table_core_algorithm_nonreflected(opt, sym):
             crc_shifted_right = crc_expr.Parenthesis(crc_expr.Shr('crc', shift_val)).simplify()
     else:
         shift_val = opt.width - opt.tbl_idx_width
-        if shift_val == 0:  # TODO replace the whole if-else with the else branch
-            crc_shifted_right = 'crc'
-        else:
-            crc_shifted_right = crc_expr.Parenthesis(crc_expr.Shr('crc', shift_val)).simplify()
+        crc_shifted_right = crc_expr.Parenthesis(crc_expr.Shr('crc', shift_val)).simplify()
 
     if opt.width is not None and opt.tbl_idx_width is not None and opt.width <= opt.tbl_idx_width:
-        crc_xor_expr = ''
+        crc_xor_expr = '0'
     else:
-        crc_xor_expr = ' ^ (crc << {cfg_table_idx_width})'.format(**sym)
+        crc_xor_expr = '(crc << {cfg_table_idx_width})'.format(**sym)
 
     if opt.tbl_idx_width == 8:
         if opt.slice_by > 1:
@@ -1468,9 +1405,9 @@ def _crc_table_core_algorithm_nonreflected(opt, sym):
                 Conditional2(opt, '', opt.width is None or opt.width > 8, [
                     'tbl_idx = {};'.format(crc_expr.And(crc_expr.Parenthesis(crc_expr.Xor(crc_shifted_right, '*d')), sym['crc_table_mask']).simplify())
                     ], [
-                    'tbl_idx = {};'.format(crc_expr.Parenthesis(crc_expr.Xor(crc_shifted_right, '*d')).simplify())  # TODO remove the parenthesis
+                    'tbl_idx = {};'.format(crc_expr.Xor(crc_shifted_right, '*d').simplify())
                     ]),
-                    'crc = {};'.format(crc_expr.And(crc_expr.Parenthesis(crc_lookup + crc_xor_expr), sym['cfg_mask']).simplify())
+                    'crc = {};'.format(crc_expr.And(crc_expr.Parenthesis(crc_expr.Xor(crc_lookup, crc_xor_expr)), sym['cfg_mask']).simplify())
                 ]
     else:
         crc_lookup = 'crc_table[tbl_idx & {crc_table_mask}]'.format(**sym)
@@ -1478,7 +1415,7 @@ def _crc_table_core_algorithm_nonreflected(opt, sym):
             str_idx = '{0:d}'.format(8 - (i + 1) * opt.tbl_idx_width)
             out += [
                     'tbl_idx = {};'.format(crc_expr.Xor(crc_shifted_right, crc_expr.Parenthesis(crc_expr.Shr('*d', str_idx)))),
-                    'crc = {};'.format(crc_lookup + crc_xor_expr),
+                    'crc = {};'.format(crc_expr.Xor(crc_lookup, crc_xor_expr).simplify()),
                     ]
     return CodeGen(opt, '', out)
 
@@ -1488,25 +1425,19 @@ def _crc_table_slice_by_algorithm(opt, sym):
         vard = 'd{}'.format(opt.slice_by // 4 - i)
         for j in range(4):
             idx1 = i * 4 + j
-            # TODO less ascii art and replace with a simple expression
-            idx2 = ' {}'.format(vard) if j == 0 else '({} >> {:2d})'.format(vard, j*8)
-            update_be.append('crc_table[{:2d}][{:10s} & 0xffu]{}'.format(idx1, idx2, ' ^' if idx1 < opt.slice_by - 1 else ';'))
-#            idx2 = crc_expr.And(crc_expr.Parenthesis(crc_expr.Shr(vard, j*8)), crc_expr.Terminal(255, '0xffu')).simplify()
-#            update_be.append('crc_table[{}][{}]{}'.format(idx1, idx2, ' ^' if idx1 < opt.slice_by - 1 else ';'))
+            idx2 = crc_expr.And(crc_expr.Parenthesis(crc_expr.Shr(vard, j*8)), crc_expr.Terminal(255, '0xffu')).simplify()
+            update_be.append('crc_table[{}][{}]{}'.format(idx1, idx2, ' ^' if idx1 < opt.slice_by - 1 else ';'))
 
     update_le = []
     for i in range(opt.slice_by // 4):
         vard = 'd{}'.format(opt.slice_by // 4 - i)
         for j in range(4):
             idx1 = i * 4 + j
-            # TODO less ascii art and replace with a simple expression
-            idx2 = ' {}'.format(vard) if j == 3 else '({} >> {:2d})'.format(vard, 24 - j*8)
-            update_le.append('crc_table[{:2d}][{:10s} & 0xffu]{}'.format(idx1, idx2, ' ^' if idx1 < opt.slice_by - 1 else ';'))
-#            idx2 = crc_expr.And(crc_expr.Parenthesis(crc_expr.Shr(vard, 24 - j*8)), crc_expr.Terminal(255, '0xffu')).simplify()
-#            update_le.append('crc_table[{}][{}]{}'.format(idx1, idx2, ' ^' if idx1 < opt.slice_by - 1 else ';'))
+            idx2 = crc_expr.And(crc_expr.Parenthesis(crc_expr.Shr(vard, 24 - j*8)), crc_expr.Terminal(255, '0xffu')).simplify()
+            update_le.append('crc_table[{}][{}]{}'.format(idx1, idx2, ' ^' if idx1 < opt.slice_by - 1 else ';'))
 
     out = [
-            'const uint32_t *d32 = (const uint32_t *)d;',   # TODO use uint_fast32_t
+            'const uint32_t *d32 = (const uint32_t *)d;',
             'while (data_len >= {crc_slice_by})'.format(**sym),
             '{',
             CodeGen(opt, 4*' ', [

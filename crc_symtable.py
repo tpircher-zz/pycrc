@@ -34,7 +34,6 @@ use as follows:
     print(sym['crc_width'])
     print('width: {crc_width}, poly: {crc_poly}'.format(**sym))
 """
-#pylint: disable=too-many-lines
 
 from crc_algorithms import Crc
 import collections
@@ -146,7 +145,7 @@ def _pretty_str(value):
     return str(value)
 
 
-def _pretty_hex(value, width=None):     # TODO return 0x????u
+def _pretty_hex(value, width=None):
     """
     Return a value of width bits as a pretty hexadecimal formatted string.
     """

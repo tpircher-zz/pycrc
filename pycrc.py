@@ -47,8 +47,6 @@ import binascii
 import sys
 
 
-# function print_parameters
-###############################################################################
 def print_parameters(opt):
     """
     Generate a string with the options pretty-printed (used in the --verbose mode).
@@ -56,8 +54,6 @@ def print_parameters(opt):
     return str(cg.ParamBlock(opt, ''))
 
 
-# function check_string
-###############################################################################
 def check_string(opt):
     """
     Return the calculated CRC sum of a string.
@@ -106,8 +102,6 @@ def check_string(opt):
     return crc
 
 
-# function check_hexstring
-###############################################################################
 def check_hexstring(opt):
     """
     Return the calculated CRC sum of a hex string.
@@ -130,8 +124,6 @@ def check_hexstring(opt):
     return check_string(opt)
 
 
-# function crc_file_update
-###############################################################################
 def crc_file_update(alg, register, check_bytes):
     """
     Update the CRC using the bit-by-bit-fast CRC algorithm.
@@ -154,8 +146,6 @@ def crc_file_update(alg, register, check_bytes):
     return register
 
 
-# function check_file
-###############################################################################
 def check_file(opt):
     """
     Calculate the CRC of a file.
@@ -192,8 +182,6 @@ def check_file(opt):
     return register
 
 
-# function write_file
-###############################################################################
 def write_file(filename, out_str):
     """
     Write the content of out_str to filename.

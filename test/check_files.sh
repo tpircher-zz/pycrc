@@ -57,15 +57,28 @@ cleanup() {
 trap cleanup 0 1 2 3 15
 
 
+generate() {
+    outfile="$1"
+    shift
+    $PYCRC "$@" -o "${outfile}"
+    sed -i -e 's/Generated on ... ... .. ..:..:.. ..../Generated on XXX XXX XX XX:XX:XX XXXX/; s/by pycrc v[0-9.]*/by pycrc vXXX/;' "${outfile}"
+}
+
 populate() {
     outdir=$1
     mkdir -p "$outdir"
-    models=`awk 'BEGIN { FS="'"'"'" } $2 == "name" && $3 ~ /^: */ { print $4 }' ../crc_models.py`
-    for m in $models; do
-        for algo in "bit-by-bit" "bit-by-bit-fast" "table-driven"; do
-            $PYCRC --model $m --algorithm $algo --generate h -o "${outdir}/${m}_${algo}.h"
-            $PYCRC --model $m --algorithm $algo --generate c -o "${outdir}/${m}_${algo}.c"
-            sed -i -e 's/Generated on ... ... .. ..:..:.. ....,/Generated on XXX XXX XX XX:XX:XX XXXX,/; s/by pycrc v[0-9.]*/by pycrc vXXX/;' "${outdir}/${m}_${algo}.h" "${outdir}/${m}_${algo}.c"
+    models=`PYTHONPATH=.. python -c 'import crc_models; print(" ".join(crc_models.CrcModels().names()))'`
+    for model in "undefined" $models; do
+        for algo in "bbb" "bbf" "tbl"; do
+            for cstd in c98 c99; do
+                if [ "$model" = "undefined" ]; then
+                    mod_opt=
+                else
+                    mod_opt="--model=${model}"
+                fi
+                generate "${outdir}/${model}_${algo}_${algo}.h" --generate=h --algorithm=${algo} $mod_opt
+                generate "${outdir}/${model}_${algo}_${algo}.c" --generate=c --algorithm=${algo} $mod_opt
+            done
         done
     done
 }

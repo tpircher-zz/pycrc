@@ -37,8 +37,6 @@ import sys
 from crc_models import CrcModels
 
 
-# Class Options
-###############################################################################
 class Options(object):
     """
     The options parsing and validating class.
@@ -66,8 +64,6 @@ class Options(object):
     action_generate_table = 0x07
 
 
-    # Class constructor
-    ###############################################################################
     def __init__(self):
         self.width = None
         self.poly = None
@@ -94,8 +90,6 @@ class Options(object):
         self.undefined_crc_parameters = False
 
 
-    # function parse
-    ###############################################################################
     def parse(self, argv=None):
         """
         Parses and validates the options given as arguments
@@ -119,7 +113,7 @@ of the following parameters:
     --width --poly --reflect-in --xor-in --reflect-out --xor-out"""
 
         models = CrcModels()
-        model_list = ", ".join(models.get_list())
+        model_list = ", ".join(models.names())
         parser = OptionParser(option_class=MyOption, usage=usage, version=self.version_str)
         parser.add_option(
             "-v", "--verbose",
@@ -400,8 +394,6 @@ of the following parameters:
 
 
 
-    # function __warning
-    ###############################################################################
     def __warning(self, message):
         """
         Print a warning message to stderr.
@@ -411,8 +403,6 @@ of the following parameters:
 
 
 
-    # function _error
-    ###############################################################################
     def __error(self, message):
         """
         Print a error message to stderr and terminate the program.
@@ -422,8 +412,6 @@ of the following parameters:
         sys.exit(1)
 
 
-# function _model_cb
-##############################################################################
 def _model_cb(option, opt_str, value, parser):
     """
     This function sets up the single parameters if the 'model' option has been selected
@@ -441,14 +429,12 @@ def _model_cb(option, opt_str, value, parser):
         setattr(parser.values, 'xor_out', model['xor_out'])
     else:
         models = CrcModels()
-        model_list = ", ".join(models.get_list())
+        model_list = ", ".join(models.names())
         raise OptionValueError(
             "unsupported model {0:s}. Supported models are: {1:s}."
             .format(value, model_list))
 
 
-# function _check_hex
-###############################################################################
 def _check_hex(dummy_option, opt, value):
     """
     Checks if a value is given in a decimal integer of hexadecimal reppresentation.
@@ -464,8 +450,6 @@ def _check_hex(dummy_option, opt, value):
             "option {0:s}: invalid integer or hexadecimal value: {1:s}.".format(opt, value))
 
 
-# function _check_bool
-###############################################################################
 def _check_bool(dummy_option, opt, value):
     """
     Checks if a value is given as a boolean value (either 0 or 1 or "true" or "false")
@@ -481,8 +465,6 @@ def _check_bool(dummy_option, opt, value):
         raise OptionValueError("option {0:s}: invalid boolean value: {1:s}.".format(opt, value))
 
 
-# Class MyOption
-###############################################################################
 class MyOption(Option):
     """
     New option parsing class extends the Option class
