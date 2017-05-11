@@ -380,7 +380,7 @@ of the following parameters:
         if op_count == 0:
             self.action = self.action_check_str
         if op_count > 1:
-            self.__error("too many actions scecified")
+            self.__error("too many actions specified")
 
         if len(args) != 0:
             self.__error("unrecognized argument(s): {0:s}".format(" ".join(args)))
