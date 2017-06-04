@@ -128,16 +128,16 @@ class ParamBlock(CodeGen):
         """
         super(ParamBlock, self).__init__(opt, indent)
         self.content = [
-                '{:13s} = {}'.format('Width', self.sym['crc_width']),
-                '{:13s} = {}'.format('Poly', self.sym['crc_poly']),
-                '{:13s} = {}'.format('XorIn', self.sym['crc_xor_in']),
-                '{:13s} = {}'.format('ReflectIn', self.sym['crc_reflect_in']),
-                '{:13s} = {}'.format('XorOut', self.sym['crc_xor_out']),
-                '{:13s} = {}'.format('ReflectOut', self.sym['crc_reflect_out']),
+                '- {:13s} = {}'.format('Width', self.sym['crc_width']),
+                '- {:13s} = {}'.format('Poly', self.sym['crc_poly']),
+                '- {:13s} = {}'.format('XorIn', self.sym['crc_xor_in']),
+                '- {:13s} = {}'.format('ReflectIn', self.sym['crc_reflect_in']),
+                '- {:13s} = {}'.format('XorOut', self.sym['crc_xor_out']),
+                '- {:13s} = {}'.format('ReflectOut', self.sym['crc_reflect_out']),
                 Conditional(opt, '', algorithm,
-                    ['{:13s} = {}'.format('Algorithm', self.sym['crc_algorithm'])]),
+                    ['- {:13s} = {}'.format('Algorithm', self.sym['crc_algorithm'])]),
                 Conditional(opt, '', opt.slice_by > 1,
-                    ['{:13s} = {}'.format('SliceBy', opt.slice_by)]),
+                    ['- {:13s} = {}'.format('SliceBy', opt.slice_by)]),
                 ]
 
 
@@ -153,13 +153,73 @@ class File(CodeGen):
         super(File, self).__init__(opt, indent)
         self.content = [
                 Comment(opt, '', [
-                    '\\file {filename}'.format(**self.sym),
+                    '\\file',
                     'Functions and types for CRC checks.',
                     '',
                     'Generated on {datetime}'.format(**self.sym),
                     'by {program_version}, {program_url}'.format(**self.sym),
                     'using the configuration:',
-                    ParamBlock(opt, '   ', algorithm = True)
+                    ParamBlock(opt, ' ', algorithm = True),
+                    Conditional(opt, '', opt.action == opt.action_generate_h, [
+                        '',
+                        'This file defines the funcions {crc_init_function}(), ' \
+                                '{crc_update_function}() and {crc_finalize_function}().'.format(**self.sym),
+                        '',
+                        'The {crc_init_function}() function returns the inital \c crc value and must be called'.format(**self.sym),
+                        'before the first call to {crc_update_function}().'.format(**self.sym),
+                        'Similarly, the {crc_finalize_function}() function must be called after the last call'.format(**self.sym),
+                        'to {crc_update_function}(), before the \c crc is being used.'.format(**self.sym),
+                        'is being used.',
+                        '',
+                        'The {crc_update_function}() function can be called any number of times (including zero'.format(**self.sym),
+                        'times) in between the {crc_init_function}() and {crc_finalize_function}() calls.'.format(**self.sym),
+                        '',
+                        'This pseudo-code shows an example usage of the API:',
+			'\code{.c}',
+                        Conditional(self.opt, '', self.opt.undefined_crc_parameters, [
+                            '{cfg_t} cfg = '.format(**self.sym) + '{',
+                            Conditional(self.opt, 4*' ', self.opt.width is None, [
+                                '0,      /* width */',
+                                ]),
+                            Conditional(self.opt, 4*' ', self.opt.poly is None, [
+                                '0,      /* poly */',
+                                ]),
+                            Conditional(self.opt, 4*' ', self.opt.reflect_in is None, [
+                                '0,      /* reflect_in */',
+                                ]),
+                            Conditional(self.opt, 4*' ', self.opt.xor_in is None, [
+                                '0,      /* xor_in */',
+                                ]),
+                            Conditional(self.opt, 4*' ', self.opt.reflect_out is None, [
+                                '0,      /* reflect_out */',
+                                ]),
+                            Conditional(self.opt, 4*' ', self.opt.xor_out is None, [
+                                '0,      /* xor_out */',
+                                ]),
+                            Conditional(self.opt, 4*' ', self.opt.width is None, [
+                                '',
+                                '0,      /* crc_mask */',
+                                '0,      /* msb_mask */',
+                                '0,      /* crc_shift */',
+                                ]),
+                            '};',
+                            ]),
+                        '{crc_t} crc;'.format(**self.sym),
+                        'unsigned char data[MAX_DATA_LEN];',
+                        'size_t data_len;',
+                        '',
+                        Conditional(self.opt, '', _use_crc_table_gen(self.opt), [
+                            '{crc_table_gen_function}(&cfg);'.format(**self.sym),
+                            ]),
+                        'crc = {}({});'.format(self.sym['crc_init_function'], '' if _use_constant_crc_init(self.sym) else '&cfg'),
+                        'while ((data_len = read_data(data, MAX_DATA_LEN)) > 0) {',
+                        CodeGen(self.opt, 4*' ', [
+                            'crc = {}({}crc, data, data_len);'.format(self.sym['crc_update_function'], '' if _use_cfg_in_crc_update(self.opt) else '&cfg, '),
+                            ]),
+                        '}',
+                        'crc = {}({}crc);'.format(self.sym['crc_finalize_function'], '' if _use_cfg_in_finalize(self.opt) else '&cfg, '),
+                        '\endcode',
+                        ]),
                     ]),
                 ]
         if opt.action == opt.action_generate_h:
