@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding="utf-8"?>
 
-<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook V5.1//EN"
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V5.1//EN"
         "http://www.oasis-open.org/docbook/xml/5.0b5/dtd/docbook.dtd" [
 <!ENTITY project_name       "pycrc">
 <!ENTITY project_version    "0.9">
@@ -27,29 +27,29 @@
 ]>
 
 
-<refentry xmlns:db="http://docbook.org/ns/docbook" db:version="5.0b5"
-         xml:id="&project_name;">
-
-    <refentryinfo>
-        <title>&project_name;</title>
-        <productname>&project_name;</productname>
+<refentry xmlns='http://docbook.org/ns/docbook' version="5.0" xml:id="pycrc">
+    <info>
+        <title>pycrc</title>
+        <productname>pycrc</productname>
         <productnumber>&project_version;</productnumber>
         <author>
-            <firstname>&author_firstname;</firstname>
-            <surname>&author_surname;</surname>
-            <contrib>Author of &project_name; and this manual page.</contrib>
+            <personname>
+                <firstname>&author_firstname;</firstname>
+                <surname>&author_surname;</surname>
+            </personname>
+            <contrib>Author of pycrc and this manual page.</contrib>
             <email>&author_email;</email>
         </author>
         <date>&date;</date>
-    </refentryinfo>
+    </info>
 
     <refmeta>
-        <refentrytitle>&project_name;</refentrytitle>
+        <refentrytitle>pycrc</refentrytitle>
         <manvolnum>1</manvolnum>
     </refmeta>
 
     <refnamediv>
-        <refname>&project_name;</refname>
+        <refname>pycrc</refname>
         <refpurpose>a free, easy to use Cyclic Redundancy Check (CRC) calculator and C source code generator.</refpurpose>
     </refnamediv>
 
@@ -60,9 +60,10 @@
         </cmdsynopsis>
     </refsynopsisdiv>
 
-    <refsect1><title>Description</title>
+    <refsect1>
+        <title>Description</title>
         <para>
-            <ulink url="&project_homepage;">&project_name;</ulink>
+            <link xlink:href="&project_homepage;">pycrc</link>
             is a CRC reference implementation in Python and a C source code generator for parametrised CRC models.
             The generated C source code can be optimised for simplicity,
             speed or small memory footprint, as required on small embedded systems.
@@ -81,7 +82,7 @@
             </itemizedlist>
         </para>
         <para>
-            &project_name; supports the following variants of the CRC algorithm:
+            pycrc supports the following variants of the CRC algorithm:
             <itemizedlist>
                 <listitem>
                     <para><replaceable>&bit-by-bit;</replaceable> or <replaceable>&bbb;</replaceable>:
@@ -127,239 +128,241 @@
         </para>
     </refsect1>
 
-    <refsect1><title>Options</title>
-    <variablelist>
-        <varlistentry>
-            <term>
-                <option>--version</option>
-            </term>
-            <listitem>
-                <para>show the program version number and exit.</para>
-            </listitem>
-        </varlistentry>
-        <varlistentry>
-            <term>
-                <option>-h</option>
-            </term>
-            <term>
-                <option>--help</option>
-            </term>
-            <listitem>
-                <para>show this help message and exit.</para>
-            </listitem>
-        </varlistentry>
-        <varlistentry>
-            <term>
-                <option>--verbose</option>
-            </term>
-            <listitem>
-                <para>be more verbose; in particular, print the value of the parameters and the chosen model to <filename>stdout</filename>.</para>
-            </listitem>
-        </varlistentry>
-        <varlistentry>
-            <term>
-                <option>--check-string=</option><replaceable>STRING</replaceable>
-            </term>
-            <listitem>
-                <para>calculate the checksum of a string (default: <quote><replaceable>123456789</replaceable></quote>). If the string contains non-ASCII characters then it will be UTF-8 decoded.</para>
-            </listitem>
-        </varlistentry>
-        <varlistentry>
-            <term>
-                <option>--check-hexstring=</option><replaceable>STRING</replaceable>
-            </term>
-            <listitem>
-                <para>calculate the checksum of a hexadecimal number string.</para>
-            </listitem>
-        </varlistentry>
-        <varlistentry>
-            <term>
-                <option>--check-file=</option><replaceable>FILE</replaceable>
-            </term>
-            <listitem>
-                <para>calculate the checksum of a file. If the file contains non-ASCII characters then it will be UTF-8 decoded.</para>
-            </listitem>
-        </varlistentry>
-        <varlistentry>
-            <term>
-                <option>--generate=</option><replaceable>CODE</replaceable>
-            </term>
-            <listitem>
-                <para>generate C source code; choose the type from {<replaceable>h</replaceable>,
-                <replaceable>c</replaceable>, <replaceable>c-main</replaceable>, <replaceable>table</replaceable>}.</para>
-            </listitem>
-        </varlistentry>
-        <varlistentry>
-            <term>
-                <option>--std=</option><replaceable>STD</replaceable>
-            </term>
-            <listitem>
-                <para>specify the C dialect of the generated code from {C89, ANSI, C99}.</para>
-            </listitem>
-        </varlistentry>
-        <varlistentry>
-            <term>
-                <option>--algorithm=</option><replaceable>ALGO</replaceable>
-            </term>
-            <listitem>
-                <para>choose an algorithm from {<replaceable>bit-by-bit</replaceable>, <replaceable>bbb</replaceable>,
-                <replaceable>bit-by-bit-fast</replaceable>, <replaceable>bbf</replaceable>,
-                <replaceable>table-driven</replaceable>, <replaceable>tbl</replaceable>,
-                <replaceable>all</replaceable>}.</para>
-            </listitem>
-        </varlistentry>
-        <varlistentry>
-            <term>
-                <option>--model=</option><replaceable>MODEL</replaceable>
-            </term>
-            <listitem>
-                <para>choose a parameter set from
-                   {<replaceable>crc-5</replaceable>,
-                    <replaceable>crc-8</replaceable>,
-                    <replaceable>dallas-1-wire</replaceable>,
-                    <replaceable>crc-12-3gpp</replaceable>,
-                    <replaceable>crc-15</replaceable>,
-                    <replaceable>crc-16</replaceable>,
-                    <replaceable>crc-16-usb</replaceable>,
-                    <replaceable>crc-16-modbus</replaceable>,
-                    <replaceable>crc-16-genibus</replaceable>,
-                    <replaceable>crc-16-ccitt</replaceable>,
-                    <replaceable>r-crc-16</replaceable>,
-                    <replaceable>kermit</replaceable>,
-                    <replaceable>x-25</replaceable>,
-                    <replaceable>xmodem</replaceable>,
-                    <replaceable>zmodem</replaceable>,
-                    <replaceable>crc-24</replaceable>,
-                    <replaceable>crc-32</replaceable>,
-                    <replaceable>crc-32c</replaceable>,
-                    <replaceable>crc-32-mpeg</replaceable>,
-                    <replaceable>crc-32-bzip2</replaceable>,
-                    <replaceable>posix</replaceable>,
-                    <replaceable>jam</replaceable>,
-                    <replaceable>xfer</replaceable>,
-                    <replaceable>crc-64</replaceable>,
-                    <replaceable>crc-64-jones</replaceable>,
-                    <replaceable>crc-64-xz</replaceable>}.</para>
-            </listitem>
-        </varlistentry>
-        <varlistentry>
-            <term>
-                <option>--width=</option><replaceable>NUM</replaceable>
-            </term>
-            <listitem>
-                <para>use <replaceable>NUM</replaceable> bits in the <replaceable>&poly;</replaceable>.</para>
-            </listitem>
-        </varlistentry>
-        <varlistentry>
-            <term>
-                <option>--poly=</option><replaceable>HEX</replaceable>
-            </term>
-            <listitem>
-                <para>use <replaceable>HEX</replaceable> as <replaceable>&poly;</replaceable>.</para>
-            </listitem>
-        </varlistentry>
-        <varlistentry>
-            <term>
-                <option>--reflect-in=</option><replaceable>BOOL</replaceable>
-            </term>
-            <listitem>
-                <para>reflect the octets in the input message.</para>
-            </listitem>
-        </varlistentry>
-        <varlistentry>
-            <term>
-                <option>--xor-in=</option><replaceable>HEX</replaceable>
-            </term>
-            <listitem>
-                <para>use <replaceable>HEX</replaceable> as initial value.</para>
-            </listitem>
-        </varlistentry>
-        <varlistentry>
-            <term>
-                <option>--reflect-out=</option><replaceable>BOOL</replaceable>
-            </term>
-            <listitem>
-                <para>reflect the resulting checksum before applying the &xor_out; value.</para>
-            </listitem>
-        </varlistentry>
-        <varlistentry>
-            <term>
-                <option>--xor-out=</option><replaceable>HEX</replaceable>
-            </term>
-            <listitem>
-                <para>xor the final CRC value with <replaceable>HEX</replaceable>.</para>
-            </listitem>
-        </varlistentry>
-        <varlistentry>
-            <term>
-                <option>--table-idx-width=</option><replaceable>NUM</replaceable>
-            </term>
-            <listitem>
-                <para>use <replaceable>NUM</replaceable> bits to index the CRC table;
-                    <replaceable>NUM</replaceable> must be one of the values
-                    {<replaceable>1</replaceable>, <replaceable>2</replaceable>,
-                    <replaceable>4</replaceable>, <replaceable>8</replaceable>}.</para>
-            </listitem>
-        </varlistentry>
-        <varlistentry>
-            <term>
-                <option>--slice-by=</option><replaceable>NUM</replaceable>
-            </term>
-            <listitem>
-                <para>speed-up the &table-driven; calculation by operating on
-                    <replaceable>NUM</replaceable> octets of data rather than a
-                    single octet at a time.
-                    <replaceable>NUM</replaceable> must be one of the values
-                    {<replaceable>4</replaceable>, <replaceable>8</replaceable>,
-                    <replaceable>16</replaceable>}.</para>
-            </listitem>
-        </varlistentry>
-        <varlistentry>
-            <term>
-                <option>--symbol-prefix=</option><replaceable>STRING</replaceable>
-            </term>
-            <listitem>
-                <para>when generating source code, use <replaceable>STRING</replaceable>
-                    as prefix to the exported C symbols.</para>
-            </listitem>
-        </varlistentry>
-        <varlistentry>
-            <term>
-                <option>--crc-type=</option><replaceable>STRING</replaceable>
-            </term>
-            <listitem>
-                <para>when generating source code, use <replaceable>STRING</replaceable> as crc_t type.</para>
-            </listitem>
-        </varlistentry>
-        <varlistentry>
-            <term>
-                <option>--include-file=</option><replaceable>FILE</replaceable>
-            </term>
-            <listitem>
-                <para>when generating source code, include also <replaceable>FILE</replaceable> as header file.
-                    This option can be specified multiple times.</para>
-            </listitem>
-        </varlistentry>
-        <varlistentry>
-            <term>
-                <option>-o</option><replaceable>FILE</replaceable>
-            </term>
-            <term>
-                <option>--output=</option><replaceable>FILE</replaceable>
-            </term>
-            <listitem>
-                <para>write the generated code to <replaceable>FILE</replaceable> instead of <filename>stdout</filename>.</para>
-            </listitem>
-        </varlistentry>
-    </variablelist>
+    <refsect1>
+        <title>Options</title>
+        <variablelist>
+            <varlistentry>
+                <term>
+                    <option>--version</option>
+                </term>
+                <listitem>
+                    <para>show the program version number and exit.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>-h</option>
+                </term>
+                <term>
+                    <option>--help</option>
+                </term>
+                <listitem>
+                    <para>show this help message and exit.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--verbose</option>
+                </term>
+                <listitem>
+                    <para>be more verbose; in particular, print the value of the parameters and the chosen model to <filename>stdout</filename>.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--check-string=</option><replaceable>STRING</replaceable>
+                </term>
+                <listitem>
+                    <para>calculate the checksum of a string (default: <quote><replaceable>123456789</replaceable></quote>). If the string contains non-ASCII characters then it will be UTF-8 decoded.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--check-hexstring=</option><replaceable>STRING</replaceable>
+                </term>
+                <listitem>
+                    <para>calculate the checksum of a hexadecimal number string.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--check-file=</option><replaceable>FILE</replaceable>
+                </term>
+                <listitem>
+                    <para>calculate the checksum of a file. If the file contains non-ASCII characters then it will be UTF-8 decoded.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--generate=</option><replaceable>CODE</replaceable>
+                </term>
+                <listitem>
+                    <para>generate C source code; choose the type from {<replaceable>h</replaceable>,
+                    <replaceable>c</replaceable>, <replaceable>c-main</replaceable>, <replaceable>table</replaceable>}.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--std=</option><replaceable>STD</replaceable>
+                </term>
+                <listitem>
+                    <para>specify the C dialect of the generated code from {C89, ANSI, C99}.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--algorithm=</option><replaceable>ALGO</replaceable>
+                </term>
+                <listitem>
+                    <para>choose an algorithm from {<replaceable>bit-by-bit</replaceable>, <replaceable>bbb</replaceable>,
+                    <replaceable>bit-by-bit-fast</replaceable>, <replaceable>bbf</replaceable>,
+                    <replaceable>table-driven</replaceable>, <replaceable>tbl</replaceable>,
+                    <replaceable>all</replaceable>}.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--model=</option><replaceable>MODEL</replaceable>
+                </term>
+                <listitem>
+                    <para>choose a parameter set from
+                       {<replaceable>crc-5</replaceable>,
+                        <replaceable>crc-8</replaceable>,
+                        <replaceable>dallas-1-wire</replaceable>,
+                        <replaceable>crc-12-3gpp</replaceable>,
+                        <replaceable>crc-15</replaceable>,
+                        <replaceable>crc-16</replaceable>,
+                        <replaceable>crc-16-usb</replaceable>,
+                        <replaceable>crc-16-modbus</replaceable>,
+                        <replaceable>crc-16-genibus</replaceable>,
+                        <replaceable>crc-16-ccitt</replaceable>,
+                        <replaceable>r-crc-16</replaceable>,
+                        <replaceable>kermit</replaceable>,
+                        <replaceable>x-25</replaceable>,
+                        <replaceable>xmodem</replaceable>,
+                        <replaceable>zmodem</replaceable>,
+                        <replaceable>crc-24</replaceable>,
+                        <replaceable>crc-32</replaceable>,
+                        <replaceable>crc-32c</replaceable>,
+                        <replaceable>crc-32-mpeg</replaceable>,
+                        <replaceable>crc-32-bzip2</replaceable>,
+                        <replaceable>posix</replaceable>,
+                        <replaceable>jam</replaceable>,
+                        <replaceable>xfer</replaceable>,
+                        <replaceable>crc-64</replaceable>,
+                        <replaceable>crc-64-jones</replaceable>,
+                        <replaceable>crc-64-xz</replaceable>}.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--width=</option><replaceable>NUM</replaceable>
+                </term>
+                <listitem>
+                    <para>use <replaceable>NUM</replaceable> bits in the <replaceable>&poly;</replaceable>.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--poly=</option><replaceable>HEX</replaceable>
+                </term>
+                <listitem>
+                    <para>use <replaceable>HEX</replaceable> as <replaceable>&poly;</replaceable>.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--reflect-in=</option><replaceable>BOOL</replaceable>
+                </term>
+                <listitem>
+                    <para>reflect the octets in the input message.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--xor-in=</option><replaceable>HEX</replaceable>
+                </term>
+                <listitem>
+                    <para>use <replaceable>HEX</replaceable> as initial value.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--reflect-out=</option><replaceable>BOOL</replaceable>
+                </term>
+                <listitem>
+                    <para>reflect the resulting checksum before applying the &xor_out; value.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--xor-out=</option><replaceable>HEX</replaceable>
+                </term>
+                <listitem>
+                    <para>xor the final CRC value with <replaceable>HEX</replaceable>.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--table-idx-width=</option><replaceable>NUM</replaceable>
+                </term>
+                <listitem>
+                    <para>use <replaceable>NUM</replaceable> bits to index the CRC table;
+                        <replaceable>NUM</replaceable> must be one of the values
+                        {<replaceable>1</replaceable>, <replaceable>2</replaceable>,
+                        <replaceable>4</replaceable>, <replaceable>8</replaceable>}.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--slice-by=</option><replaceable>NUM</replaceable>
+                </term>
+                <listitem>
+                    <para>speed-up the &table-driven; calculation by operating on
+                        <replaceable>NUM</replaceable> octets of data rather than a
+                        single octet at a time.
+                        <replaceable>NUM</replaceable> must be one of the values
+                        {<replaceable>4</replaceable>, <replaceable>8</replaceable>,
+                        <replaceable>16</replaceable>}.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--symbol-prefix=</option><replaceable>STRING</replaceable>
+                </term>
+                <listitem>
+                    <para>when generating source code, use <replaceable>STRING</replaceable>
+                        as prefix to the exported C symbols.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--crc-type=</option><replaceable>STRING</replaceable>
+                </term>
+                <listitem>
+                    <para>when generating source code, use <replaceable>STRING</replaceable> as crc_t type.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>--include-file=</option><replaceable>FILE</replaceable>
+                </term>
+                <listitem>
+                    <para>when generating source code, include also <replaceable>FILE</replaceable> as header file.
+                        This option can be specified multiple times.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
+                    <option>-o</option><replaceable>FILE</replaceable>
+                </term>
+                <term>
+                    <option>--output=</option><replaceable>FILE</replaceable>
+                </term>
+                <listitem>
+                    <para>write the generated code to <replaceable>FILE</replaceable> instead of <filename>stdout</filename>.</para>
+                </listitem>
+            </varlistentry>
+        </variablelist>
     </refsect1>
 
-    <refsect1><title>The CRC Parametric Model</title>
+    <refsect1>
+        <title>The CRC Parametric Model</title>
         <para>
             The parametric model follows Ross N. Williams' convention described in
-            <ulink url="http://www.ross.net/crc/crcpaper.html">A Painless Guide to CRC Error Detection Algorithms</ulink>,
+            <link xlink:href="http://www.ross.net/crc/crcpaper.html">A Painless Guide to CRC Error Detection Algorithms</link>,
             often called the Rocksoft Model.
-            Since most people are familiar with this kind of parameters, &project_name; follows this convention, described as follows:
+            Since most people are familiar with this kind of parameters, pycrc follows this convention, described as follows:
             <glosslist>
                 <glossentry>
                     <glossterm><replaceable>&width;</replaceable></glossterm>
@@ -368,7 +371,7 @@
                         The number of significant bits in the CRC <replaceable>&poly;</replaceable>,
                         excluding the most significant 1.
                         This will also be the number of bits in the final CRC result.
-                        In previous versions of &project_name; only multiples of 8 could be used as
+                        In previous versions of pycrc only multiples of 8 could be used as
                         <replaceable>&width;</replaceable> for the <replaceable>&table-driven;</replaceable> algorithm.
                         As of version 0.7.5 any value is accepted for <replaceable>&width;</replaceable> for all algorithms.
                         </para>
@@ -390,7 +393,7 @@
                         <para>
                         Most <replaceable>&poly;</replaceable>s used in real world applications are odd (the least significant
                         bit is 1), but there are some good even ones.
-                        &project_name; allows the use of even <replaceable>&poly;</replaceable>s but some of them may yield
+                        pycrc allows the use of even <replaceable>&poly;</replaceable>s but some of them may yield
                         incorrect checksums depending on the used algorithm.
                         Use at your own risk and if in doubt pick a well-known <replaceable>MODEL</replaceable> above.
                         </para>
@@ -465,12 +468,13 @@
         </para>
     </refsect1>
 
-    <refsect1><title>Code generation</title>
+    <refsect1>
+        <title>Code generation</title>
         <para>
         In the default configuration, the generated code is strict ISO C99.
         A minimal set of three functions are defined for each algorithm:
         <function>crc_init()</function>, <function>crc_update()</function> and <function>crc_finalize()</function>.
-        Depending on the number of parameters given to &project_name;, a different interface will be defined.
+        Depending on the number of parameters given to pycrc, a different interface will be defined.
         A fully parametrised model has a simpler API, while the generated code for a runtime-specified
         implementation requires a pointer to a configuration structure as first parameter to all functions.
         </para>
@@ -483,14 +487,14 @@
 
         <refsect2><title>Fully parametrised models</title>
             <para>
-            The prototypes of the CRC functions are normally generated by &project_name; using the
+            The prototypes of the CRC functions are normally generated by pycrc using the
             <replaceable>--generate h</replaceable> option.
             The CRC functions for a fully parametrised model will look like:
             </para>
             <funcsynopsis>
                 <funcsynopsisinfo>
 #include &lt;stdlib.h&gt;
-typedef uint16_t crc_t;         /* &project_name; will use an appropriate size here */
+typedef uint16_t crc_t;         /* pycrc will use an appropriate size here */
                 </funcsynopsisinfo>
                 <funcprototype>
                     <?dbhtml funcsynopsis-style='ansi'?>
@@ -516,7 +520,7 @@ typedef uint16_t crc_t;         /* &project_name; will use an appropriate size h
             <para>
             The code snippet below shows how to use the generated functions.
             <programlisting>
-#include "&project_name;_generated_crc.h"
+#include "pycrc_generated_crc.h"
 #include &lt;stdio.h&gt;
 
 int main(void)
@@ -538,7 +542,8 @@ int main(void)
             </para>
         </refsect2>
 
-        <refsect2><title>Models with runtime-configurable parameters</title>
+        <refsect2>
+            <title>Models with runtime-configurable parameters</title>
             <para>
             When the model is not fully defined then the missing parameters are stored in a structure of
             type <type>crc_cfg_t</type>.
@@ -586,7 +591,7 @@ typedef struct {
             </para>
 
             <para>
-            The file <filename>test/main.c</filename> in the source package of &project_name;
+            The file <filename>test/main.c</filename> in the source package of pycrc
             contains a fully featured example of how to use the generated source code.
             A shorter, more compact <code>main()</code> function can be generated with the
             <replaceable>--generate c-main</replaceable> option.
@@ -642,22 +647,23 @@ typedef struct {
         </para>
     </refsect1>
 
-    <refsect1><title>See Also</title>
+    <refsect1>
+        <title>See Also</title>
         <para>
-            The homepage of &project_name; is <ulink url="&project_homepage;">&project_homepage;</ulink>.
+            The homepage of pycrc is <link xlink:href="&project_homepage;">&project_homepage;</link>.
         </para>
         <para>
-            A list of common CRC models is at <ulink url="&project_models;">&project_models;</ulink>.
+            A list of common CRC models is at <link xlink:href="&project_models;">&project_models;</link>.
             For a long list of known CRC models, see Greg Cook's
-            <ulink url="http://reveng.sourceforge.net/crc-catalogue/">Catalogue of Parameterised CRC Algorithms</ulink>.
+            <link xlink:href="http://reveng.sourceforge.net/crc-catalogue/">Catalogue of Parameterised CRC Algorithms</link>.
         </para>
     </refsect1>
 
-    <refsect1><title>Copyright</title>
+    <refsect1>
+        <title>Copyright</title>
         <para>
             This work is licensed under a
-            <ulink url="https://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International</ulink>.
+            <link xlink:href="https://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International</link>.
         </para>
     </refsect1>
-
 </refentry>
