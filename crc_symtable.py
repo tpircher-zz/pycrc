@@ -195,14 +195,14 @@ def _pretty_header_filename(filename):
 
 def _pretty_hdrprotection(opt):
     """
-    Return the name of a C header protection (e.g. __CRC_IMPLEMENTATION_H__).
+    Return the name of a C header protection (e.g. CRC_IMPLEMENTATION_H).
     """
     if opt.output_file is None:
         filename = 'pycrc_stdout'
     else:
         filename = os.path.basename(opt.output_file)
     out_str = ''.join([s.upper() if s.isalnum() else '_' for s in filename])
-    return '__' + out_str + '__'
+    return out_str
 
 
 def _get_underlying_crc_t(opt):
