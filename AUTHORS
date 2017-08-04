@@ -10,3 +10,5 @@ Stephan Brumme: his implementation of the slice-by-x algorithm was used as a
 
 Danjel McGougan: whose Universal Crc project was highly influential in the
     implementation of widths < 8 in the table-driven algorithm.
+
+André Hartmann, ashelly and others for minor fixes.
