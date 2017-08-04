@@ -179,28 +179,28 @@ class File(CodeGen):
                         Conditional(self.opt, '', self.opt.undefined_crc_parameters, [
                             '{cfg_t} cfg = '.format(**self.sym) + '{',
                             Conditional(self.opt, 4*' ', self.opt.width is None, [
-                                '0,      /* width */',
+                                '0,      // width',
                                 ]),
                             Conditional(self.opt, 4*' ', self.opt.poly is None, [
-                                '0,      /* poly */',
+                                '0,      // poly',
                                 ]),
                             Conditional(self.opt, 4*' ', self.opt.reflect_in is None, [
-                                '0,      /* reflect_in */',
+                                '0,      // reflect_in',
                                 ]),
                             Conditional(self.opt, 4*' ', self.opt.xor_in is None, [
-                                '0,      /* xor_in */',
+                                '0,      // xor_in',
                                 ]),
                             Conditional(self.opt, 4*' ', self.opt.reflect_out is None, [
-                                '0,      /* reflect_out */',
+                                '0,      // reflect_out',
                                 ]),
                             Conditional(self.opt, 4*' ', self.opt.xor_out is None, [
-                                '0,      /* xor_out */',
+                                '0,      // xor_out',
                                 ]),
                             Conditional(self.opt, 4*' ', self.opt.width is None, [
                                 '',
-                                '0,      /* crc_mask */',
-                                '0,      /* msb_mask */',
-                                '0,      /* crc_shift */',
+                                '0,      // crc_mask',
+                                '0,      // msb_mask',
+                                '0,      // crc_shift',
                                 ]),
                             '};',
                             ]),
