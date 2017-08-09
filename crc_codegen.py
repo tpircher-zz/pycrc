@@ -162,7 +162,7 @@ class File(CodeGen):
                     ParamBlock(opt, ' ', algorithm = True),
                     Conditional(opt, '', opt.action == opt.action_generate_h, [
                         '',
-                        'This file defines the funcions {crc_init_function}(), ' \
+                        'This file defines the functions {crc_init_function}(), ' \
                                 '{crc_update_function}() and {crc_finalize_function}().'.format(**self.sym),
                         '',
                         'The {crc_init_function}() function returns the inital \c crc value and must be called'.format(**self.sym),
