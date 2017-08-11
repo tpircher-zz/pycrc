@@ -150,7 +150,7 @@ class CrcTests(object):
                 print("error: can't delete {0:s}".format(f))
                 pass
 
-    def __getstatusoutput(self, cmd_str):
+    def __get_status_output(self, cmd_str):
         if self.python3:
             import subprocess
             return subprocess.getstatusoutput(cmd_str)
@@ -166,7 +166,7 @@ class CrcTests(object):
         cmd_str = self.pycrc_bin + ' {0:s} --std {1:s} --generate h -o {2:s}.h'.format(args, cstd, gen_src)
         if self.verbose:
             print(cmd_str)
-        ret = self.__getstatusoutput(cmd_str)
+        ret = self.__get_status_output(cmd_str)
         if ret[0] != 0:
             print('error: the following command returned error: {0:s}'.format(cmd_str))
             print(ret[1])
@@ -176,7 +176,7 @@ class CrcTests(object):
         cmd_str = self.pycrc_bin + ' {0:s} --std {1:s} --generate c-main -o {2:s}.c'.format(args, cstd, gen_src)
         if self.verbose:
             print(cmd_str)
-        ret = self.__getstatusoutput(cmd_str)
+        ret = self.__get_status_output(cmd_str)
         if ret[0] != 0:
             print('error: the following command returned error: {0:s}'.format(cmd_str))
             print(ret[1])
@@ -191,7 +191,7 @@ class CrcTests(object):
         cmd_str = 'gcc -W -Wall -pedantic -Werror -std={0:s} -o {1:s} {2:s}.c'.format(cstd, binfile, binfile)
         if self.verbose:
             print(cmd_str)
-        ret = self.__getstatusoutput(cmd_str)
+        ret = self.__get_status_output(cmd_str)
         if len(ret) > 1 and len(ret[1]) > 0:
             print(ret[1])
         if ret[0] != 0:
@@ -294,7 +294,7 @@ class CrcTests(object):
         """
         if self.verbose:
             print(cmd_str)
-        ret = self.__getstatusoutput(cmd_str)
+        ret = self.__get_status_output(cmd_str)
         if ret[0] != 0:
             print('error: the following command returned error: {0:s}'.format(cmd_str))
             print(ret[1])

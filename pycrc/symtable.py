@@ -152,9 +152,9 @@ def _pretty_hex(value, width=None):
     if value is None:
         return 'Undefined'
     if width is None:
-        return '{:#x}'.format(value)
+        return '{0:#x}'.format(value)
     width = (width + 3) // 4
-    hex_str = "{{:#0{:d}x}}".format(width + 2)
+    hex_str = "{{0:#0{0:d}x}}".format(width + 2)
     return hex_str.format(value)
 
 
