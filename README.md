@@ -26,18 +26,15 @@ Installation
 ============
 
 This program doesn't need any particular installation. The script can be
-called from any directory.
+called from the source directory.
 Simply call the python interpreter with the script as parameter:
 
+    python -m pycrc [options]
+
+If you get an error "pycrc is a package and cannot be directly executed" then
+you can run the pycrc.py file like this:
+
     python pycrc.py [options]
-
-On UNIX-like systems, you might want to make the script executable:
-
-    chmod +x pycrc.py
-
-Then the script can be called like an application.
-
-    ./pycrc.py [options]
 
 If you get an error "No such file or directory" when running ./pycrc.py then
 make sure the file is saved in UNIX file endings:

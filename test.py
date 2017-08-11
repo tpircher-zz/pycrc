@@ -629,9 +629,9 @@ class CrcTests(object):
         self.verbose = opt.verbose
 
         if self.python3:
-            self.pycrc_bin = 'python3 -m pycrc'
+            self.pycrc_bin = 'python3 pycrc.py'
         else:
-            self.pycrc_bin = 'python -m pycrc'
+            self.pycrc_bin = 'python pycrc.py'
 
         if not self.__setup_files(opt):
             return False
