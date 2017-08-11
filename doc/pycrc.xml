@@ -3,10 +3,10 @@
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V5.1//EN"
         "http://www.oasis-open.org/docbook/xml/5.0b5/dtd/docbook.dtd" [
 <!ENTITY project_name       "pycrc">
-<!ENTITY project_version    "0.9">
+<!ENTITY project_version    "0.9.1">
 <!ENTITY project_homepage   "https://pycrc.org">
 <!ENTITY project_models     "https://pycrc.org/models.html">
-<!ENTITY date               "2015-10-11">
+<!ENTITY date               "2017-08-11">
 <!ENTITY author_firstname   "Thomas">
 <!ENTITY author_surname     "Pircher">
 <!ENTITY author_email       "tehpeh-web@tty1.net">
@@ -55,7 +55,7 @@
 
     <refsynopsisdiv>
         <cmdsynopsis>
-            <command>python pycrc.py</command>
+            <command>python -m pycrc</command>
             <arg>OPTIONS</arg>
         </cmdsynopsis>
     </refsynopsisdiv>
@@ -608,7 +608,7 @@ typedef struct {
                     <glossterm>Calculate the CRC-32 checksum of the string <quote>123456789</quote>:</glossterm>
                     <glossdef>
                         <para>
-                        <userinput>python pycrc.py --model crc-32 --check-string 123456789</userinput>
+                        <userinput>python -m pycrc --model crc-32 --check-string 123456789</userinput>
                         </para>
                     </glossdef>
                 </glossentry>
@@ -620,10 +620,10 @@ typedef struct {
                         To be precise, the size of the resulting table will be <code>16 * sizeof(crc_t)</code>.
                         </para>
                         <para>
-                        <userinput>python pycrc.py --model crc-16 --algorithm table-driven --table-idx-width 4 --generate h -o crc.h</userinput>
+                        <userinput>python -m pycrc --model crc-16 --algorithm table-driven --table-idx-width 4 --generate h -o crc.h</userinput>
                         </para>
                         <para>
-                        <userinput>python pycrc.py --model crc-16 --algorithm table-driven --table-idx-width 4 --generate c -o crc.c</userinput>
+                        <userinput>python -m pycrc --model crc-16 --algorithm table-driven --table-idx-width 4 --generate c -o crc.c</userinput>
                         </para>
                         <para>
                         A variant of the <replaceable>c</replaceable> target is <replaceable>c-main</replaceable>:
@@ -631,7 +631,7 @@ typedef struct {
                         the CRC functions:
                         </para>
                         <para>
-                        <userinput>python pycrc.py --model crc-16 --algorithm table-driven --table-idx-width 4 --generate c-main -o crc.c</userinput>
+                        <userinput>python -m pycrc --model crc-16 --algorithm table-driven --table-idx-width 4 --generate c-main -o crc.c</userinput>
                         </para>
                     </glossdef>
                 </glossentry>
@@ -639,7 +639,7 @@ typedef struct {
                     <glossterm>Generate the CRC table only:</glossterm>
                     <glossdef>
                         <para>
-                        <userinput>python pycrc.py --model kermit --generate table -o crc-table.txt</userinput>
+                        <userinput>python -m pycrc --model kermit --generate table -o crc-table.txt</userinput>
                         </para>
                     </glossdef>
                 </glossentry>

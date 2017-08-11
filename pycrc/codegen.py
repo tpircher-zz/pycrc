@@ -24,18 +24,18 @@
 """
 use as follows:
 
-    import crc_codegen
-    import crc_opt
-    opt = crc_opt.Options()
-    print(crc_codegen.CodeGen(opt, '', [
+    import pycrc.codegen as cg
+    import pycrc.opt as opt
+    opt = opt.Options()
+    print(cg.CodeGen(opt, '', [
         'if (a == b) {',
-        crc_codegen.CodeGen(opt, '    ', ['print("a equals b\\n");']),
+        cg.CodeGen(opt, 4*' ', ['print("a equals b\\n");']),
         '}',
         ]))
 """
 
-import crc_symtable
-import crc_expr
+import pycrc.symtable
+import pycrc.expr as expr
 
 
 class CodeGen(object):
@@ -47,7 +47,7 @@ class CodeGen(object):
         The class constructor.
         """
         self.opt = opt
-        self.sym = crc_symtable.SymbolTable(opt)
+        self.sym = pycrc.symtable.SymbolTable(opt)
         self.indent = indent
         self.content = content
 
@@ -956,15 +956,15 @@ def _crc_final_value(opt, sym):
     """
     if opt.algorithm == opt.algo_table_driven:
         if opt.reflect_in == opt.reflect_out:
-            return crc_expr.Xor('crc', sym['crc_xor_out']).simplify()
+            return expr.Xor('crc', sym['crc_xor_out']).simplify()
         else:
-            reflect_fun = crc_expr.FunctionCall(sym['crc_reflect_function'], ['crc', sym['crc_width']])
-            return crc_expr.Xor(reflect_fun, sym['crc_xor_out']).simplify()
+            reflect_fun = expr.FunctionCall(sym['crc_reflect_function'], ['crc', sym['crc_width']])
+            return expr.Xor(reflect_fun, sym['crc_xor_out']).simplify()
     elif opt.reflect_out:
-        reflect_fun = crc_expr.FunctionCall(sym['crc_reflect_function'], ['crc', sym['crc_width']])
-        return crc_expr.Xor(reflect_fun, sym['crc_xor_out']).simplify()
+        reflect_fun = expr.FunctionCall(sym['crc_reflect_function'], ['crc', sym['crc_width']])
+        return expr.Xor(reflect_fun, sym['crc_xor_out']).simplify()
     else:
-        return crc_expr.Xor('crc', sym['crc_xor_out']).simplify()
+        return expr.Xor('crc', sym['crc_xor_out']).simplify()
 
 
 def _crc_table(opt, sym):
@@ -1026,12 +1026,12 @@ def _crc_table_gen(opt, sym):
                                 'crc = i;',
                                 ]),
                         ]),
-                        'crc <<= {};'.format(crc_expr.Parenthesis(crc_expr.Add(crc_expr.Sub(sym['cfg_width'], sym['cfg_table_idx_width']), sym['cfg_shift'])).simplify()),
+                        'crc <<= {};'.format(expr.Parenthesis(expr.Add(expr.Sub(sym['cfg_width'], sym['cfg_table_idx_width']), sym['cfg_shift'])).simplify()),
                         'for (j = 0; j < {cfg_table_idx_width}; j++) '.format(**sym) + '{',
                         CodeGen(opt, 4*' ', [
                             'if (crc & {cfg_msb_mask_shifted}) '.format(**sym) + '{',
                             CodeGen(opt, 4*' ', [
-                                'crc = {};'.format(crc_expr.Xor(crc_expr.Parenthesis(crc_expr.Shl('crc', 1)), sym['cfg_poly_shifted']).simplify()),
+                                'crc = {};'.format(expr.Xor(expr.Parenthesis(expr.Shl('crc', 1)), sym['cfg_poly_shifted']).simplify()),
                                 ]),
                             '} else {',
                             CodeGen(opt, 4*' ', [
@@ -1043,7 +1043,7 @@ def _crc_table_gen(opt, sym):
                         Conditional(opt, '', opt.reflect_in is None, [
                             'if (cfg->reflect_in) {',
                             Conditional2(opt, 4*' ', sym.tbl_shift is None or sym.tbl_shift > 0, [
-                                'crc = {};'.format(crc_expr.Shl(crc_expr.FunctionCall(sym['crc_reflect_function'], [crc_expr.Shr('crc', sym['cfg_shift']), sym['cfg_width']]), sym['cfg_shift']).simplify()),
+                                'crc = {};'.format(expr.Shl(expr.FunctionCall(sym['crc_reflect_function'], [expr.Shr('crc', sym['cfg_shift']), sym['cfg_width']]), sym['cfg_shift']).simplify()),
                                 ], [
                                 'crc = {crc_reflect_function}(crc, {cfg_width});'.format(**sym),
                                 ]),
@@ -1051,12 +1051,12 @@ def _crc_table_gen(opt, sym):
                             ]),
                         Conditional(opt, '', opt.reflect_in, [
                             Conditional2(opt, 4*' ', sym.tbl_shift is None or sym.tbl_shift > 0, [
-                                'crc = {};'.format(crc_expr.Shl(crc_expr.FunctionCall(sym['crc_reflect_function'], [crc_expr.Shr('crc', sym['cfg_shift']), sym['cfg_width']]), sym['cfg_shift']).simplify()),
+                                'crc = {};'.format(expr.Shl(expr.FunctionCall(sym['crc_reflect_function'], [expr.Shr('crc', sym['cfg_shift']), sym['cfg_width']]), sym['cfg_shift']).simplify()),
                                 ], [
                                 'crc = {crc_reflect_function}(crc, {cfg_width});'.format(**sym),
                                 ]),
                             ]),
-                        'crc_table[i] = {};'.format(crc_expr.Shr(crc_expr.Parenthesis(crc_expr.And('crc', sym['cfg_mask_shifted'])), sym['cfg_shift'])),
+                        'crc_table[i] = {};'.format(expr.Shr(expr.Parenthesis(expr.And('crc', sym['cfg_mask_shifted'])), sym['cfg_shift'])),
                         ]),
                     '}',
                 ]),
@@ -1241,9 +1241,9 @@ def _crc_update_function_gen(opt, sym):
                             ]),
                         CodeGen(opt, 4*' ', [
                             Conditional2(opt, '', opt.c_std == 'C89', [
-                                'bit = !!({});'.format(crc_expr.And('crc', sym['cfg_msb_mask']).simplify()),
+                                'bit = !!({});'.format(expr.And('crc', sym['cfg_msb_mask']).simplify()),
                                 ], [
-                                'bit = {};'.format(crc_expr.And('crc', sym['cfg_msb_mask']).simplify()),
+                                'bit = {};'.format(expr.And('crc', sym['cfg_msb_mask']).simplify()),
                                 ]),
                             'if (c & i) {',
                             CodeGen(opt, 4*' ', [
@@ -1261,7 +1261,7 @@ def _crc_update_function_gen(opt, sym):
                         'crc &= {cfg_mask};'.format(**sym)
                         ]),
                     '}',
-                    'return {};'.format(crc_expr.And('crc', sym['cfg_mask']).simplify()),
+                    'return {};'.format(expr.And('crc', sym['cfg_mask']).simplify()),
                     ]),
                 ]
 
@@ -1305,7 +1305,7 @@ def _crc_update_function_gen(opt, sym):
                                 ]),
                             '}',
                         ]),
-                    'return {};'.format(crc_expr.And('crc', sym['cfg_mask']).simplify()),
+                    'return {};'.format(expr.And('crc', sym['cfg_mask']).simplify()),
                     ]),
             ]
     out += [
@@ -1396,7 +1396,7 @@ def _crc_finalize_function_gen(opt, sym):
                     ]
     out += [
             CodeGen(opt, 4*' ', [
-                'return {};'.format(crc_expr.And(crc_expr.Parenthesis(crc_expr.Xor('crc', sym['cfg_xor_out'])), sym['cfg_mask']).simplify()),
+                'return {};'.format(expr.And(expr.Parenthesis(expr.Xor('crc', sym['cfg_xor_out'])), sym['cfg_mask']).simplify()),
                 ]),
             '}',
             ]
@@ -1423,14 +1423,14 @@ def _crc_table_core_algorithm_reflected(opt, sym):
                     ], [
                     'tbl_idx = crc ^ *d;',
                     ]),
-                    'crc = {};'.format(crc_expr.And(crc_expr.Parenthesis(crc_expr.Xor(crc_lookup, crc_expr.Parenthesis(crc_expr.Shr('crc', sym['cfg_table_idx_width'])))), sym['cfg_mask']).simplify()),
+                    'crc = {};'.format(expr.And(expr.Parenthesis(expr.Xor(crc_lookup, expr.Parenthesis(expr.Shr('crc', sym['cfg_table_idx_width'])))), sym['cfg_mask']).simplify()),
                 ]
     else:
         crc_lookup = 'crc_table[tbl_idx & {crc_table_mask}]'.format(**sym)
         for i in range(8 // opt.tbl_idx_width):
             out += [
-                'tbl_idx = {};'.format(crc_expr.Xor('crc', crc_expr.Parenthesis(crc_expr.Shr('*d', crc_expr.Parenthesis(crc_expr.Mul(i, sym['cfg_table_idx_width']))))).simplify()),
-                'crc = {};'.format(crc_expr.Xor(crc_lookup, crc_xor_expr).simplify())
+                'tbl_idx = {};'.format(expr.Xor('crc', expr.Parenthesis(expr.Shr('*d', expr.Parenthesis(expr.Mul(i, sym['cfg_table_idx_width']))))).simplify()),
+                'crc = {};'.format(expr.Xor(crc_lookup, crc_xor_expr).simplify())
                 ]
     return CodeGen(opt, '', out)
 
@@ -1440,16 +1440,16 @@ def _crc_table_core_algorithm_nonreflected(opt, sym):
     """
     out = []
     if opt.width == None:
-        crc_shifted_right = crc_expr.Parenthesis(crc_expr.Shr('crc', crc_expr.Parenthesis(crc_expr.Sub(sym['cfg_width'], sym['cfg_table_idx_width'])))).simplify()
+        crc_shifted_right = expr.Parenthesis(expr.Shr('crc', expr.Parenthesis(expr.Sub(sym['cfg_width'], sym['cfg_table_idx_width'])))).simplify()
     elif opt.width < 8:
         shift_val = opt.width - opt.tbl_idx_width
         if shift_val < 0:
-            crc_shifted_right = crc_expr.Parenthesis(crc_expr.Shl('crc', -shift_val)).simplify()
+            crc_shifted_right = expr.Parenthesis(expr.Shl('crc', -shift_val)).simplify()
         else:
-            crc_shifted_right = crc_expr.Parenthesis(crc_expr.Shr('crc', shift_val)).simplify()
+            crc_shifted_right = expr.Parenthesis(expr.Shr('crc', shift_val)).simplify()
     else:
         shift_val = opt.width - opt.tbl_idx_width
-        crc_shifted_right = crc_expr.Parenthesis(crc_expr.Shr('crc', shift_val)).simplify()
+        crc_shifted_right = expr.Parenthesis(expr.Shr('crc', shift_val)).simplify()
 
     if opt.width is not None and opt.tbl_idx_width is not None and opt.width <= opt.tbl_idx_width:
         crc_xor_expr = '0'
@@ -1463,19 +1463,19 @@ def _crc_table_core_algorithm_nonreflected(opt, sym):
             crc_lookup = 'crc_table[tbl_idx]'
         out += [
                 Conditional2(opt, '', opt.width is None or opt.width > 8, [
-                    'tbl_idx = {};'.format(crc_expr.And(crc_expr.Parenthesis(crc_expr.Xor(crc_shifted_right, '*d')), sym['crc_table_mask']).simplify())
+                    'tbl_idx = {};'.format(expr.And(expr.Parenthesis(expr.Xor(crc_shifted_right, '*d')), sym['crc_table_mask']).simplify())
                     ], [
-                    'tbl_idx = {};'.format(crc_expr.Xor(crc_shifted_right, '*d').simplify())
+                    'tbl_idx = {};'.format(expr.Xor(crc_shifted_right, '*d').simplify())
                     ]),
-                    'crc = {};'.format(crc_expr.And(crc_expr.Parenthesis(crc_expr.Xor(crc_lookup, crc_xor_expr)), sym['cfg_mask']).simplify())
+                    'crc = {};'.format(expr.And(expr.Parenthesis(expr.Xor(crc_lookup, crc_xor_expr)), sym['cfg_mask']).simplify())
                 ]
     else:
         crc_lookup = 'crc_table[tbl_idx & {crc_table_mask}]'.format(**sym)
         for i in range(8 // opt.tbl_idx_width):
             str_idx = '{0:d}'.format(8 - (i + 1) * opt.tbl_idx_width)
             out += [
-                    'tbl_idx = {};'.format(crc_expr.Xor(crc_shifted_right, crc_expr.Parenthesis(crc_expr.Shr('*d', str_idx)))),
-                    'crc = {};'.format(crc_expr.Xor(crc_lookup, crc_xor_expr).simplify()),
+                    'tbl_idx = {};'.format(expr.Xor(crc_shifted_right, expr.Parenthesis(expr.Shr('*d', str_idx)))),
+                    'crc = {};'.format(expr.Xor(crc_lookup, crc_xor_expr).simplify()),
                     ]
     return CodeGen(opt, '', out)
 
@@ -1485,7 +1485,7 @@ def _crc_table_slice_by_algorithm(opt, sym):
         vard = 'd{}'.format(opt.slice_by // 4 - i)
         for j in range(4):
             idx1 = i * 4 + j
-            idx2 = crc_expr.And(crc_expr.Parenthesis(crc_expr.Shr(vard, j*8)), crc_expr.Terminal(255, '0xffu')).simplify()
+            idx2 = expr.And(expr.Parenthesis(expr.Shr(vard, j*8)), expr.Terminal(255, '0xffu')).simplify()
             update_be.append('crc_table[{}][{}]{}'.format(idx1, idx2, ' ^' if idx1 < opt.slice_by - 1 else ';'))
 
     update_le = []
@@ -1493,7 +1493,7 @@ def _crc_table_slice_by_algorithm(opt, sym):
         vard = 'd{}'.format(opt.slice_by // 4 - i)
         for j in range(4):
             idx1 = i * 4 + j
-            idx2 = crc_expr.And(crc_expr.Parenthesis(crc_expr.Shr(vard, 24 - j*8)), crc_expr.Terminal(255, '0xffu')).simplify()
+            idx2 = expr.And(expr.Parenthesis(expr.Shr(vard, 24 - j*8)), expr.Terminal(255, '0xffu')).simplify()
             update_le.append('crc_table[{}][{}]{}'.format(idx1, idx2, ' ^' if idx1 < opt.slice_by - 1 else ';'))
 
     out = [

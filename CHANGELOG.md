@@ -6,15 +6,27 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 ## [Unreleased]
+
+### Added
+- Added setup.py script to install pycrc on the system, if desired.
+
 ### Changed
 - Completely rewritten the code generator back-end. The new back-end is more
   flexible and allows for a better optimisation of the generated expressions.
-
-### Fixed
+- The preferred way to call pycrc is `python -m pycrc [...]` as opposed to
+  `python pycrc.py [...]`.
+- Moved the python code under the `pycrc` directory and changed how the pycrc
+  sub-modules are included. Before one would write `import crc_xxx`, now one
+  would write `import pycrc.xxx`.
 - New license for the documentation:
   [Creative Commons Attribution-Share Alike 4.0 Unported License][CC-BY-SA-4.0].
+
+### Fixed
 - Fixed binary files handling with Python 2.7.
   Fixes #11. Thanks to James Bowman.
+- Fixed some spelling. Thanks to Frank (ftheile) and ashelly.
+- Fixed Header Guard generation. Don't use underscores to start the header
+  guard name. Thanks to Andre Hartmann.
 
 
 ## [v0.9] - 2016-01-06

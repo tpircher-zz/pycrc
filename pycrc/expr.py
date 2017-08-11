@@ -24,10 +24,10 @@
 """
 This modules simplifies an expression.
 
-    import crc_expr as e
+    import pycrc.expr as exp
 
-    expr = e.Xor('var', e.Parenthesis(e.And('0x700', 4)))
-    print('"{}" -> "{}"'.format(expr, expr.simplify()))
+    my_expr = exp.Xor('var', exp.Parenthesis(exp.And('0x700', 4)))
+    print('"{}" -> "{}"'.format(my_expr, my_expr.simplify()))
 """
 
 

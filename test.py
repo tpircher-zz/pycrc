@@ -7,9 +7,8 @@ from optparse import OptionParser, Option, OptionValueError
 from copy import copy
 import os, sys
 import tempfile
-sys.path.append("..")
-from crc_models import CrcModels
-from crc_algorithms import Crc
+from pycrc.models import CrcModels
+from pycrc.algorithms import Crc
 
 
 class Options(object):
@@ -630,9 +629,9 @@ class CrcTests(object):
         self.verbose = opt.verbose
 
         if self.python3:
-            self.pycrc_bin = 'python3 ../pycrc.py'
+            self.pycrc_bin = 'python3 -m pycrc'
         else:
-            self.pycrc_bin = 'python ../pycrc.py'
+            self.pycrc_bin = 'python -m pycrc'
 
         if not self.__setup_files(opt):
             return False

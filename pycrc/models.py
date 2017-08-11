@@ -26,21 +26,21 @@ Collection of CRC models. This module contains the CRC models known to pycrc.
 
 To print the parameters of a particular model:
 
-    import crc_models
+    from pycrc.models import CrcModels
 
-    models = crc_models.CrcModels()
+    models = CrcModels()
     print(", ".join(models.names()))
     m = models.get_params("crc-32")
     if m != None:
-       print("Width:        {width:d}".format(**m))
-       print("Poly:         {poly:#x}".format(**m))
-       print("ReflectIn:    {reflect_in}".format(**m))
-       print("XorIn:        {xor_in:#x}".format(**m))
-       print("ReflectOut:   {reflect_out}".format(**m))
-       print("XorOut:       {xor_out:#x}".format(**m))
-       print("Check:        {check:#x}".format(**m))
+        print("Width:        {width:d}".format(**m))
+        print("Poly:         {poly:#x}".format(**m))
+        print("ReflectIn:    {reflect_in}".format(**m))
+        print("XorIn:        {xor_in:#x}".format(**m))
+        print("ReflectOut:   {reflect_out}".format(**m))
+        print("XorOut:       {xor_out:#x}".format(**m))
+        print("Check:        {check:#x}".format(**m))
     else:
-       print("model not found.")
+        print("model not found.")
 """
 
 

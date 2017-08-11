@@ -1,6 +1,6 @@
 #  pycrc -- parameterisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2015  Thomas Pircher  <tehpeh-web@tty1.net>
+#  Copyright (c) 2006-2017  Thomas Pircher  <tehpeh-web@tty1.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to
@@ -35,14 +35,14 @@ Examples
 
 This is an example use of the different algorithms:
 
->>> from crc_algorithms import Crc
->>>
->>> crc = Crc(width = 16, poly = 0x8005,
-...           reflect_in = True, xor_in = 0x0000,
-...           reflect_out = True, xor_out = 0x0000)
->>> print("{0:#x}".format(crc.bit_by_bit("123456789")))
->>> print("{0:#x}".format(crc.bit_by_bit_fast("123456789")))
->>> print("{0:#x}".format(crc.table_driven("123456789")))
+    from pycrc.algorithms import Crc
+
+    crc = Crc(width = 16, poly = 0x8005,
+            reflect_in = True, xor_in = 0x0000,
+            reflect_out = True, xor_out = 0x0000)
+    print("{0:#x}".format(crc.bit_by_bit("123456789")))
+    print("{0:#x}".format(crc.bit_by_bit_fast("123456789")))
+    print("{0:#x}".format(crc.table_driven("123456789")))
 """
 
 class Crc(object):

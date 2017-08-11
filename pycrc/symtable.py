@@ -25,17 +25,17 @@
 Symbol table for the macro processor used by pycrc.
 use as follows:
 
-    import crc_opt
-    import crc_symtable
+    import pycrc.opt as opt
+    import pycrc.symtable as sym
 
-    opt = crc_opt.Options()
-    sym = crc_symtable.SymbolTable(opt)
+    opt = opt.Options()
+    sym = sym.SymbolTable(opt)
 
     print(sym['crc_width'])
     print('width: {crc_width}, poly: {crc_poly}'.format(**sym))
 """
 
-from crc_algorithms import Crc
+from pycrc.algorithms import Crc
 import collections
 import time
 import os

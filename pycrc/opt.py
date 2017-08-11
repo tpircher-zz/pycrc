@@ -1,6 +1,6 @@
 #  pycrc -- parameterisable CRC calculation utility and C source code generator
 #
-#  Copyright (c) 2006-2016  Thomas Pircher  <tehpeh-web@tty1.net>
+#  Copyright (c) 2006-2017  Thomas Pircher  <tehpeh-web@tty1.net>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to
@@ -25,7 +25,7 @@
 Option parsing library for pycrc.
 use as follows:
 
-   from crc_opt import Options
+   from pycrc.opt import Options
 
    opt = Options()
    opt.parse(sys.argv[1:])
@@ -34,7 +34,7 @@ use as follows:
 from optparse import OptionParser, Option, OptionValueError
 from copy import copy
 import sys
-from crc_models import CrcModels
+from pycrc.models import CrcModels
 
 
 class Options(object):
@@ -42,12 +42,6 @@ class Options(object):
     The options parsing and validating class.
     """
     # pylint: disable=too-many-instance-attributes, too-few-public-methods
-
-    # Program details
-    program_name = "pycrc"
-    version = "0.9"
-    version_str = "{0:s} v{1:s}".format(program_name, version)
-    web_address = "https://pycrc.org"
 
     # Bitmap of the algorithms
     algo_none = 0x00
@@ -64,7 +58,12 @@ class Options(object):
     action_generate_table = 0x07
 
 
-    def __init__(self):
+    def __init__(self, progname='pycrc', version=None, url=None):
+        self.program_name = progname
+        self.version = version
+        self.version_str = "{0:s} v{1:s}".format(progname, version)
+        self.web_address = url
+
         self.width = None
         self.poly = None
         self.reflect_in = None
@@ -399,7 +398,7 @@ of the following parameters:
         Print a warning message to stderr.
         """
         sys.stderr.write(
-            "{0:s}: warning: {1:s}\n".format(sys.argv[0], message))
+            "{0:s}: warning: {1:s}\n".format(self.program_name, message))
 
 
 
@@ -408,7 +407,7 @@ of the following parameters:
         Print a error message to stderr and terminate the program.
         """
         sys.stderr.write(
-            "{0:s}: error: {1:s}\n".format(sys.argv[0], message))
+            "{0:s}: error: {1:s}\n".format(self.program_name, message))
         sys.exit(1)
 
 
