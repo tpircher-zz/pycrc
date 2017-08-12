@@ -2,7 +2,6 @@
 
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V5.1//EN"
         "http://www.oasis-open.org/docbook/xml/5.0b5/dtd/docbook.dtd" [
-<!ENTITY project_name       "pycrc">
 <!ENTITY project_version    "0.9.1">
 <!ENTITY project_homepage   "https://pycrc.org">
 <!ENTITY project_models     "https://pycrc.org/models.html">
@@ -294,6 +293,19 @@
             </varlistentry>
             <varlistentry>
                 <term>
+                    <option>--slice-by=</option><replaceable>NUM</replaceable>
+                </term>
+                <listitem>
+                    <para>speed-up the &table-driven; calculation by operating on
+                        <replaceable>NUM</replaceable> octets of data rather than a
+                        single octet at a time.
+                        <replaceable>NUM</replaceable> must be one of the values
+                        {<replaceable>4</replaceable>, <replaceable>8</replaceable>,
+                        <replaceable>16</replaceable>}.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
+                <term>
                     <option>--table-idx-width=</option><replaceable>NUM</replaceable>
                 </term>
                 <listitem>
@@ -305,15 +317,14 @@
             </varlistentry>
             <varlistentry>
                 <term>
-                    <option>--slice-by=</option><replaceable>NUM</replaceable>
+                    <option>--force-poly</option>
                 </term>
                 <listitem>
-                    <para>speed-up the &table-driven; calculation by operating on
-                        <replaceable>NUM</replaceable> octets of data rather than a
-                        single octet at a time.
-                        <replaceable>NUM</replaceable> must be one of the values
-                        {<replaceable>4</replaceable>, <replaceable>8</replaceable>,
-                        <replaceable>16</replaceable>}.</para>
+                    <para>override any errors about possibly unsuitable
+                        polynoms. pycrc does not allow even polynoms or
+                        polynoms that are wider than &width;. Use this option
+                        to override the error, if you know what you are
+                        doing.</para>
                 </listitem>
             </varlistentry>
             <varlistentry>
@@ -391,11 +402,12 @@
                         <replaceable>&poly;</replaceable>.
                         </para>
                         <para>
-                        Most <replaceable>&poly;</replaceable>s used in real world applications are odd (the least significant
+                        Most polynomials used in real world applications are odd (the least significant
                         bit is 1), but there are some good even ones.
-                        pycrc allows the use of even <replaceable>&poly;</replaceable>s but some of them may yield
-                        incorrect checksums depending on the used algorithm.
-                        Use at your own risk and if in doubt pick a well-known <replaceable>MODEL</replaceable> above.
+                        pycrc allows the use of even polynomials with the <option>--force-poly</option>
+                        option.
+                        Some even polynomials may yield incorrect checksums depending on the used algorithm.
+                        Use at your own risk and if at all possible use a well-known <replaceable>MODEL</replaceable> above.
                         </para>
                     </glossdef>
                 </glossentry>

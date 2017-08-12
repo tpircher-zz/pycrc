@@ -605,6 +605,7 @@ class CrcTests(object):
             print('Running __test_random_params()...')
         for width in [8, 16, 32]:
             for poly in [0x8005, 0x4c11db7, 0xa5a5a5a5]:
+                poly = poly & ((1 << width) - 1)
                 for refin in [0, 1]:
                     for refout in [0, 1]:
                         for init in [0x0, 0x1, 0x5a5a5a5a]:

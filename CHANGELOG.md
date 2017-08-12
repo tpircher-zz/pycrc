@@ -9,6 +9,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - Added setup.py script to install pycrc on the system, if desired.
+- Added checks about possibly unsuitable polynomials. Use the --force-poly
+  option to override the error message.
 
 ### Changed
 - Completely rewritten the code generator back-end. The new back-end is more

@@ -115,107 +115,111 @@ of the following parameters:
         model_list = ", ".join(models.names())
         parser = OptionParser(option_class=MyOption, usage=usage, version=self.version_str)
         parser.add_option(
-            "-v", "--verbose",
-            action="store_true", dest="verbose", default=False,
-            help="be more verbose; print the value of the parameters "
-            "and the chosen model to stdout")
+                "-v", "--verbose",
+                action="store_true", dest="verbose", default=False,
+                help="be more verbose; print the value of the parameters "
+                "and the chosen model to stdout")
         parser.add_option(
-            "--check-string",
-            action="store", type="string", dest="check_string",
-            help="calculate the checksum of a string (default: '123456789')",
-            metavar="STRING")
+                "--check-string",
+                action="store", type="string", dest="check_string",
+                help="calculate the checksum of a string (default: '123456789')",
+                metavar="STRING")
         parser.add_option(
-            "--check-hexstring",
-            action="store", type="string", dest="check_hexstring",
-            help="calculate the checksum of a hexadecimal number string",
-            metavar="STRING")
+                "--check-hexstring",
+                action="store", type="string", dest="check_hexstring",
+                help="calculate the checksum of a hexadecimal number string",
+                metavar="STRING")
         parser.add_option(
-            "--check-file",
-            action="store", type="string", dest="check_file",
-            help="calculate the checksum of a file",
-            metavar="FILE")
+                "--check-file",
+                action="store", type="string", dest="check_file",
+                help="calculate the checksum of a file",
+                metavar="FILE")
         parser.add_option(
-            "--generate",
-            action="store", type="string", dest="generate", default=None,
-            help="generate C source code; choose the type from {h, c, c-main, table}",
-            metavar="CODE")
+                "--generate",
+                action="store", type="string", dest="generate", default=None,
+                help="generate C source code; choose the type from {h, c, c-main, table}",
+                metavar="CODE")
         parser.add_option(
-            "--std",
-            action="store", type="string", dest="c_std", default="C99",
-            help="choose the C dialect of the generated code from {C89, ANSI, C99}",
-            metavar="STD")
+                "--std",
+                action="store", type="string", dest="c_std", default="C99",
+                help="choose the C dialect of the generated code from {C89, ANSI, C99}",
+                metavar="STD")
         parser.add_option(
-            "--algorithm",
-            action="store", type="string", dest="algorithm", default="all",
-            help="choose an algorithm from "
-            "{bit-by-bit, bbb, bit-by-bit-fast, bbf, table-driven, tbl, all}",
-            metavar="ALGO")
+                "--algorithm",
+                action="store", type="string", dest="algorithm", default="all",
+                help="choose an algorithm from "
+                "{bit-by-bit, bbb, bit-by-bit-fast, bbf, table-driven, tbl, all}",
+                metavar="ALGO")
         parser.add_option(
-            "--model",
-            action="callback", callback=_model_cb, type="string", dest="model", default=None,
-            help="choose a parameter set from {{{0:s}}}".format(model_list),
-            metavar="MODEL")
+                "--model",
+                action="callback", callback=_model_cb, type="string", dest="model", default=None,
+                help="choose a parameter set from {{{0:s}}}".format(model_list),
+                metavar="MODEL")
         parser.add_option(
-            "--width",
-            action="store", type="hex", dest="width",
-            help="use NUM bits in the polynomial",
-            metavar="NUM")
+                "--width",
+                action="store", type="hex", dest="width",
+                help="use NUM bits in the polynomial",
+                metavar="NUM")
         parser.add_option(
-            "--poly",
-            action="store", type="hex", dest="poly",
-            help="use HEX as polynomial",
-            metavar="HEX")
+                "--poly",
+                action="store", type="hex", dest="poly",
+                help="use HEX as polynomial",
+                metavar="HEX")
         parser.add_option(
-            "--reflect-in",
-            action="store", type="bool", dest="reflect_in",
-            help="reflect the octets in the input message",
-            metavar="BOOL")
+                "--reflect-in",
+                action="store", type="bool", dest="reflect_in",
+                help="reflect the octets in the input message",
+                metavar="BOOL")
         parser.add_option(
-            "--xor-in",
-            action="store", type="hex", dest="xor_in",
-            help="use HEX as initial value",
-            metavar="HEX")
+                "--xor-in",
+                action="store", type="hex", dest="xor_in",
+                help="use HEX as initial value",
+                metavar="HEX")
         parser.add_option(
-            "--reflect-out",
-            action="store", type="bool", dest="reflect_out",
-            help="reflect the resulting checksum before applying the --xor-out value",
-            metavar="BOOL")
+                "--reflect-out",
+                action="store", type="bool", dest="reflect_out",
+                help="reflect the resulting checksum before applying the --xor-out value",
+                metavar="BOOL")
         parser.add_option(
-            "--xor-out",
-            action="store", type="hex", dest="xor_out",
-            help="xor the final CRC value with HEX",
-            metavar="HEX")
+                "--xor-out",
+                action="store", type="hex", dest="xor_out",
+                help="xor the final CRC value with HEX",
+                metavar="HEX")
         parser.add_option(
-            "--slice-by",
-            action="store", type="int", dest="slice_by",
-            help="read NUM bytes at a time from the input. NUM must be one of the values {4, 8, 16}",
-            metavar="NUM")
+                "--slice-by",
+                action="store", type="int", dest="slice_by",
+                help="read NUM bytes at a time from the input. NUM must be one of the values {4, 8, 16}",
+                metavar="NUM")
         parser.add_option(
-            "--table-idx-width",
-            action="store", type="int", dest="table_idx_width",
-            help="use NUM bits to index the CRC table; NUM must be one of the values {1, 2, 4, 8}",
-            metavar="NUM")
+                "--table-idx-width",
+                action="store", type="int", dest="table_idx_width",
+                help="use NUM bits to index the CRC table; NUM must be one of the values {1, 2, 4, 8}",
+                metavar="NUM")
         parser.add_option(
-            "--symbol-prefix",
-            action="store", type="string", dest="symbol_prefix",
-            help="when generating source code, use STRING as prefix to the exported C symbols",
-            metavar="STRING")
+                "--force-poly",
+                action="store_true", dest="force_poly", default=False,
+                help="override any errors about possibly unsuitable polynoms")
         parser.add_option(
-            "--crc-type",
-            action="store", type="string", dest="crc_type",
-            help="when generating source code, use STRING as crc_t type",
-            metavar="STRING")
+                "--symbol-prefix",
+                action="store", type="string", dest="symbol_prefix",
+                help="when generating source code, use STRING as prefix to the exported C symbols",
+                metavar="STRING")
         parser.add_option(
-            "--include-file",
-            action="append", type="string", dest="include_files",
-            help="when generating source code, include also FILE as header file; "
-            "can be specified multiple times",
-            metavar="FILE")
+                "--crc-type",
+                action="store", type="string", dest="crc_type",
+                help="when generating source code, use STRING as crc_t type",
+                metavar="STRING")
         parser.add_option(
-            "-o", "--output",
-            action="store", type="string", dest="output_file",
-            help="write the generated code to file instead to stdout",
-            metavar="FILE")
+                "--include-file",
+                action="append", type="string", dest="include_files",
+                help="when generating source code, include also FILE as header file; "
+                "can be specified multiple times",
+                metavar="FILE")
+        parser.add_option(
+                "-o", "--output",
+                action="store", type="string", dest="output_file",
+                help="write the generated code to file instead to stdout",
+                metavar="FILE")
 
         (options, args) = parser.parse_args(argv)
 
@@ -261,11 +265,16 @@ of the following parameters:
             else:
                 self.__error("unsupported table-idx-width {0:d}".format(options.table_idx_width))
 
+        if self.poly != None and self.poly % 2 == 0 and not options.force_poly:
+            self.__error("even polinomials are not allowed by default. Use --force-poly to override this.")
+
         if self.width != None:
             if self.width <= 0:
                 self.__error("Width must be strictly positive")
             self.msb_mask = 0x1 << (self.width - 1)
             self.mask = ((self.msb_mask - 1) << 1) | 1
+            if self.poly != None and self.poly >> (self.width + 1) != 0 and not options.force_poly:
+                self.__error("the polynomial is wider than the supplied Width. Use --force-poly to override this.")
             if self.poly != None:
                 self.poly = self.poly & self.mask
             if self.xor_in != None:
