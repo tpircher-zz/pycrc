@@ -5,7 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
-## [Unreleased]
+## [v0.9.1] - 2017-09-09
 
 ### Added
 - Added setup.py script to install pycrc on the system, if desired.
@@ -471,6 +471,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 [Unreleased]: https://github.com/tpircher/pycrc
+[v0.9.1]: https://github.com/tpircher/pycrc/releases/tag/v0.9.1
 [v0.9]: https://github.com/tpircher/pycrc/releases/tag/v0.9
 [v0.8.3]: https://github.com/tpircher/pycrc/releases/tag/v0.8.3
 [v0.8.2]: https://github.com/tpircher/pycrc/releases/tag/v0.8.2
