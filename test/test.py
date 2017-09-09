@@ -8,6 +8,7 @@ from copy import copy
 import os, sys
 import tempfile
 sys.path.append('..')
+sys.path.append('.')
 from pycrc.models import CrcModels
 from pycrc.algorithms import Crc
 
@@ -631,9 +632,9 @@ class CrcTests(object):
         self.verbose = opt.verbose
 
         if self.python3:
-            self.pycrc_bin = 'python3 ../pycrc.py'
+            self.pycrc_bin = 'python3 pycrc.py'
         else:
-            self.pycrc_bin = 'python ../pycrc.py'
+            self.pycrc_bin = 'python pycrc.py'
 
         if not self.__setup_files(opt):
             return False
