@@ -15,8 +15,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Completely rewritten the code generator back-end. The new back-end is more
   flexible and allows for a better optimisation of the generated expressions.
-- The preferred way to call pycrc is `python -m pycrc [...]` as opposed to
-  `python pycrc.py [...]`.
 - Moved the python code under the `pycrc` directory and changed how the pycrc
   sub-modules are included. Before one would write `import crc_xxx`, now one
   would write `import pycrc.xxx`.
