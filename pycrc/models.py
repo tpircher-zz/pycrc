@@ -215,6 +215,16 @@ class CrcModels(object):
         'check':         0x21cf02,
     })
     models.append({
+        'name':         'mode-s',
+        'width':         24,
+        'poly':          0xfff409,
+        'reflect_in':    False,
+        'xor_in':        0x0,
+        'reflect_out':   False,
+        'xor_out':       0x0,
+        'check':         0x054268,
+    })    
+    models.append({
         'name':         'crc-32',
         'width':         32,
         'poly':          0x4c11db7,
