@@ -204,7 +204,6 @@ class CrcModels(object):
         'xor_out':       0x0,
         'check':         0x31c3,
     })
-
     models.append({
         'name':         'crc-24',
         'width':         24,
