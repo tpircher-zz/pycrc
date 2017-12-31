@@ -175,7 +175,7 @@ class File(CodeGen):
                         'times) in between the {crc_init_function}() and {crc_finalize_function}() calls.'.format(**self.sym),
                         '',
                         'This pseudo-code shows an example usage of the API:',
-			'\code{.c}',
+                        '\code{.c}',
                         Conditional(self.opt, '', self.opt.undefined_crc_parameters, [
                             '{cfg_t} cfg = '.format(**self.sym) + '{',
                             Conditional(self.opt, 4*' ', self.opt.width is None, [
@@ -1292,16 +1292,21 @@ def _crc_update_function_gen(opt, sym):
                         '}',
                         ], [
                             Conditional(opt, '', opt.slice_by > 1, [
+                                '/* Align to a multiple of {crc_slice_by} bytes */'.format(**sym),
+                                'while (data_len && (((uintptr_t)(const void *)d) % {crc_slice_by} != 0))'.format(**sym) + ' {',
+                                CodeGen(opt, 4*' ', [
+                                    _crc_table_core_algorithm(opt, sym),
+                                    'data_len--;',
+                                    ]),
+                                '}',
+                                '',
                                 _crc_table_slice_by_algorithm(opt, sym),
+                                '/* Remaining bytes with the standard algorithm */',
+                                'd = (const unsigned char *)d32;',
                                 ]),
                             'while (data_len--) {',
                             CodeGen(opt, 4*' ', [
-                                Conditional2(opt, '', opt.reflect_in, [
-                                    _crc_table_core_algorithm_reflected(opt, sym),
-                                    ], [
-                                    _crc_table_core_algorithm_nonreflected(opt, sym),
-                                    ]),
-                                'd++;',
+                                _crc_table_core_algorithm(opt, sym),
                                 ]),
                             '}',
                         ]),
@@ -1401,6 +1406,21 @@ def _crc_finalize_function_gen(opt, sym):
             '}',
             ]
     return out
+
+def _crc_table_core_algorithm(opt, sym):
+    """
+    Return the core of the table-driven algorithm.
+    """
+    out = []
+    out += [
+        Conditional2(opt, '', opt.reflect_in, [
+            _crc_table_core_algorithm_reflected(opt, sym),
+            ], [
+            _crc_table_core_algorithm_nonreflected(opt, sym),
+            ]),
+        'd++;',
+    ]
+    return CodeGen(opt, '', out)
 
 def _crc_table_core_algorithm_reflected(opt, sym):
     """
@@ -1535,7 +1555,5 @@ def _crc_table_slice_by_algorithm(opt, sym):
                 ]),
             '}',
             '',
-            '/* Remaining bytes with the standard algorithm */',
-            'd = (const unsigned char *)d32;',
             ]
     return CodeGen(opt, '', out)

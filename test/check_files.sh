@@ -76,8 +76,18 @@ populate() {
                 else
                     mod_opt="--model=${model}"
                 fi
-                generate "${outdir}/${model}_${algo}_${algo}.h" --generate=h --algorithm=${algo} $mod_opt
-                generate "${outdir}/${model}_${algo}_${algo}.c" --generate=c --algorithm=${algo} $mod_opt
+                generate "${outdir}/${model}_${algo}_${cstd}.h" --generate=h --algorithm=${algo} $mod_opt
+                generate "${outdir}/${model}_${algo}_${cstd}.c" --generate=c --algorithm=${algo} $mod_opt
+            done
+        done
+    done
+
+    algo=tbl
+    for model in crc-32; do
+        for slice in 4 8 16; do
+            for cstd in c98 c99; do
+                generate "${outdir}/${model}_${algo}_sb${slice}_${cstd}.h" --generate=h --algorithm=${algo} --model=${model} --slice-by ${slice}
+                generate "${outdir}/${model}_${algo}_sb${slice}_${cstd}.c" --generate=c --algorithm=${algo} --model=${model} --slice-by ${slice}
             done
         done
     done
