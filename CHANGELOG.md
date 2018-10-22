@@ -116,7 +116,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Updated [qm.py from GitHub][qm github].
-- Esplicitly stated that the output of pycrc is not considered a substantial
+- Explicitly stated that the output of pycrc is not considered a substantial
   part of the code of pycrc in `README.md`.
 - Re-organised the symbol table: grouped the code by functionality, not by
   algorithm.
