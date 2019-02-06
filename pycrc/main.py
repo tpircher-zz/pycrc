@@ -217,18 +217,6 @@ def main():
     if opt.action in set([
             opt.action_generate_h, opt.action_generate_c, opt.action_generate_c_main,
             opt.action_generate_table]):
-        if opt.action == opt.action_generate_h:
-            in_str = "$h_template"
-        elif opt.action == opt.action_generate_c:
-            in_str = "$c_template"
-        elif opt.action == opt.action_generate_c_main:
-            in_str = "$c_template\n\n$main_template"
-        elif opt.action == opt.action_generate_table:
-            in_str = "$crc_table_init"
-        else:
-            sys.stderr.write(
-                "{0:s}: error: unknown action. Please file a bug report!\n".format(progname))
-            sys.exit(1)
         out = str(cg.File(opt, ''))
         if opt.output_file == None:
             print(out)

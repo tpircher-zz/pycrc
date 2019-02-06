@@ -151,16 +151,31 @@ class File(CodeGen):
         The class constructor.
         """
         super(File, self).__init__(opt, indent)
-        self.content = [
-                Comment(opt, '', [
+        self.content = []
+
+        if opt.action == opt.action_generate_h:
+            self.content = self._code_file() + self._header_file()
+        elif opt.action == opt.action_generate_c:
+            self.content = self._code_file() + self._c_file()
+        elif opt.action == opt.action_generate_c_main:
+            self.content = self._code_file() + self._c_file() + self._main_file()
+        elif opt.action == opt.action_generate_table:
+            self.content = ['{crc_table_init}'.format(**self.sym)]
+
+    def _code_file(self):
+        """
+        Add code file
+        """
+        out = [
+                Comment(self.opt, '', [
                     '\\file',
                     'Functions and types for CRC checks.',
                     '',
                     'Generated on {datetime}'.format(**self.sym),
                     'by {program_version}, {program_url}'.format(**self.sym),
                     'using the configuration:',
-                    ParamBlock(opt, ' ', algorithm = True),
-                    Conditional(opt, '', opt.action == opt.action_generate_h, [
+                    ParamBlock(self.opt, ' ', algorithm = True),
+                    Conditional(self.opt, '', self.opt.action == self.opt.action_generate_h, [
                         '',
                         'This file defines the functions {crc_init_function}(), ' \
                                 '{crc_update_function}() and {crc_finalize_function}().'.format(**self.sym),
@@ -222,12 +237,7 @@ class File(CodeGen):
                         ]),
                     ]),
                 ]
-        if opt.action == opt.action_generate_h:
-            self.content += self._header_file()
-        elif opt.action == opt.action_generate_c:
-            self.content += self._c_file()
-        elif opt.action == opt.action_generate_c_main:
-            self.content += self._c_file() + self._main_file()
+        return out
 
     def _header_file(self):
         """
