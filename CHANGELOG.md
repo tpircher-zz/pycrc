@@ -5,6 +5,15 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+## [v0.9.2] - 2019-02-06
+
+### Fixed
+- Fix code generator to output the table correctly.
+  Fixes #28.
+- Ensure the data is aligned when using slice-by.
+  Fixes #24.
+
+
 ## [v0.9.1] - 2017-09-09
 
 ### Added
