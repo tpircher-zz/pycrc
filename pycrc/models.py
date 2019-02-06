@@ -26,9 +26,9 @@ Collection of CRC models. This module contains the CRC models known to pycrc.
 
 To print the parameters of a particular model:
 
-    from pycrc.models import CrcModels
+    import pycrc.models as cm
 
-    models = CrcModels()
+    models = cm.CrcModels()
     print(", ".join(models.names()))
     m = models.get_params("crc-32")
     if m != None:
