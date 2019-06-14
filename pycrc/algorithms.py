@@ -81,8 +81,12 @@ class Crc(object):
             self.tbl_idx_width = 8
             self.tbl_width = 1 << self.tbl_idx_width
 
-        self.direct_init = self.xor_in
-        self.nondirect_init = self.__get_nondirect_init(self.xor_in)
+        if self.reflect_out:
+            register_init = self.reflect(self.xor_in, self.width)
+        else:
+            register_init = self.xor_in
+        self.direct_init = register_init
+        self.nondirect_init = self.__get_nondirect_init(register_init)
         if self.width < 8:
             self.crc_shift = 8 - self.width
         else:

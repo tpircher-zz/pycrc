@@ -162,7 +162,7 @@ def check_file(opt):
         reflect_out=opt.reflect_out, xor_out=opt.xor_out,
         table_idx_width=opt.tbl_idx_width)
 
-    if not opt.reflect_in:
+    if not opt.reflect_out:
         register = opt.xor_in
     else:
         register = alg.reflect(opt.xor_in, opt.width)
