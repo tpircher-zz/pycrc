@@ -180,7 +180,7 @@ class File(CodeGen):
                         'This file defines the functions {crc_init_function}(), ' \
                                 '{crc_update_function}() and {crc_finalize_function}().'.format(**self.sym),
                         '',
-                        'The {crc_init_function}() function returns the inital \c crc value and must be called'.format(**self.sym),
+                        'The {crc_init_function}() function returns the initial \c crc value and must be called'.format(**self.sym),
                         'before the first call to {crc_update_function}().'.format(**self.sym),
                         'Similarly, the {crc_finalize_function}() function must be called after the last call'.format(**self.sym),
                         'to {crc_update_function}(), before the \c crc is being used.'.format(**self.sym),
