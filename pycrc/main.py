@@ -162,10 +162,9 @@ def check_file(opt):
         reflect_out=opt.reflect_out, xor_out=opt.xor_out,
         table_idx_width=opt.tbl_idx_width)
 
-    if not opt.reflect_in:
-        register = opt.xor_in
-    else:
-        register = alg.reflect(opt.xor_in, opt.width)
+    # Always use the xor_in value unreflected
+    # As in the rocksoft reference implementation
+    register = opt.xor_in
 
     try:
         with open(opt.check_file, 'rb') as f:
