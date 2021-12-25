@@ -36,7 +36,7 @@ use as follows:
 """
 
 from pycrc.algorithms import Crc
-import collections
+import collections.abc
 import time
 import os
 
@@ -46,7 +46,7 @@ class SymbolTable(object):
         self.opt = opt
 
 
-class SymbolTable(collections.MutableMapping):
+class SymbolTable(collections.abc.MutableMapping):
     """A dictionary that applies an arbitrary key-altering
        function before accessing the keys"""
 
