@@ -46,7 +46,7 @@ class SymbolTable(object):
         self.opt = opt
 
 
-class SymbolTable(collections.MutableMapping):
+class SymbolTable(collections.ChainMap):
     """A dictionary that applies an arbitrary key-altering
        function before accessing the keys"""
 
